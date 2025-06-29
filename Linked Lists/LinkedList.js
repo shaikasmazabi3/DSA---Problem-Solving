@@ -102,6 +102,22 @@ class LinkedList {
     }
     return this;
   }
+
+  length() {
+    //Expecting Length is not given and only head is given finding the length
+    let count = 0;
+    if (!this.head) {
+      return count;
+    } else {
+      let temp = this.head;
+      while (temp !== null) {
+        temp = temp.next;
+        count++;
+      }
+      // return count;
+      return console.log("Count is ", count);
+    }
+  }
 }
 
 const myList = new LinkedList();
