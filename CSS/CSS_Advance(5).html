@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Advanced CSS Concepts Interactive Presentation - Part 5</title>
+<style>
+  /* Base styles */
+  body {
+    margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #121212; color: #eee; overflow-x: hidden; user-select: none;
+  }
+  .container {
+    max-width: 900px; margin: 2rem auto; padding: 1rem 2rem;
+    background: #1e1e1e; border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.7); position: relative;
+  }
+  h1, h2, h3 {
+    color: #f0a500; margin-bottom: 0.5rem;
+  }
+  p {
+    line-height: 1.5; font-size: 1.1rem; margin-bottom: 1rem;
+  }
+  code {
+    background: #333; padding: 0.2em 0.4em; border-radius: 4px;
+    font-family: monospace; color: #f0a500;
+  }
+  /* Slide styles */
+  .slide {
+    display: none; opacity: 0; transform: translateX(50px);
+    transition: all 0.6s ease;
+  }
+  .slide.active {
+    display: block; opacity: 1; transform: translateX(0);
+  }
+  /* Navigation controls */
+  .nav-buttons {
+    display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;
+  }
+  button {
+    background: #f0a500; border: none; color: #121212;
+    font-weight: bold; padding: 0.6rem 1.2rem; border-radius: 6px;
+    cursor: pointer; font-size: 1rem; transition: background 0.3s ease;
+    user-select: none;
+  }
+  button:hover { background: #d18e00; }
+  button:disabled { background: #555; cursor: not-allowed; }
+  /* Progress bar */
+  .progress-bar {
+    height: 6px; background: #333; border-radius: 3px; margin-top: 1rem;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%; background: #f0a500; width: 0%;
+    transition: width 0.4s ease;
+  }
+  /* Houdini demo */
+  .houdini-box {
+    background: #222; border-radius: 8px; padding: 1rem;
+    box-shadow: 0 0 10px #6c5ce7; color: #eee;
+    margin-top: 1rem;
+  }
+  .houdini-box p {
+    margin-bottom: 0.5rem;
+  }
+  /* Performance tips */
+  .tips-list {
+    list-style-type: disc;
+    margin-left: 1.5rem;
+    color: #eee;
+  }
+  /* Responsive */
+  @media (max-width: 600px) {
+    .container { padding: 1rem; margin: 1rem; }
+    p { font-size: 1rem; }
+    button { padding: 0.5rem 1rem; font-size: 0.9rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container" role="main" aria-label="Advanced CSS Concepts Presentation Part 5">
+
+  <!-- Slide 9 -->
+  <section class="slide active" aria-live="polite" aria-atomic="true" id="slide-9">
+    <h1>CSS Houdini: Extending the Browser's CSS Engine</h1>
+    <p><strong>CSS Houdini</strong> is a set of low-level APIs that allow developers to extend CSS by hooking into the browser’s rendering engine.</p>
+    <p>This enables creation of custom CSS properties, paint worklets, layout worklets, and more, allowing styles and animations beyond standard CSS capabilities.</p>
+
+    <div class="houdini-box" aria-label="Houdini paint worklet demo explanation">
+      <p><strong>Example:</strong> Custom paint worklet to draw diagonal stripes background.</p>
+      <pre><code>
+CSS:
+.element {
+  background-image: paint(diagonal-stripes);
+}
+
+JavaScript:
+// Register paint worklet
+CSS.paintWorklet.addModule('diagonal-stripes.js');
+      </code></pre>
+      <p>In <code>diagonal-stripes.js</code>, you define how to paint the stripes programmatically.</p>
+    </div>
+
+    <p>Houdini empowers developers to innovate and optimize rendering performance by working closer to the browser engine.</p>
+  </section>
+
+  <!-- Slide 10 -->
+  <section class="slide" aria-live="polite" aria-atomic="true" id="slide-10">
+    <h1>Browser Rendering Engines</h1>
+    <p>Major browser engines include:</p>
+    <ul>
+      <li><strong>Blink:</strong> Used by Chrome, Edge, Opera.</li>
+      <li><strong>Gecko:</strong> Used by Firefox.</li>
+      <li><strong>WebKit:</strong> Used by Safari.</li>
+    </ul>
+    <p>Understanding differences helps optimize CSS for cross-browser compatibility and performance.</p>
+
+    <h2>Rendering Flow Overview</h2>
+    <ol>
+      <li>Parsing HTML and CSS.</li>
+      <li>Constructing DOM and CSSOM.</li>
+      <li>Building Render Tree.</li>
+      <li>Layout and paint.</li>
+      <li>Compositing layers.</li>
+    </ol>
+
+    <p>Each engine implements optimizations and supports CSS features differently, so testing is crucial.</p>
+  </section>
+
+  <!-- Slide 11 -->
+  <section class="slide" aria-live="polite" aria-atomic="true" id="slide-11">
+    <h1>Performance and Memory Considerations</h1>
+    <p>Efficient CSS is essential for responsive, smooth user experiences.</p>
+
+    <h2>Key Performance Tips:</h2>
+    <ul class="tips-list">
+      <li>Minimize CSS size and complexity.</li>
+      <li>Avoid deep selector chains and high specificity.</li>
+      <li>Limit use of expensive selectors like <code>:nth-child()</code> or universal selector <code>*</code>.</li>
+      <li>Batch DOM and style changes to avoid layout thrashing.</li>
+      <li>Use hardware-accelerated properties (e.g., <code>transform</code>, <code>opacity</code>) for animations.</li>
+      <li>Defer non-critical CSS and inline critical CSS.</li>
+    </ul>
+
+    <h2>Layout Thrashing Example:</h2>
+    <pre><code>
+for (let i = 0; i &lt; 100; i++) {
+  element.style.width = i + 'px';
+  let height = element.offsetHeight; // forces layout recalculation on every iteration
+}
+    </code></pre>
+    <p>Better to batch changes to minimize reflows.</p>
+  </section>
+
+  <!-- Navigation -->
+  <div class="nav-buttons" role="navigation" aria-label="Slide navigation">
+    <button id="prevBtn" aria-label="Previous Slide">Previous</button>
+    <button id="playPauseBtn" aria-label="Play Presentation">Play</button>
+    <button id="nextBtn" aria-label="Next Slide">Next</button>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-bar" aria-hidden="true">
+    <div class="progress-bar-inner"></div>
+  </div>
+
+</div>
+
+<script>
+  (function() {
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const progressBar = document.querySelector('.progress-bar-inner');
+    let current = 0;
+    let playing = false;
+    let timer = null;
+    const slideCount = slides.length;
+    const slideDuration = 10000; // 10 seconds per slide
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+      current = index;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === slideCount - 1;
+      updateProgress();
+    }
+
+    function nextSlide() {
+      if(current < slideCount - 1) {
+        showSlide(current + 1);
+      } else {
+        pausePresentation();
+      }
+    }
+
+    function prevSlide() {
+      if(current > 0) {
+        showSlide(current - 1);
+      }
+    }
+
+    function playPresentation() {
+      playing = true;
+      playPauseBtn.textContent = 'Pause';
+      timer = setInterval(() => {
+        if(current < slideCount - 1) {
+          nextSlide();
+        } else {
+          pausePresentation();
+        }
+      }, slideDuration);
+    }
+
+    function pausePresentation() {
+      playing = false;
+      playPauseBtn.textContent = 'Play';
+      clearInterval(timer);
+    }
+
+    function togglePlayPause() {
+      if(playing) {
+        pausePresentation();
+      } else {
+        playPresentation();
+      }
+    }
+
+    function updateProgress() {
+      const percent = ((current + 1) / slideCount) * 100;
+      progressBar.style.width = percent + '%';
+    }
+
+    // Event listeners
+    prevBtn.addEventListener('click', () => {
+      pausePresentation();
+      prevSlide();
+    });
+    nextBtn.addEventListener('click', () => {
+      pausePresentation();
+      nextSlide();
+    });
+    playPauseBtn.addEventListener('click', togglePlayPause);
+
+    // Keyboard navigation support
+    document.addEventListener('keydown', e => {
+      if(e.key === 'ArrowRight') {
+        pausePresentation();
+        nextSlide();
+      } else if(e.key === 'ArrowLeft') {
+        pausePresentation();
+        prevSlide();
+      } else if(e.key === ' ') {
+        e.preventDefault();
+        togglePlayPause();
+      }
+    });
+
+    // Initialize
+    showSlide(0);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Frontend Fun: Debouncing, Throttling & More!</title>
+    <style>
+      /* General styles */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f0f8ff;
+        color: #222;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      header {
+        background: #4a90e2;
+        color: white;
+        padding: 1em;
+        text-align: center;
+        font-size: 1.5em;
+        font-weight: 700;
+      }
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        max-width: 700px;
+        margin: 1em auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        padding: 1.5em;
+      }
+      section {
+        display: none;
+        flex-direction: column;
+        gap: 1em;
+      }
+      section.active {
+        display: flex;
+      }
+      h2 {
+        font-size: 1.3em;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+      }
+      p {
+        font-size: 1em;
+        line-height: 1.4;
+      }
+      pre {
+        background: #eef6fc;
+        border: 1px solid #a0c4ff;
+        border-radius: 6px;
+        padding: 1em;
+        overflow-x: auto;
+        font-size: 0.9em;
+        font-family: Consolas, monospace;
+      }
+      code {
+        color: #0b5394;
+        font-weight: 600;
+      }
+      button {
+        background: #4a90e2;
+        color: white;
+        border: none;
+        padding: 0.5em 1em;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1em;
+        align-self: start;
+        transition: background 0.3s ease;
+      }
+      button:hover,
+      button:focus {
+        background: #357abd;
+        outline: none;
+      }
+      .nav-buttons {
+        margin-top: 1em;
+        display: flex;
+        justify-content: space-between;
+      }
+      .quiz {
+        background: #dff0d8;
+        border: 1px solid #a6d785;
+        border-radius: 10px;
+        padding: 1em;
+        margin-top: 1em;
+      }
+      .quiz.hidden {
+        display: none;
+      }
+      .quiz button {
+        background: #6aa84f;
+        margin-top: 0.5em;
+      }
+      .feedback {
+        margin-top: 0.5em;
+        font-weight: 700;
+      }
+      .correct {
+        color: green;
+      }
+      .incorrect {
+        color: red;
+      }
+      /* Emoji icons */
+      .emoji {
+        font-size: 1.4em;
+      }
+      /* Animated diagrams */
+      .diagram {
+        border: 2px solid #4a90e2;
+        border-radius: 12px;
+        padding: 1em;
+        position: relative;
+        background: #e6f0ff;
+        min-height: 140px;
+      }
+      /* Debounce animation */
+      .debounce-box {
+        width: 40px;
+        height: 40px;
+        background: #4a90e2;
+        border-radius: 8px;
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translate(0, -50%);
+        transition: left 0.5s ease;
+      }
+      .debounce-box.move {
+        left: calc(100% - 40px);
+      }
+      /* Throttle animation */
+      .throttle-box {
+        width: 40px;
+        height: 40px;
+        background: #f9a825;
+        border-radius: 8px;
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translate(0, -50%);
+      }
+      .throttle-box.move {
+        animation: throttleMove 4s linear forwards;
+      }
+      @keyframes throttleMove {
+        0% {
+          left: 0;
+        }
+        25% {
+          left: 33%;
+        }
+        50% {
+          left: 66%;
+        }
+        75% {
+          left: 100%;
+        }
+        100% {
+          left: 0;
+        }
+      }
+      /* Infinite scroll animation */
+      .scroll-area {
+        border: 1px solid #a0c4ff;
+        height: 120px;
+        overflow-y: auto;
+        background: white;
+        margin-top: 0.5em;
+        border-radius: 8px;
+        padding: 0.5em;
+      }
+      .scroll-item {
+        background: #b3d4fc;
+        margin: 0.3em 0;
+        padding: 0.5em;
+        border-radius: 6px;
+      }
+      /* List virtualization */
+      .list-virt-container {
+        border: 1px solid #a0c4ff;
+        height: 120px;
+        overflow-y: auto;
+        background: white;
+        margin-top: 0.5em;
+        border-radius: 8px;
+        position: relative;
+      }
+      .list-virt-spacer {
+        height: 600px; /* simulate large list height */
+      }
+      .list-virt-visible {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+      .list-virt-item {
+        background: #b3d4fc;
+        margin: 0.3em 0;
+        padding: 0.5em;
+        border-radius: 6px;
+      }
+      /* Accessibility focus */
+      button:focus-visible {
+        outline: 3px solid #357abd;
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <header role="banner" aria-label="Frontend Web Concepts Interactive Lesson">
+      🚀 Frontend Fun: Debouncing, Throttling & More!
+    </header>
+    <main role="main" aria-live="polite">
+      <!-- Slide 1: Introduction -->
+      <section id="slide1" class="active" aria-label="Introduction slide">
+        <h2>👋 Welcome to Frontend Fun!</h2>
+        <p>
+          Today we'll learn some cool tricks web developers use to make websites
+          fast and smooth.
+        </p>
+        <p>
+          We'll explore: <strong>Debouncing</strong>,
+          <strong>Throttling</strong>, <strong>Infinite Scroll</strong>, and
+          <strong>List Virtualization</strong>.
+        </p>
+        <p>
+          Each concept will have fun animations, easy examples, and quick
+          quizzes to check your understanding!
+        </p>
+        <button id="startBtn" aria-label="Start the lesson">
+          Start Learning!
+        </button>
+      </section>
+
+      <!-- Slide 2: Debouncing -->
+      <section id="slide2" aria-label="Debouncing explanation">
+        <h2>⌛ Debouncing: The Friendly Mailman</h2>
+        <p>
+          Imagine a mailman delivering letters. If you keep ringing the doorbell
+          fast, the mailman waits until you stop ringing before delivering the
+          letter.
+        </p>
+        <p>
+          This is like <strong>debouncing</strong>: waiting until the action
+          stops before doing something.
+        </p>
+        <div
+          class="diagram"
+          aria-label="Animation showing a blue box moving after stops"
+        >
+          <div id="debounceBox" class="debounce-box" aria-hidden="true"></div>
+        </div>
+        <p>
+          <button
+            id="debounceAnimateBtn"
+            aria-label="Animate debouncing example"
+          >
+            See Debounce in Action
+          </button>
+        </p>
+        <pre aria-label="Debounce function code example" tabindex="0">
+function debounce(func, delay) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+    </pre
+        >
+        <button
+          id="debounceQuizBtn"
+          aria-expanded="false"
+          aria-controls="debounceQuiz"
+        >
+          Take Quiz
+        </button>
+        <div id="debounceQuiz" class="quiz hidden" aria-live="polite">
+          <p>When does a debounced function run?</p>
+          <button data-correct="false">Immediately on every event</button>
+          <button data-correct="true">After the events stop for a while</button>
+          <button data-correct="false">Never</button>
+          <div class="feedback" role="alert" aria-live="assertive"></div>
+        </div>
+      </section>
+
+      <!-- Slide 3: Throttling -->
+      <section id="slide3" aria-label="Throttling explanation">
+        <h2>⏳ Throttling: The Busy Traffic Light</h2>
+        <p>
+          Think of a traffic light that lets cars go only every few seconds. No
+          matter how many cars come, it controls the flow.
+        </p>
+        <p>
+          <strong>Throttling</strong> limits how often something happens, like a
+          traffic light controlling cars.
+        </p>
+        <div
+          class="diagram"
+          aria-label="Animation showing orange box moving in steps"
+        >
+          <div id="throttleBox" class="throttle-box" aria-hidden="true"></div>
+        </div>
+        <p>
+          <button
+            id="throttleAnimateBtn"
+            aria-label="Animate throttling example"
+          >
+            See Throttle in Action
+          </button>
+        </p>
+        <pre aria-label="Throttle function code example" tabindex="0">
+function throttle(func, limit) {
+  let inThrottle;
+  return function(...args) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+}
+    </pre
+        >
+        <button
+          id="throttleQuizBtn"
+          aria-expanded="false"
+          aria-controls="throttleQuiz"
+        >
+          Take Quiz
+        </button>
+        <div id="throttleQuiz" class="quiz hidden" aria-live="polite">
+          <p>What does throttling do?</p>
+          <button data-correct="true">Limits how often a function runs</button>
+          <button data-correct="false">
+            Runs a function immediately every time
+          </button>
+          <button data-correct="false">
+            Delays function until all events stop
+          </button>
+          <div class="feedback" role="alert" aria-live="assertive"></div>
+        </div>
+      </section>
+
+      <!-- Slide 4: Infinite Scroll -->
+      <section id="slide4" aria-label="Infinite scroll explanation">
+        <h2>📜 Infinite Scroll: The Endless Storybook</h2>
+        <p>
+          Imagine a magical storybook that loads new pages as you turn them, so
+          you never run out of stories!
+        </p>
+        <p>
+          This is <strong>infinite scroll</strong> — loading more content as you
+          scroll down.
+        </p>
+        <div
+          class="scroll-area"
+          tabindex="0"
+          aria-label="Infinite scroll example area"
+          role="region"
+        >
+          <!-- Dynamic content loaded here -->
+        </div>
+        <p>
+          <button id="loadMoreBtn" aria-label="Load more items">
+            Load More Stories 📖
+          </button>
+        </p>
+        <button
+          id="scrollQuizBtn"
+          aria-expanded="false"
+          aria-controls="scrollQuiz"
+        >
+          Take Quiz
+        </button>
+        <div id="scrollQuiz" class="quiz hidden" aria-live="polite">
+          <p>What does infinite scroll do?</p>
+          <button data-correct="true">
+            Loads more content when you scroll down
+          </button>
+          <button data-correct="false">Loads all content at once</button>
+          <button data-correct="false">
+            Stops loading content after first page
+          </button>
+          <div class="feedback" role="alert" aria-live="assertive"></div>
+        </div>
+      </section>
+
+      <!-- Slide 5: List Virtualization -->
+      <section id="slide5" aria-label="List virtualization explanation">
+        <h2>📋 List Virtualization: The Magic Peekaboo List</h2>
+        <p>
+          Imagine a huge list of toys, but you only see the ones near you. The
+          rest are hidden until you scroll.
+        </p>
+        <p>
+          <strong>List virtualization</strong> shows only what you need to see,
+          making the website faster!
+        </p>
+        <div
+          class="list-virt-container"
+          tabindex="0"
+          aria-label="List virtualization example area"
+          role="region"
+        >
+          <div class="list-virt-spacer"></div>
+          <div class="list-virt-visible" id="virtVisible"></div>
+        </div>
+        <button id="virtQuizBtn" aria-expanded="false" aria-controls="virtQuiz">
+          Take Quiz
+        </button>
+        <div id="virtQuiz" class="quiz hidden" aria-live="polite">
+          <p>Why use list virtualization?</p>
+          <button data-correct="true">
+            To show only items visible on screen
+          </button>
+          <button data-correct="false">To show all items at once</button>
+          <button data-correct="false">To hide all items</button>
+          <div class="feedback" role="alert" aria-live="assertive"></div>
+        </div>
+      </section>
+
+      <!-- Slide 6: Conclusion -->
+      <section id="slide6" aria-label="Conclusion slide">
+        <h2>🎉 You Did It!</h2>
+        <p>Now you know how websites use smart tricks to be fast and fun:</p>
+        <ul>
+          <li>Debouncing waits for quiet moments 🛎️</li>
+          <li>Throttling controls the flow like traffic lights 🚦</li>
+          <li>Infinite scroll keeps stories coming endlessly 📚</li>
+          <li>List virtualization shows only what you need 👀</li>
+        </ul>
+        <p>Keep exploring and coding! 💻✨</p>
+        <button id="restartBtn" aria-label="Restart the lesson">
+          Start Over
+        </button>
+      </section>
+
+      <!-- Navigation -->
+      <nav class="nav-buttons" aria-label="Slide navigation">
+        <button id="prevBtn" aria-label="Previous slide" disabled>
+          ⬅️ Previous
+        </button>
+        <button id="nextBtn" aria-label="Next slide">Next ➡️</button>
+      </nav>
+    </main>
+
+    <script>
+      // Slide navigation
+      const slides = [...document.querySelectorAll("main > section")];
+      let current = 0;
+
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      function showSlide(index) {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle("active", i === index);
+        });
+        current = index;
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = current === slides.length - 1;
+        // Reset quiz visibility on slide change
+        const quizzes = slides[current].querySelectorAll(".quiz");
+        quizzes.forEach((q) => {
+          q.classList.add("hidden");
+          q.previousElementSibling.setAttribute("aria-expanded", "false");
+          q.querySelectorAll("button").forEach((b) => (b.disabled = false));
+          const feedback = q.querySelector(".feedback");
+          if (feedback) feedback.textContent = "";
+        });
+      }
+
+      prevBtn.addEventListener("click", () => {
+        if (current > 0) showSlide(current - 1);
+      });
+      nextBtn.addEventListener("click", () => {
+        if (current < slides.length - 1) showSlide(current + 1);
+      });
+
+      // Start button
+      document
+        .getElementById("startBtn")
+        .addEventListener("click", () => showSlide(1));
+      // Restart button
+      document
+        .getElementById("restartBtn")
+        .addEventListener("click", () => showSlide(0));
+
+      // Debounce animation
+      const debounceBox = document.getElementById("debounceBox");
+      document
+        .getElementById("debounceAnimateBtn")
+        .addEventListener("click", () => {
+          debounceBox.classList.remove("move");
+          // Simulate rapid events, only last triggers movement after delay
+          let count = 0;
+          const interval = setInterval(() => {
+            count++;
+            // On last event, move box
+            if (count === 5) {
+              debounceBox.classList.add("move");
+              clearInterval(interval);
+            }
+          }, 150);
+        });
+
+      // Throttle animation
+      const throttleBox = document.getElementById("throttleBox");
+      document
+        .getElementById("throttleAnimateBtn")
+        .addEventListener("click", () => {
+          throttleBox.style.left = "0";
+          throttleBox.classList.remove("move");
+          // Restart animation
+          void throttleBox.offsetWidth; // Trigger reflow
+          throttleBox.classList.add("move");
+        });
+
+      // Infinite scroll example
+      const scrollArea = document.querySelector(".scroll-area");
+      const loadMoreBtn = document.getElementById("loadMoreBtn");
+      let scrollCount = 0;
+      function loadMoreItems() {
+        for (let i = 1; i <= 5; i++) {
+          const item = document.createElement("div");
+          item.className = "scroll-item";
+          item.textContent = `Story #${scrollCount * 5 + i}`;
+          scrollArea.appendChild(item);
+        }
+        scrollCount++;
+      }
+      loadMoreItems();
+      loadMoreBtn.addEventListener("click", loadMoreItems);
+
+      // List virtualization example
+      const virtContainer = document.querySelector(".list-virt-container");
+      const virtVisible = document.getElementById("virtVisible");
+      const totalItems = 30;
+      const itemHeight = 36; // approx height including margin
+      const visibleCount = 5;
+
+      function renderVirtualList(scrollTop) {
+        const startIndex = Math.floor(scrollTop / itemHeight);
+        const endIndex = Math.min(startIndex + visibleCount, totalItems);
+        virtVisible.style.top = startIndex * itemHeight + "px";
+        virtVisible.innerHTML = "";
+        for (let i = startIndex; i < endIndex; i++) {
+          const div = document.createElement("div");
+          div.className = "list-virt-item";
+          div.textContent = `Toy #${i + 1}`;
+          virtVisible.appendChild(div);
+        }
+      }
+      virtContainer.addEventListener("scroll", () => {
+        renderVirtualList(virtContainer.scrollTop);
+      });
+      // Initial render
+      renderVirtualList(0);
+
+      // Quiz toggles and feedback
+      const quizButtons = document.querySelectorAll("button[id$='QuizBtn']");
+      quizButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const quiz = document.getElementById(
+            btn.getAttribute("aria-controls"),
+          );
+          const expanded = btn.getAttribute("aria-expanded") === "true";
+          btn.setAttribute("aria-expanded", String(!expanded));
+          quiz.classList.toggle("hidden");
+          if (!quiz.classList.contains("hidden")) {
+            // Focus first quiz option button
+            const firstOption = quiz.querySelector("button");
+            if (firstOption) firstOption.focus();
+          }
+        });
+      });
+
+      // Quiz answer handling
+      const quizzes = document.querySelectorAll(".quiz");
+      quizzes.forEach((quiz) => {
+        quiz.querySelectorAll("button").forEach((optionBtn) => {
+          optionBtn.addEventListener("click", () => {
+            const correct = optionBtn.getAttribute("data-correct") === "true";
+            // Disable all options
+            quiz.querySelectorAll("button").forEach((b) => (b.disabled = true));
+            const feedback = quiz.querySelector(".feedback");
+            if (correct) {
+              feedback.textContent = "🎉 Correct!";
+              feedback.classList.add("correct");
+              feedback.classList.remove("incorrect");
+            } else {
+              feedback.textContent = "❌ Oops! Try again.";
+              feedback.classList.add("incorrect");
+              feedback.classList.remove("correct");
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

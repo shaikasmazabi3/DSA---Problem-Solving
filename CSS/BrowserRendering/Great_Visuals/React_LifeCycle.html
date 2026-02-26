@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>React Lifecycle & Hooks for Kids 🌱</title>
+    <style>
+      /* Reset & base */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f8ff;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #004080;
+      }
+      main {
+        max-width: 700px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem 2rem;
+      }
+      section {
+        display: none;
+        animation: fadeIn 0.6s ease forwards;
+      }
+      section.active {
+        display: block;
+      }
+      nav {
+        text-align: center;
+        margin-top: 1.5rem;
+      }
+      button {
+        background: #007acc;
+        border: none;
+        color: white;
+        padding: 0.6rem 1.4rem;
+        margin: 0 0.3rem;
+        font-size: 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      button:hover,
+      button:focus {
+        background: #005f99;
+        outline: none;
+      }
+      button[disabled] {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      /* Code styling */
+      pre {
+        background: #e6f1ff;
+        border-left: 5px solid #007acc;
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1rem;
+        margin: 1rem 0;
+      }
+      code {
+        font-weight: bold;
+        color: #004080;
+      }
+
+      /* Emoji icon styles */
+      .emoji {
+        font-size: 2rem;
+        vertical-align: middle;
+        margin-right: 0.4rem;
+      }
+
+      /* Diagrams */
+      .diagram {
+        margin: 1rem auto;
+        max-width: 100%;
+        text-align: center;
+      }
+      .box {
+        display: inline-block;
+        border: 2px solid #007acc;
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        margin: 0.5rem;
+        background: #d0e7ff;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        user-select: none;
+      }
+      .box:hover,
+      .box:focus {
+        background: #a6c9ff;
+        outline: none;
+      }
+      .box.active {
+        background: #007acc;
+        color: white;
+      }
+      .arrow {
+        font-size: 2rem;
+        color: #007acc;
+        user-select: none;
+      }
+
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .progress-bar {
+        position: relative;
+        height: 20px;
+        background: #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 1rem 0;
+      }
+      .progress-bar > div {
+        height: 100%;
+        background: #007acc;
+        width: 0;
+        transition: width 1.2s ease;
+      }
+
+      /* Quiz styles */
+      .quiz {
+        background: #f9fafb;
+        border: 2px solid #007acc;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+      }
+      .quiz button {
+        background: #004080;
+        margin: 0.3rem 0.6rem 0.3rem 0;
+      }
+      .quiz button.correct {
+        background: #28a745;
+      }
+      .quiz button.wrong {
+        background: #dc3545;
+      }
+      .quiz .feedback {
+        margin-top: 0.8rem;
+        font-weight: bold;
+      }
+
+      /* Accessibility focus */
+      button:focus-visible,
+      .box:focus-visible {
+        outline: 3px solid #ffbf47;
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <main
+      role="main"
+      aria-label="React Lifecycle and Hooks Lesson for Beginners"
+    >
+      <h1>🌱 React Lifecycle & Hooks Explained for Kids!</h1>
+
+      <!-- Slides container -->
+      <section
+        id="slide1"
+        class="active"
+        tabindex="0"
+        aria-label="Introduction to React lifecycle"
+      >
+        <h2>
+          <span class="emoji" aria-hidden="true">⚙️</span> What is React
+          Lifecycle?
+        </h2>
+        <p>
+          Imagine React components like little robots 🤖. They have a
+          <strong>life cycle</strong> — they <em>wake up</em>, <em>do work</em>,
+          and <em>go to sleep</em>.
+        </p>
+        <p>
+          React helps you control what happens during these stages so your app
+          works smoothly!
+        </p>
+        <div class="diagram" aria-label="Lifecycle stages illustration">
+          <span class="box" tabindex="0" aria-describedby="desc-mount"
+            >Mounting<br />🛠️</span
+          >
+          <span class="arrow" aria-hidden="true">➡️</span>
+          <span class="box" tabindex="0" aria-describedby="desc-update"
+            >Updating<br />🔄</span
+          >
+          <span class="arrow" aria-hidden="true">➡️</span>
+          <span class="box" tabindex="0" aria-describedby="desc-unmount"
+            >Unmounting<br />🚪</span
+          >
+        </div>
+        <p id="desc-mount">
+          Mounting is when the robot wakes up and starts working (appears on
+          screen).
+        </p>
+        <p id="desc-update">
+          Updating is when the robot changes what it’s doing (updates data or
+          UI).
+        </p>
+        <p id="desc-unmount">
+          Unmounting is when the robot goes to sleep (disappears from the
+          screen).
+        </p>
+        <button aria-label="Go to next slide" id="next1">Next ➡️</button>
+      </section>
+
+      <section
+        id="slide2"
+        tabindex="0"
+        aria-label="Mounting stage and useState hook"
+      >
+        <h2>
+          <span class="emoji" aria-hidden="true">🌅</span> Mounting: The Robot
+          Wakes Up
+        </h2>
+        <p>
+          When React shows a component for the first time, it
+          <strong>mounts</strong> it.
+        </p>
+        <p>
+          We can use <code>useState</code> to give our robot a memory box 🧠 to
+          remember things.
+        </p>
+        <pre><code>const [count, setCount] = React.useState(0);</code></pre>
+        <p>
+          This means: “Hey robot, remember <code>count</code> (starting at 0).
+          If you want to change it, use <code>setCount</code>.”
+        </p>
+        <p>Try clicking the button below to see it in action!</p>
+        <button id="incrementBtn" aria-live="polite" aria-atomic="true">
+          Clicked 0 times
+        </button>
+        <button aria-label="Go to next slide" id="next2">Next ➡️</button>
+        <button aria-label="Go back to previous slide" id="prev2">
+          ⬅️ Back
+        </button>
+      </section>
+
+      <section
+        id="slide3"
+        tabindex="0"
+        aria-label="Updating stage and useEffect hook"
+      >
+        <h2>
+          <span class="emoji" aria-hidden="true">🔄</span> Updating: The Robot
+          Learns New Things
+        </h2>
+        <p>
+          When your robot’s memory changes, it can run special tasks called
+          <code>useEffect</code>.
+        </p>
+        <p>
+          Think of <code>useEffect</code> like your robot checking a to-do list
+          whenever something important changes.
+        </p>
+        <pre><code>React.useEffect(() =&gt; {
+  console.log("Count changed!");
+}, [count]);</code></pre>
+        <p>This means: "Whenever <code>count</code> changes, run this code."</p>
+        <p>
+          Watch the console log (press F12 and open Console) when you click the
+          button below!
+        </p>
+        <button id="updateBtn" aria-live="polite" aria-atomic="true">
+          Click me to update count
+        </button>
+        <button aria-label="Go to next slide" id="next3">Next ➡️</button>
+        <button aria-label="Go back to previous slide" id="prev3">
+          ⬅️ Back
+        </button>
+      </section>
+
+      <section
+        id="slide4"
+        tabindex="0"
+        aria-label="Unmounting stage and cleanup"
+      >
+        <h2>
+          <span class="emoji" aria-hidden="true">🚪</span> Unmounting: Robot
+          Goes to Sleep
+        </h2>
+        <p>
+          When your robot leaves the screen, React <strong>unmounts</strong> it.
+        </p>
+        <p>
+          Sometimes, your robot needs to clean up before going to sleep — like
+          turning off lights or stopping timers.
+        </p>
+        <pre><code>React.useEffect(() =&gt; {
+  const timer = setInterval(() =&gt; {
+    console.log("Tick");
+  }, 1000);
+  return () =&gt; clearInterval(timer); // Cleanup when unmounting
+}, []);</code></pre>
+        <p>Cleanup keeps everything neat and tidy!</p>
+        <button aria-label="Go back to previous slide" id="prev4">
+          ⬅️ Back
+        </button>
+      </section>
+
+      <section
+        id="slide5"
+        tabindex="0"
+        aria-label="Quick Quiz on React Lifecycle"
+      >
+        <h2>
+          <span class="emoji" aria-hidden="true">❓</span> Quick Quiz: Test Your
+          React Robot Knowledge!
+        </h2>
+        <p>
+          What React lifecycle stage is when the component first appears on
+          screen?
+        </p>
+        <div class="quiz" role="radiogroup" aria-labelledby="quiz-question">
+          <button data-correct="true" aria-pressed="false">Mounting</button>
+          <button data-correct="false" aria-pressed="false">Updating</button>
+          <button data-correct="false" aria-pressed="false">Unmounting</button>
+        </div>
+        <div class="quiz feedback" aria-live="polite" aria-atomic="true"></div>
+        <button aria-label="Restart lesson" id="restart">
+          Restart Lesson 🔄
+        </button>
+      </section>
+
+      <nav aria-label="Slides navigation">
+        <button id="btnPrev" disabled>⬅️ Previous</button>
+        <button id="btnNext">Next ➡️</button>
+      </nav>
+    </main>
+
+    <script>
+      // Slide navigation logic
+      const slides = [...document.querySelectorAll("main > section")];
+      const btnPrev = document.getElementById("btnPrev");
+      const btnNext = document.getElementById("btnNext");
+      let currentSlide = 0;
+
+      function showSlide(index) {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle("active", i === index);
+          if (i === index) slide.focus();
+        });
+        currentSlide = index;
+        btnPrev.disabled = index === 0;
+        btnNext.disabled = index === slides.length - 1;
+      }
+
+      btnPrev.addEventListener("click", () => showSlide(currentSlide - 1));
+      btnNext.addEventListener("click", () => showSlide(currentSlide + 1));
+
+      // Also bind slide navigation buttons inside slides
+      document
+        .getElementById("next1")
+        .addEventListener("click", () => showSlide(1));
+      document
+        .getElementById("next2")
+        .addEventListener("click", () => showSlide(2));
+      document
+        .getElementById("prev2")
+        .addEventListener("click", () => showSlide(0));
+      document
+        .getElementById("next3")
+        .addEventListener("click", () => showSlide(3));
+      document
+        .getElementById("prev3")
+        .addEventListener("click", () => showSlide(1));
+      document
+        .getElementById("prev4")
+        .addEventListener("click", () => showSlide(2));
+      document
+        .getElementById("restart")
+        .addEventListener("click", () => showSlide(0));
+
+      // Slide 2: useState demo
+      const incrementBtn = document.getElementById("incrementBtn");
+      let count = 0;
+      incrementBtn.addEventListener("click", () => {
+        count++;
+        incrementBtn.textContent = `Clicked ${count} times`;
+        incrementBtn.setAttribute("aria-live", "polite");
+      });
+
+      // Slide 3: useEffect demo simulation
+      const updateBtn = document.getElementById("updateBtn");
+      let updateCount = 0;
+      updateBtn.addEventListener("click", () => {
+        updateCount++;
+        updateBtn.textContent = `Clicked ${updateCount} times`;
+        console.log("Count changed!"); // Simulate useEffect logging
+      });
+
+      // Slide 5: Quiz logic
+      const quizButtons = document.querySelectorAll(".quiz button");
+      const feedback = document.querySelector(".quiz .feedback");
+      quizButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const isCorrect = button.getAttribute("data-correct") === "true";
+          feedback.textContent = isCorrect
+            ? "🎉 Correct! Mounting is when the robot wakes up."
+            : "❌ Try again!";
+          quizButtons.forEach((btn) => {
+            btn.disabled = true;
+            if (btn.getAttribute("data-correct") === "true")
+              btn.classList.add("correct");
+            else btn.classList.add("wrong");
+          });
+          button.setAttribute("aria-pressed", "true");
+        });
+      });
+
+      // Keyboard navigation for boxes on slide 1
+      const boxes = document.querySelectorAll("#slide1 .box");
+      boxes.forEach((box) => {
+        box.addEventListener("click", () => {
+          boxes.forEach((b) => b.classList.remove("active"));
+          box.classList.add("active");
+          alert(box.textContent + " stage explained above.");
+        });
+        box.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            box.click();
+          }
+        });
+      });
+
+      // Initialize first slide
+      showSlide(0);
+    </script>
+  </body>
+</html>

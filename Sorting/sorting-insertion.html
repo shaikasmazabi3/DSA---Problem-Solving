@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insertion Sort - Complete Detailed Visualization</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+      }
+
+      .header h1 {
+        font-size: 36px;
+        margin-bottom: 10px;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .control-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+      }
+
+      .control-panel h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 18px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      .input-group label {
+        display: block;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+
+      .input-group input:focus {
+        outline: none;
+        border-color: #f5576c;
+      }
+
+      .info-section {
+        background: #f0f0f0;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #555;
+      }
+
+      .info-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .info-item {
+        margin-bottom: 8px;
+        font-size: 12px;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #f5576c;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 13px;
+      }
+
+      .start-btn {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+      }
+
+      .start-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+      }
+
+      .reset-btn {
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      .reset-btn:hover {
+        background: #e0e0e0;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .visualization-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      .step-header {
+        margin-bottom: 30px;
+      }
+
+      .step-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .step-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #f5576c;
+        text-align: center;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #f5576c;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        font-family: "Courier New", monospace;
+      }
+
+      .variables-panel {
+        background: #f0f8ff;
+        border: 2px solid #0d6efd;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+      }
+
+      .variable-box {
+        background: white;
+        border: 2px solid #0d6efd;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+      }
+
+      .var-name {
+        font-weight: 700;
+        color: #0d6efd;
+        font-size: 12px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+      }
+
+      .var-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #333;
+        font-family: "Courier New", monospace;
+        background: #f0f8ff;
+        padding: 10px;
+        border-radius: 6px;
+      }
+
+      .var-status {
+        font-size: 11px;
+        color: #666;
+        margin-top: 8px;
+        font-style: italic;
+      }
+
+      .visualization {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+      }
+
+      .vis-title {
+        font-weight: 600;
+        color: #f5576c;
+        margin-bottom: 20px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .bars-container {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 8px;
+        height: 300px;
+        margin-bottom: 30px;
+        position: relative;
+        flex-direction: row;
+      }
+
+      .bar-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        height: 100%;
+        position: relative;
+        min-width: 40px;
+      }
+
+      .bar {
+        width: 100%;
+        background: #f5576c;
+        border-radius: 4px 4px 0 0;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        box-sizing: border-box;
+        border: 2px solid transparent;
+        /* FIX: Remove the flex-direction conflict */
+        flex-direction: column;
+      }
+      .back-link {
+        display: inline-block;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+
+      .bar-value {
+        background: white;
+        border-radius: 4px;
+        padding: 3px 12px;
+        border: 1px solid #f5576c;
+        color: #f5576c;
+        font-weight: bold;
+        font-size: 13px;
+        margin-bottom: 5px;
+      }
+
+      .bar-index {
+        font-size: 11px;
+        font-weight: 600;
+        color: #666;
+        margin-top: 8px;
+        text-align: center;
+      }
+
+      .bar.comparing {
+        background: #ffc107;
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+        border: 2px solid #ff9800;
+      }
+
+      .bar.shifting {
+        background: #ff9800;
+        box-shadow: 0 0 15px rgba(255, 152, 0, 0.6);
+        border: 2px solid #ff6f00;
+      }
+
+      .bar.sorted {
+        background: #28a745;
+        border: 2px solid #1e7e34;
+      }
+
+      .bar.key {
+        background: #0d6efd;
+        box-shadow: 0 0 20px rgba(13, 110, 253, 0.8);
+        border: 3px solid #0a58ca;
+        animation: pulse 0.6s infinite;
+      }
+
+      .bar.i-pointer {
+        border: 3px dashed #9c27b0;
+        box-shadow: inset 0 0 10px rgba(156, 39, 176, 0.3);
+      }
+
+      .bar.j-pointer {
+        border: 3px dashed #00bcd4;
+        box-shadow: inset 0 0 10px rgba(0, 188, 212, 0.3);
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      .pointer-label {
+        font-size: 10px;
+        font-weight: 700;
+        position: absolute;
+        top: -25px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        white-space: nowrap;
+        text-align: center;
+        z-index: 10;
+      }
+
+      .pointer-i {
+        background: #9c27b0;
+        color: white;
+        left: 0;
+      }
+
+      .pointer-j {
+        background: #00bcd4;
+        color: white;
+        right: 0;
+      }
+
+      .pointer-key {
+        background: #0d6efd;
+        color: white;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .step-info {
+        background: #fff3e0;
+        border-left: 4px solid #ff9800;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+      }
+
+      .step-info-title {
+        font-weight: 700;
+        color: #ff9800;
+        margin-bottom: 10px;
+        font-size: 15px;
+      }
+
+      .step-info-content {
+        color: #555;
+        font-size: 14px;
+        line-height: 1.8;
+        font-family: "Courier New", monospace;
+      }
+
+      .nav-buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      .nav-btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 14px;
+      }
+
+      .prev-btn {
+        background: #e0e0e0;
+        color: #333;
+      }
+
+      .prev-btn:hover:not(:disabled) {
+        background: #d0d0d0;
+      }
+
+      .next-btn {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+      }
+
+      .next-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+      }
+
+      .prev-btn:disabled,
+      .next-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .progress {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 13px;
+        color: #666;
+        font-weight: 600;
+      }
+
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #555;
+      }
+
+      .legend-color {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+      }
+
+      .color-comparing {
+        background: #ffc107;
+      }
+
+      .color-shifting {
+        background: #ff9800;
+      }
+
+      .color-sorted {
+        background: #28a745;
+      }
+
+      .color-key {
+        background: #0d6efd;
+      }
+
+      .color-default {
+        background: #f5576c;
+      }
+
+      @media (max-width: 1024px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .control-panel {
+          position: static;
+        }
+
+        .variables-panel {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 24px;
+        }
+
+        .bars-container {
+          height: 250px;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .variables-panel {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="sorting-index.html" class="back-link">← Back to Index</a>
+      <div class="header">
+        <h1>💳 Insertion Sort - Detailed Visualization</h1>
+        <p>See EVERY Variable, Pointer & State Change</p>
+      </div>
+
+      <div class="main-grid">
+        <!-- Control Panel -->
+        <div class="control-panel">
+          <h2>⚙️ Controls</h2>
+          <div class="input-group">
+            <label>Array Size</label>
+            <input type="number" id="sizeInput" value="7" min="3" max="15" />
+          </div>
+          <div class="input-group">
+            <label>Animation Speed</label>
+            <input
+              type="range"
+              id="speedInput"
+              min="100"
+              max="1000"
+              value="300"
+              style="width: 100%"
+            />
+            <small style="color: #999">Faster ← → Slower</small>
+          </div>
+          <div class="buttons">
+            <button class="start-btn" onclick="startVisualization()">
+              Start
+            </button>
+            <button class="reset-btn" onclick="resetVisualization()">
+              Reset
+            </button>
+          </div>
+          <div class="info-section">
+            <div class="info-title">Algorithm Info</div>
+            <div class="info-item">
+              <span class="info-label">Type:</span> Comparison-Based
+            </div>
+            <div class="info-item">
+              <span class="info-label">Time Avg:</span> O(n²)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Time Best:</span> O(n)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Space:</span> O(1)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Stable:</span> ✓ Yes
+            </div>
+          </div>
+          <div class="info-section">
+            <div class="info-title">Pseudo Code</div>
+            <div
+              style="
+                font-size: 11px;
+                line-height: 1.5;
+                color: #555;
+                font-family: monospace;
+              "
+            >
+              for i = 1 to n-1:<br />
+              &nbsp;&nbsp;key = arr[i]<br />
+              &nbsp;&nbsp;j = i - 1<br />
+              &nbsp;&nbsp;while j >= 0 AND arr[j] > key:<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;arr[j+1] = arr[j]<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;j = j - 1<br />
+              &nbsp;&nbsp;arr[j+1] = key
+            </div>
+          </div>
+        </div>
+
+        <!-- Visualization Panel -->
+        <div class="visualization-panel">
+          <div class="step-header">
+            <div class="step-title" id="stepTitle">Initialization</div>
+            <div class="step-description" id="stepDescription">
+              Click "Start" to begin the visualization
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Comparisons</div>
+              <div class="stat-value" id="comparisons">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Shifts</div>
+              <div class="stat-value" id="shifts">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Pass (i)</div>
+              <div class="stat-value" id="pass">-</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Sorted Count</div>
+              <div class="stat-value" id="sorted">0</div>
+            </div>
+          </div>
+
+          <!-- Variables Panel -->
+          <div class="variables-panel" id="variablesPanel">
+            <div class="variable-box">
+              <div class="var-name">i (Current Pass)</div>
+              <div class="var-value" id="varI">-</div>
+              <div class="var-status" id="varIStatus"></div>
+            </div>
+            <div class="variable-box">
+              <div class="var-name">j (Compare Index)</div>
+              <div class="var-value" id="varJ">-</div>
+              <div class="var-status" id="varJStatus"></div>
+            </div>
+            <div class="variable-box">
+              <div class="var-name">key (Current Element)</div>
+              <div class="var-value" id="varKey">-</div>
+              <div class="var-status" id="varKeyStatus"></div>
+            </div>
+            <div class="variable-box">
+              <div class="var-name">arr[j] (Comparing With)</div>
+              <div class="var-value" id="varArrJ">-</div>
+              <div class="var-status" id="varArrJStatus"></div>
+            </div>
+          </div>
+
+          <div class="visualization">
+            <div class="vis-title">Array State with Pointers & Key</div>
+            <div class="bars-container" id="barsContainer"></div>
+          </div>
+
+          <div class="step-info" id="stepInfo" style="display: none">
+            <div class="step-info-title" id="stepInfoTitle">
+              Step Information
+            </div>
+            <div class="step-info-content" id="stepInfoContent"></div>
+          </div>
+
+          <div class="nav-buttons">
+            <button
+              class="nav-btn prev-btn"
+              id="prevBtn"
+              onclick="previousStep()"
+              disabled
+            >
+              ← Previous
+            </button>
+            <button
+              class="nav-btn next-btn"
+              id="nextBtn"
+              onclick="nextStep()"
+              disabled
+            >
+              Next →
+            </button>
+          </div>
+          <div class="progress" id="progress">Ready to start</div>
+
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color color-default"></div>
+              <span>Unsorted</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-key"></div>
+              <span>Current Key</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-comparing"></div>
+              <span>Comparing</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-shifting"></div>
+              <span>Shifting</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-sorted"></div>
+              <span>Sorted</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let array = [];
+      let steps = [];
+      let currentStep = 0;
+
+      function generateRandomArray(size) {
+        return Array.from(
+          { length: size },
+          () => Math.floor(Math.random() * 99) + 1,
+        );
+      }
+
+      function createSteps() {
+        steps = [];
+        const arr = [...array];
+        let comparisons = 0;
+        let shifts = 0;
+
+        // Initial step
+        steps.push({
+          array: [...arr],
+          i: null,
+          j: null,
+          key: null,
+          comparing: [],
+          shifting: [],
+          action: "INIT",
+          comparisons,
+          shifts,
+          sorted: 0,
+          title: "Initial Array",
+          description:
+            "Array is unsorted. Insertion Sort will build a sorted portion from left to right. Start with i=1.",
+          explanation:
+            "Sorted Section: [] (0 elements)\nUnsorted Section: arr[0..n-1]\nNo elements picked yet.",
+        });
+
+        // Main sorting loop
+        for (let i = 1; i < arr.length; i++) {
+          const key = arr[i];
+
+          // Step: Pick the key
+          steps.push({
+            array: [...arr],
+            i: i,
+            j: null,
+            key: key,
+            comparing: [],
+            shifting: [],
+            action: "PICK_KEY",
+            comparisons,
+            shifts,
+            sorted: i,
+            title: `Pass ${i}: Pick Key = ${key}`,
+            description: `Pick arr[${i}] = ${key}. Initialize j = i - 1 = ${i - 1}.`,
+            explanation: `KEY PICKED: ${key}\nSorted Section: arr[0..${i - 1}] (${i} elements)\nAbout to compare key with arr[j] where j starts at ${i - 1}`,
+          });
+
+          let j = i - 1;
+
+          // Inner while loop
+          while (j >= 0 && arr[j] > key) {
+            // Step: Compare
+            steps.push({
+              array: [...arr],
+              i: i,
+              j: j,
+              key: key,
+              comparing: [j, i],
+              shifting: [],
+              action: "COMPARE",
+              comparisons: comparisons + 1,
+              shifts,
+              sorted: i,
+              title: `Pass ${i}: Compare arr[${j}]=${arr[j]} > key=${key}?`,
+              description: `Compare arr[${j}] = ${arr[j]} with key = ${key}. TRUE! Need to SHIFT.`,
+              explanation: `Comparison: arr[${j}]=${arr[j]} > key=${key}?\nResult: YES ✓\nAction: SHIFT arr[${j}] right`,
+            });
+            comparisons++;
+
+            // Step: Shift
+            arr[j + 1] = arr[j];
+            shifts++;
+            steps.push({
+              array: [...arr],
+              i: i,
+              j: j,
+              key: key,
+              comparing: [],
+              shifting: [j, j + 1],
+              action: "SHIFT",
+              comparisons,
+              shifts,
+              sorted: i,
+              title: `Pass ${i}: Shift arr[${j}]=${arr[j]} to position ${j + 1}`,
+              description: `Shifted arr[${j}] to position ${j + 1}. Decrement j: j = ${j} - 1 = ${j - 1}.`,
+              explanation: `SHIFTING: arr[${j + 1}] = arr[${j}] (moved ${arr[j]} right)\nj updated: ${j} → ${j - 1}`,
+            });
+
+            j--;
+          }
+
+          // Step: Insert key at correct position
+          arr[j + 1] = key;
+          steps.push({
+            array: [...arr],
+            i: i,
+            j: j,
+            key: key,
+            comparing: [],
+            shifting: [],
+            action: "INSERT",
+            comparisons,
+            shifts,
+            sorted: i + 1,
+            title: `Pass ${i}: Insert key=${key} at position ${j + 1}`,
+            description: `Insert ${key} at arr[${j + 1}]. Sorted portion now has ${i + 1} elements.`,
+            explanation: `INSERTED: key=${key} at arr[${j + 1}]\nSorted Section: arr[0..${i}] (${i + 1} elements)\nReady for next i = ${i + 1}`,
+          });
+        }
+
+        // Final step
+        steps.push({
+          array: [...arr],
+          i: null,
+          j: null,
+          key: null,
+          comparing: [],
+          shifting: [],
+          action: "DONE",
+          comparisons,
+          shifts,
+          sorted: arr.length,
+          title: "✅ Sorting Complete!",
+          description: `Array is fully sorted! Total comparisons: ${comparisons}, Total shifts: ${shifts}.`,
+          explanation: `FINAL SORTED ARRAY: [${arr.join(", ")}]\nTotal Comparisons: ${comparisons}\nTotal Shifts: ${shifts}`,
+        });
+      }
+
+      function renderBars(stepData) {
+        const container = document.getElementById("barsContainer");
+        container.innerHTML = "";
+        const arr = stepData.array;
+        const maxValue = Math.max(...arr);
+
+        arr.forEach((value, index) => {
+          const wrapper = document.createElement("div");
+          wrapper.className = "bar-wrapper";
+
+          const bar = document.createElement("div");
+          bar.className = "bar";
+
+          // Color classes based on state
+          if (index < stepData.sorted) {
+            bar.classList.add("sorted");
+          } else if (stepData.shifting.includes(index)) {
+            bar.classList.add("shifting");
+          } else if (stepData.comparing.includes(index)) {
+            bar.classList.add("comparing");
+          }
+
+          // Special highlighting for key
+          if (stepData.key !== null && index === stepData.i) {
+            bar.classList.add("key");
+          }
+
+          // Pointer highlighting
+          if (stepData.i !== null && index === stepData.i) {
+            const pointerLabel = document.createElement("div");
+            pointerLabel.className = "pointer-label pointer-i";
+            pointerLabel.textContent = "i";
+            bar.appendChild(pointerLabel);
+          }
+
+          if (stepData.j !== null && index === stepData.j) {
+            const pointerLabel = document.createElement("div");
+            pointerLabel.className = "pointer-label pointer-j";
+            pointerLabel.textContent = "j";
+            bar.appendChild(pointerLabel);
+          }
+
+          const height = (value / maxValue) * 100;
+          bar.style.height = height + "%";
+
+          const valueSpan = document.createElement("div");
+          valueSpan.className = "bar-value";
+          valueSpan.textContent = value;
+          bar.appendChild(valueSpan);
+
+          const indexSpan = document.createElement("div");
+          indexSpan.className = "bar-index";
+          indexSpan.textContent = `${index}`;
+          wrapper.appendChild(bar);
+          wrapper.appendChild(indexSpan);
+
+          container.appendChild(wrapper);
+        });
+      }
+
+      function displayStep(stepIndex) {
+        if (stepIndex < 0 || stepIndex >= steps.length) return;
+
+        const step = steps[stepIndex];
+
+        // Update title and description
+        document.getElementById("stepTitle").textContent = step.title;
+        document.getElementById("stepDescription").textContent =
+          step.description;
+
+        // Update stats
+        document.getElementById("comparisons").textContent = step.comparisons;
+        document.getElementById("shifts").textContent = step.shifts;
+        document.getElementById("pass").textContent =
+          step.i !== null ? step.i : "-";
+        document.getElementById("sorted").textContent = step.sorted;
+
+        // Update variables panel
+        document.getElementById("varI").textContent =
+          step.i !== null ? step.i : "-";
+        document.getElementById("varIStatus").textContent =
+          step.i !== null ? `Outer loop iteration` : `Not active`;
+
+        document.getElementById("varJ").textContent =
+          step.j !== null ? step.j : "-";
+        document.getElementById("varJStatus").textContent =
+          step.j !== null
+            ? step.j >= 0
+              ? `Inner loop pointer`
+              : `Loop ended (j < 0)`
+            : `Not active`;
+
+        document.getElementById("varKey").textContent =
+          step.key !== null ? step.key : "-";
+        document.getElementById("varKeyStatus").textContent =
+          step.key !== null ? `Current element in hand` : `Not picked`;
+
+        if (
+          step.j !== null &&
+          step.j >= 0 &&
+          step.array[step.j] !== undefined
+        ) {
+          document.getElementById("varArrJ").textContent = step.array[step.j];
+          document.getElementById("varArrJStatus").textContent =
+            `Comparing with key`;
+        } else {
+          document.getElementById("varArrJ").textContent = "-";
+          document.getElementById("varArrJStatus").textContent = `N/A`;
+        }
+
+        // Render bars
+        renderBars(step);
+
+        // Update step info
+        document.getElementById("stepInfo").style.display = "block";
+        document.getElementById("stepInfoTitle").textContent =
+          step.action + " STEP";
+        document.getElementById("stepInfoContent").textContent =
+          step.explanation;
+
+        // Update navigation
+        document.getElementById("prevBtn").disabled = stepIndex === 0;
+        document.getElementById("nextBtn").disabled =
+          stepIndex === steps.length - 1;
+        document.getElementById("progress").textContent =
+          `Step ${stepIndex + 1} of ${steps.length}`;
+
+        currentStep = stepIndex;
+      }
+
+      function startVisualization() {
+        const size = parseInt(document.getElementById("sizeInput").value);
+        if (size < 3 || size > 15) {
+          alert("Array size must be between 3 and 15");
+          return;
+        }
+        array = generateRandomArray(size);
+        createSteps();
+        displayStep(0);
+      }
+
+      function nextStep() {
+        if (currentStep < steps.length - 1) {
+          displayStep(currentStep + 1);
+        }
+      }
+
+      function previousStep() {
+        if (currentStep > 0) {
+          displayStep(currentStep - 1);
+        }
+      }
+
+      function resetVisualization() {
+        array = [];
+        steps = [];
+        currentStep = 0;
+        document.getElementById("barsContainer").innerHTML = "";
+        document.getElementById("stepTitle").textContent = "Initialization";
+        document.getElementById("stepDescription").textContent =
+          'Click "Start" to begin the visualization';
+        document.getElementById("comparisons").textContent = "0";
+        document.getElementById("shifts").textContent = "0";
+        document.getElementById("pass").textContent = "-";
+        document.getElementById("sorted").textContent = "0";
+        document.getElementById("varI").textContent = "-";
+        document.getElementById("varJ").textContent = "-";
+        document.getElementById("varKey").textContent = "-";
+        document.getElementById("varArrJ").textContent = "-";
+        document.getElementById("stepInfo").style.display = "none";
+        document.getElementById("prevBtn").disabled = true;
+        document.getElementById("nextBtn").disabled = true;
+        document.getElementById("progress").textContent = "Ready to start";
+      }
+    </script>
+  </body>
+</html>

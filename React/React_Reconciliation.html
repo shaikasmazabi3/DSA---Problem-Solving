@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>React Reconciliation Nested List Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f9f9f9;
+        margin: 0;
+        padding: 20px;
+        color: #222;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .container {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        max-width: 1300px;
+        margin: 0 auto 40px;
+      }
+      .section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+        padding: 20px;
+        width: 30%;
+        display: flex;
+        flex-direction: column;
+      }
+      .section h2 {
+        text-align: center;
+        margin-bottom: 15px;
+      }
+      .tree {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        min-height: 300px;
+        background: #fafafa;
+        flex-grow: 1;
+        overflow-y: auto;
+      }
+      ul {
+        list-style: none;
+        padding-left: 20px;
+      }
+      li {
+        padding: 8px 12px;
+        margin: 6px 0;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        background: white;
+        position: relative;
+        transition: background-color 0.6s ease, color 0.6s ease;
+      }
+      /* Highlight animations */
+      .highlight-diff {
+        animation: highlightDiff 1.2s ease forwards;
+      }
+      .highlight-update {
+        animation: highlightUpdate 1.2s ease forwards;
+      }
+      .highlight-add {
+        animation: highlightAdd 1.5s ease forwards;
+      }
+      .highlight-remove {
+        animation: highlightRemove 1.5s ease forwards;
+      }
+      @keyframes highlightDiff {
+        0% {
+          box-shadow: 0 0 12px 3px #2196f3;
+        }
+        100% {
+          box-shadow: none;
+        }
+      }
+      @keyframes highlightUpdate {
+        0% {
+          background-color: #ffeb3b;
+        }
+        50% {
+          background-color: #fff176;
+        }
+        100% {
+          background-color: white;
+        }
+      }
+      @keyframes highlightAdd {
+        0% {
+          background-color: #c8e6c9;
+        }
+        100% {
+          background-color: white;
+        }
+      }
+      @keyframes highlightRemove {
+        0% {
+          background-color: #ffcdd2;
+          opacity: 1;
+        }
+        100% {
+          background-color: white;
+          opacity: 0;
+          height: 0;
+          margin: 0;
+          padding: 0;
+        }
+      }
+      #controls {
+        text-align: center;
+        margin-top: 20px;
+      }
+      button,
+      select {
+        background: #0078d4;
+        border: none;
+        color: white;
+        padding: 12px 20px;
+        margin: 0 10px 10px 10px;
+        font-size: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 3px 6px rgb(0 120 212 / 0.5);
+        transition: background-color 0.3s ease;
+      }
+      button:hover:not(:disabled),
+      select:hover:not(:disabled) {
+        background: #005ea2;
+      }
+      button:disabled,
+      select:disabled {
+        background: #a0c4ff;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      select {
+        color: black;
+        width: 300px;
+      }
+      .status {
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #0078d4;
+        min-height: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>React Reconciliation Nested List Visualization</h1>
+
+    <div id="controls">
+      <select id="exampleSelect" aria-label="Select example to visualize">
+        <option value="nestedTextChange">
+          Change Nested Item Text ("Green Tea" → "Black Tea")
+        </option>
+        <option value="nestedAddItem">Add Nested Item ("Honey")</option>
+        <option value="nestedRemoveItem">Remove Nested Item ("Sugar")</option>
+        <option value="nestedReorder">Reorder Nested Items</option>
+      </select>
+      <button id="btnNextStep">Next Step</button>
+      <button id="btnReset" disabled>Reset</button>
+    </div>
+
+    <div class="status" id="statusMessage">
+      Select an example and click "Next Step" to start.
+    </div>
+
+    <div class="container">
+      <section class="section">
+        <h2>Old Virtual DOM</h2>
+        <div class="tree" id="oldVirtualDomTree"></div>
+      </section>
+      <section class="section">
+        <h2>New Virtual DOM</h2>
+        <div class="tree" id="newVirtualDomTree"></div>
+      </section>
+      <section class="section">
+        <h2>Real DOM</h2>
+        <div class="tree" id="realDomTree"></div>
+      </section>
+    </div>
+
+    <script>
+      // Initial nested data structure
+      const initialVDOM = [
+        {
+          key: "item1",
+          text: "Tea",
+          style: {},
+          children: [
+            { key: "item1-1", text: "Green Tea", style: {} },
+            { key: "item1-2", text: "Black Tea", style: {} },
+          ],
+        },
+        {
+          key: "item2",
+          text: "Milk",
+          style: {},
+          children: [],
+        },
+        {
+          key: "item3",
+          text: "Sugar",
+          style: {},
+          children: [],
+        },
+      ];
+
+      // Deep clone utility
+      function deepClone(obj) {
+        return JSON.parse(JSON.stringify(obj));
+      }
+
+      // States
+      let oldVirtualDOM = deepClone(initialVDOM);
+      let newVirtualDOM = deepClone(initialVDOM);
+      let realDOM = deepClone(initialVDOM);
+
+      // Containers
+      const oldVDOMContainer = document.getElementById("oldVirtualDomTree");
+      const newVDOMContainer = document.getElementById("newVirtualDomTree");
+      const realDOMContainer = document.getElementById("realDomTree");
+      const statusMessage = document.getElementById("statusMessage");
+      const btnNextStep = document.getElementById("btnNextStep");
+      const btnReset = document.getElementById("btnReset");
+      const exampleSelect = document.getElementById("exampleSelect");
+
+      // Recursive render function for nested lists
+      function renderTree(
+        container,
+        nodes,
+        highlights = {},
+        highlightType = ""
+      ) {
+        container.innerHTML = "";
+        function createList(items) {
+          const ul = document.createElement("ul");
+          items.forEach((item) => {
+            const li = document.createElement("li");
+            li.textContent = item.text;
+            if (item.style && item.style.backgroundColor) {
+              li.style.backgroundColor = item.style.backgroundColor;
+            }
+            if (highlights[item.key]) {
+              if (highlightType === "diff") {
+                li.classList.add("highlight-diff");
+                li.addEventListener(
+                  "animationend",
+                  () => li.classList.remove("highlight-diff"),
+                  { once: true }
+                );
+              } else if (highlightType === "update") {
+                li.classList.add("highlight-update");
+                li.addEventListener(
+                  "animationend",
+                  () => li.classList.remove("highlight-update"),
+                  { once: true }
+                );
+              } else if (highlightType === "add") {
+                li.classList.add("highlight-add");
+                li.addEventListener(
+                  "animationend",
+                  () => li.classList.remove("highlight-add"),
+                  { once: true }
+                );
+              } else if (highlightType === "remove") {
+                li.classList.add("highlight-remove");
+                li.addEventListener(
+                  "animationend",
+                  () => li.classList.remove("highlight-remove"),
+                  { once: true }
+                );
+              }
+            }
+            if (item.children && item.children.length > 0) {
+              li.appendChild(createList(item.children));
+            }
+            ul.appendChild(li);
+          });
+          return ul;
+        }
+        container.appendChild(createList(nodes));
+      }
+
+      // Compare two nested trees and produce a map of changes keyed by node key
+      function diffTrees(oldNodes, newNodes) {
+        const changes = {};
+
+        const oldMap = {};
+        oldNodes.forEach((n) => (oldMap[n.key] = n));
+        const newMap = {};
+        newNodes.forEach((n) => (newMap[n.key] = n));
+
+        // Detect removals
+        Object.keys(oldMap).forEach((key) => {
+          if (!newMap[key]) {
+            changes[key] = "remove";
+          }
+        });
+
+        // Detect additions and updates
+        newNodes.forEach((newNode) => {
+          const oldNode = oldMap[newNode.key];
+          if (!oldNode) {
+            changes[newNode.key] = "add";
+          } else {
+            if (oldNode.text !== newNode.text) {
+              changes[newNode.key] = "text";
+            } else if (
+              (oldNode.style.backgroundColor || "") !==
+              (newNode.style.backgroundColor || "")
+            ) {
+              changes[newNode.key] = "style";
+            }
+            // Recursively check children
+            if (newNode.children && oldNode.children) {
+              Object.assign(
+                changes,
+                diffTrees(oldNode.children, newNode.children)
+              );
+            }
+          }
+        });
+
+        return changes;
+      }
+
+      // Update real DOM based on changes
+      function updateRealDOM(changes, oldNodes, newNodes) {
+        // Remove nodes
+        Object.entries(changes).forEach(([key, changeType]) => {
+          if (changeType === "remove") {
+            const idx = oldNodes.findIndex((n) => n.key === key);
+            if (idx !== -1) oldNodes.splice(idx, 1);
+          }
+        });
+
+        // Add or update nodes
+        newNodes.forEach((newNode) => {
+          const oldNode = oldNodes.find((n) => n.key === newNode.key);
+          if (!oldNode) {
+            oldNodes.push(deepClone(newNode));
+          } else {
+            if (changes[newNode.key] === "text") {
+              oldNode.text = newNode.text;
+            }
+            if (changes[newNode.key] === "style") {
+              oldNode.style = deepClone(newNode.style);
+            }
+            if (newNode.children && oldNode.children) {
+              updateRealDOM(changes, oldNode.children, newNode.children);
+            }
+          }
+        });
+      }
+
+      // Commit newVirtualDOM as oldVirtualDOM
+      function commitNewVDOM() {
+        oldVirtualDOM = deepClone(newVirtualDOM);
+      }
+
+      // Clear highlights on all trees
+      function clearHighlights() {
+        renderTree(oldVDOMContainer, oldVirtualDOM);
+        renderTree(newVDOMContainer, newVirtualDOM);
+        renderTree(realDOMContainer, realDOM);
+      }
+
+      // Examples steps for nested list
+      const examples = {
+        nestedTextChange: {
+          description: [
+            'Change nested item text ("Green Tea" → "Black Tea (Updated)")',
+            "Diff old and new Virtual DOM (highlight changes)",
+            "Update Real DOM nodes based on diff",
+            "Commit new Virtual DOM as old",
+          ],
+          steps: [
+            () => {
+              newVirtualDOM[0].children[0].text = "Black Tea (Updated)";
+            },
+            () => {},
+            () =>
+              updateRealDOM(
+                diffTrees(oldVirtualDOM, newVirtualDOM),
+                realDOM,
+                newVirtualDOM
+              ),
+            () => commitNewVDOM(),
+          ],
+        },
+        nestedAddItem: {
+          description: [
+            'Add nested item "Honey" under "Tea"',
+            "Diff old and new Virtual DOM (highlight changes)",
+            "Update Real DOM nodes based on diff",
+            "Commit new Virtual DOM as old",
+          ],
+          steps: [
+            () => {
+              newVirtualDOM[0].children.push({
+                key: "item1-3",
+                text: "Honey",
+                style: {},
+              });
+            },
+            () => {},
+            () =>
+              updateRealDOM(
+                diffTrees(oldVirtualDOM, newVirtualDOM),
+                realDOM,
+                newVirtualDOM
+              ),
+            () => commitNewVDOM(),
+          ],
+        },
+        nestedRemoveItem: {
+          description: [
+            'Remove nested item "Sugar"',
+            "Diff old and new Virtual DOM (highlight changes)",
+            "Update Real DOM nodes based on diff",
+            "Commit new Virtual DOM as old",
+          ],
+          steps: [
+            () => {
+              newVirtualDOM = newVirtualDOM.filter(
+                (item) => item.key !== "item3"
+              );
+            },
+            () => {},
+            () =>
+              updateRealDOM(
+                diffTrees(oldVirtualDOM, newVirtualDOM),
+                realDOM,
+                newVirtualDOM
+              ),
+            () => commitNewVDOM(),
+          ],
+        },
+        nestedReorder: {
+          description: [
+            'Reorder nested items under "Tea" (Black Tea first)',
+            "Diff old and new Virtual DOM (highlight changes)",
+            "Update Real DOM nodes based on diff",
+            "Commit new Virtual DOM as old",
+          ],
+          steps: [
+            () => {
+              newVirtualDOM[0].children = [
+                newVirtualDOM[0].children.find((c) => c.key === "item1-2"),
+                newVirtualDOM[0].children.find((c) => c.key === "item1-1"),
+              ];
+            },
+            () => {},
+            () =>
+              updateRealDOM(
+                diffTrees(oldVirtualDOM, newVirtualDOM),
+                realDOM,
+                newVirtualDOM
+              ),
+            () => commitNewVDOM(),
+          ],
+        },
+      };
+
+      // Step control variables
+      let step = 0;
+      let currentExample = exampleSelect.value;
+
+      function nextStep() {
+        const example = examples[currentExample];
+        if (!example) return;
+
+        if (step < example.steps.length) {
+          statusMessage.textContent = `Step ${step + 1}: ${
+            example.description[step]
+          }`;
+          example.steps[step]();
+          if (step === 1) {
+            // Diff and highlight
+            const changes = diffTrees(oldVirtualDOM, newVirtualDOM);
+            renderTree(oldVDOMContainer, oldVirtualDOM, changes, "diff");
+            renderTree(newVDOMContainer, newVirtualDOM, changes, "diff");
+            renderTree(realDOMContainer, realDOM);
+          } else if (step === 2) {
+            // Update real DOM and highlight updates
+            const changes = diffTrees(oldVirtualDOM, newVirtualDOM);
+            updateRealDOM(changes, realDOM, newVirtualDOM);
+            renderTree(oldVDOMContainer, oldVirtualDOM);
+            renderTree(newVDOMContainer, newVirtualDOM);
+            renderTree(realDOMContainer, realDOM, changes, "update");
+          } else if (step === 3) {
+            commitNewVDOM();
+            clearHighlights();
+          } else {
+            renderTree(oldVDOMContainer, oldVirtualDOM);
+            renderTree(newVDOMContainer, newVirtualDOM);
+            renderTree(realDOMContainer, realDOM);
+          }
+          step++;
+          if (step >= example.steps.length) {
+            btnNextStep.disabled = true;
+            btnReset.disabled = false;
+          }
+        }
+      }
+
+      function reset() {
+        step = 0;
+        oldVirtualDOM = deepClone(initialVDOM);
+        newVirtualDOM = deepClone(initialVDOM);
+        realDOM = deepClone(initialVDOM);
+        btnNextStep.disabled = false;
+        btnReset.disabled = true;
+        clearHighlights();
+        statusMessage.textContent =
+          'Select an example and click "Next Step" to start.';
+      }
+
+      exampleSelect.addEventListener("change", () => {
+        reset();
+        currentExample = exampleSelect.value;
+      });
+
+      btnNextStep.addEventListener("click", nextStep);
+      btnReset.addEventListener("click", reset);
+
+      // Initial render
+      clearHighlights();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quick Sort - Complete Step-by-Step Visualization</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .header h1 {
+        font-size: 36px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 16px;
+        opacity: 0.9;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .control-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+      }
+
+      .control-panel h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 18px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      .input-group label {
+        display: block;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+
+      .input-group input:focus {
+        outline: none;
+        border-color: #fa709a;
+      }
+
+      .info-section {
+        background: #f0f0f0;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #555;
+      }
+
+      .info-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .info-item {
+        margin-bottom: 8px;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #fa709a;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 13px;
+      }
+
+      .start-btn {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+      }
+
+      .start-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(250, 112, 154, 0.4);
+      }
+
+      .reset-btn {
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      .reset-btn:hover {
+        background: #e0e0e0;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .visualization-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      .step-header {
+        margin-bottom: 30px;
+      }
+
+      .step-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .step-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #fa709a;
+        text-align: center;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #fa709a;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        font-family: "Courier New", monospace;
+      }
+
+      .visualization {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        min-height: 300px;
+      }
+
+      .vis-title {
+        font-weight: 600;
+        color: #fa709a;
+        margin-bottom: 20px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .bars-container {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 8px;
+        height: 250px;
+        margin-bottom: 20px;
+      }
+
+      .bar {
+        flex: 1;
+        background: #fa709a;
+        border-radius: 4px 4px 0 0;
+        transition: all 0.3s ease;
+        position: relative;
+        min-width: 30px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+      }
+
+      .bar-value {
+        background : white;
+        border-radius: 4px;
+        padding : 3px 12px;
+        border: 1px solid #fa709a;
+        color: #fa709a;
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 5px;
+      }
+
+      .bar.pivot {
+        background: #ff6b6b;
+        box-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
+      }
+
+      .bar.partition-left {
+        background: #ffc107;
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+      }
+
+      .bar.partition-right {
+        background: #17a2b8;
+        box-shadow: 0 0 15px rgba(23, 162, 184, 0.6);
+      }
+
+      .bar.sorted {
+        background: #28a745;
+      }
+
+      .step-info {
+        background: #fff3e0;
+        border-left: 4px solid #ff9800;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+      }
+
+      .step-info-title {
+        font-weight: 700;
+        color: #ff9800;
+        margin-bottom: 10px;
+        font-size: 15px;
+      }
+
+      .step-info-content {
+        color: #555;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .nav-buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      .nav-btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 14px;
+      }
+
+      .prev-btn {
+        background: #e0e0e0;
+        color: #333;
+      }
+
+      .prev-btn:hover:not(:disabled) {
+        background: #d0d0d0;
+      }
+
+      .next-btn {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+      }
+
+      .next-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(250, 112, 154, 0.4);
+      }
+
+      .prev-btn:disabled,
+      .next-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .progress {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 13px;
+        color: #666;
+        font-weight: 600;
+      }
+
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #555;
+      }
+
+      .legend-color {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+      }
+
+      .color-pivot {
+        background: #ff6b6b;
+      }
+
+      .color-left {
+        background: #ffc107;
+      }
+
+      .color-right {
+        background: #17a2b8;
+      }
+
+      .color-sorted {
+        background: #28a745;
+      }
+
+      .color-default {
+        background: #fa709a;
+      }
+
+      .back-link {
+        display: inline-block;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 1024px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .control-panel {
+          position: static;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 24px;
+        }
+
+        .bars-container {
+          height: 200px;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="sorting-index.html" class="back-link">← Back to Index</a>
+
+      <div class="header">
+        <h1>⚡ Quick Sort Visualization</h1>
+        <p>Partition & Conquer - Step by Step</p>
+      </div>
+
+      <div class="main-grid">
+        <!-- Control Panel -->
+        <div class="control-panel">
+          <h2>⚙️ Controls</h2>
+
+          <div class="input-group">
+            <label>Array Size</label>
+            <input type="number" id="sizeInput" value="8" min="3" max="20" />
+          </div>
+
+          <div class="input-group">
+            <label>Animation Speed</label>
+            <input
+              type="range"
+              id="speedInput"
+              min="100"
+              max="1000"
+              value="300"
+              style="width: 100%"
+            />
+            <small style="color: #999">Faster ← → Slower</small>
+          </div>
+
+          <div class="buttons">
+            <button class="start-btn" onclick="startVisualization()">
+              Start
+            </button>
+            <button class="reset-btn" onclick="resetVisualization()">
+              Reset
+            </button>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">Algorithm Info</div>
+            <div class="info-item">
+              <span class="info-label">Type:</span> Divide & Conquer
+            </div>
+            <div class="info-item">
+              <span class="info-label">Time Avg:</span> O(n log n)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Time Worst:</span> O(n²)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Space:</span> O(log n)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Stable:</span> ✗ No
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">How It Works</div>
+            <div style="font-size: 12px; line-height: 1.6; color: #666">
+              1. Choose pivot element<br />
+              2. Partition around pivot<br />
+              3. Elements < pivot go left<br />
+              4. Elements > pivot go right<br />
+              5. Recursively sort partitions
+            </div>
+          </div>
+        </div>
+
+        <!-- Visualization Panel -->
+        <div class="visualization-panel">
+          <div class="step-header">
+            <div class="step-title" id="stepTitle">Initialization</div>
+            <div class="step-description" id="stepDescription">
+              Click "Start" to begin the visualization
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Comparisons</div>
+              <div class="stat-value" id="comparisons">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Swaps</div>
+              <div class="stat-value" id="swaps">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Partitions</div>
+              <div class="stat-value" id="partitions">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Sorted</div>
+              <div class="stat-value" id="sorted">0</div>
+            </div>
+          </div>
+
+          <div class="visualization">
+            <div class="vis-title">Array Visualization</div>
+            <div class="bars-container" id="barsContainer"></div>
+          </div>
+
+          <div class="step-info" id="stepInfo" style="display: none">
+            <div class="step-info-title" id="stepInfoTitle">
+              Step Information
+            </div>
+            <div class="step-info-content" id="stepInfoContent"></div>
+          </div>
+
+          <div class="nav-buttons">
+            <button
+              class="nav-btn prev-btn"
+              id="prevBtn"
+              onclick="previousStep()"
+              disabled
+            >
+              ← Previous
+            </button>
+            <button
+              class="nav-btn next-btn"
+              id="nextBtn"
+              onclick="nextStep()"
+              disabled
+            >
+              Next →
+            </button>
+          </div>
+
+          <div class="progress" id="progress">Ready to start</div>
+
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color color-default"></div>
+              <span>Unsorted</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-pivot"></div>
+              <span>Pivot</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-left"></div>
+              <span>Partition Left</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-right"></div>
+              <span>Partition Right</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-sorted"></div>
+              <span>Sorted</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let array = [];
+      let steps = [];
+      let currentStep = 0;
+
+      function generateRandomArray(size) {
+        return Array.from(
+          { length: size },
+          () => Math.floor(Math.random() * 100) + 1,
+        );
+      }
+
+      function createSteps() {
+        steps = [];
+        const arr = [...array];
+        let comparisons = 0;
+        let swaps = 0;
+        let partitions = 0;
+
+        // Initial state
+        steps.push({
+          array: [...arr],
+          pivot: -1,
+          left: [],
+          right: [],
+          comparisons,
+          swaps,
+          partitions,
+          sorted: 0,
+          title: "Initial Array",
+          description: "Ready for Quick Sort. Will select pivot and partition.",
+        });
+
+        // Quick sort
+        const quickSort = (low, high) => {
+          if (low < high) {
+            const pivot = arr[high];
+            let i = low - 1;
+
+            steps.push({
+              array: [...arr],
+              pivot: high,
+              left: [],
+              right: [],
+              comparisons,
+              swaps,
+              partitions: partitions + 1,
+              sorted: 0,
+              title: `Partition: Pivot = ${pivot}`,
+              description: `Selected pivot at index ${high}. Will partition array.`,
+            });
+
+            for (let j = low; j < high; j++) {
+              steps.push({
+                array: [...arr],
+                pivot: high,
+                left: [j],
+                right: [],
+                comparisons: comparisons + 1,
+                swaps,
+                partitions,
+                sorted: 0,
+                title: `Comparing arr[${j}]=${arr[j]} with pivot=${pivot}`,
+                description: `Is ${arr[j]} < ${pivot}?`,
+              });
+
+              comparisons++;
+
+              if (arr[j] < pivot) {
+                i++;
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+                swaps++;
+
+                steps.push({
+                  array: [...arr],
+                  pivot: high,
+                  left: [i],
+                  right: [],
+                  comparisons,
+                  swaps,
+                  partitions,
+                  sorted: 0,
+                  title: `Swapped`,
+                  description: `Swapped arr[${i}] and arr[${j}]`,
+                });
+              }
+            }
+
+            [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+            swaps++;
+
+            const pi = i + 1;
+
+            steps.push({
+              array: [...arr],
+              pivot: pi,
+              left: [],
+              right: [],
+              comparisons,
+              swaps,
+              partitions: partitions + 1,
+              sorted: 0,
+              title: `Partition Complete`,
+              description: `Pivot ${pivot} at correct position ${pi}`,
+            });
+
+            quickSort(low, pi - 1);
+            quickSort(pi + 1, high);
+          }
+        };
+
+        quickSort(0, arr.length - 1);
+        partitions = steps.filter((s) => s.title.includes("Partition")).length;
+
+        // Final step
+        steps.push({
+          array: [...arr],
+          pivot: -1,
+          left: [],
+          right: [],
+          comparisons,
+          swaps,
+          partitions,
+          sorted: arr.length,
+          title: "✅ Sorting Complete!",
+          description: `Array sorted! Comparisons: ${comparisons}, Swaps: ${swaps}`,
+        });
+      }
+
+      function renderBars(
+        array,
+        pivot = -1,
+        left = [],
+        right = [],
+        sorted = 0,
+      ) {
+        const container = document.getElementById("barsContainer");
+        container.innerHTML = "";
+        const maxValue = Math.max(...array);
+
+        array.forEach((value, index) => {
+          const bar = document.createElement("div");
+          bar.className = "bar";
+
+          if (sorted > 0) {
+            bar.classList.add("sorted");
+          } else if (pivot === index) {
+            bar.classList.add("pivot");
+          } else if (left.includes(index)) {
+            bar.classList.add("partition-left");
+          } else if (right.includes(index)) {
+            bar.classList.add("partition-right");
+          }
+
+          const height = (value / maxValue) * 100;
+          bar.style.height = height + "%";
+
+          const valueSpan = document.createElement("div");
+          valueSpan.className = "bar-value";
+          valueSpan.textContent = value;
+          bar.appendChild(valueSpan);
+
+          container.appendChild(bar);
+        });
+      }
+
+      function displayStep(stepIndex) {
+        if (stepIndex < 0 || stepIndex >= steps.length) return;
+
+        const step = steps[stepIndex];
+
+        document.getElementById("stepTitle").textContent = step.title;
+        document.getElementById("stepDescription").textContent =
+          step.description;
+        document.getElementById("comparisons").textContent = step.comparisons;
+        document.getElementById("swaps").textContent = step.swaps;
+        document.getElementById("partitions").textContent = step.partitions;
+        document.getElementById("sorted").textContent = step.sorted;
+
+        renderBars(step.array, step.pivot, step.left, step.right, step.sorted);
+
+        document.getElementById("stepInfo").style.display = "block";
+        document.getElementById("stepInfoTitle").textContent =
+          "Quick Sort Concept";
+        document.getElementById("stepInfoContent").innerHTML = `
+                <strong>Comparisons:</strong> ${step.comparisons}<br>
+                <strong>Swaps:</strong> ${step.swaps}<br>
+                <strong>Pivot Position:</strong> ${step.pivot >= 0 ? step.pivot : "None"}
+            `;
+
+        document.getElementById("prevBtn").disabled = stepIndex === 0;
+        document.getElementById("nextBtn").disabled =
+          stepIndex === steps.length - 1;
+        document.getElementById("progress").textContent =
+          `Step ${stepIndex + 1} of ${steps.length}`;
+
+        currentStep = stepIndex;
+      }
+
+      function startVisualization() {
+        const size = parseInt(document.getElementById("sizeInput").value);
+        array = generateRandomArray(size);
+        createSteps();
+        displayStep(0);
+      }
+
+      function nextStep() {
+        if (currentStep < steps.length - 1) {
+          displayStep(currentStep + 1);
+        }
+      }
+
+      function previousStep() {
+        if (currentStep > 0) {
+          displayStep(currentStep - 1);
+        }
+      }
+
+      function resetVisualization() {
+        array = [];
+        steps = [];
+        currentStep = 0;
+        document.getElementById("barsContainer").innerHTML = "";
+        document.getElementById("stepTitle").textContent = "Initialization";
+        document.getElementById("stepDescription").textContent =
+          'Click "Start" to begin the visualization';
+        document.getElementById("comparisons").textContent = "0";
+        document.getElementById("swaps").textContent = "0";
+        document.getElementById("partitions").textContent = "0";
+        document.getElementById("sorted").textContent = "0";
+        document.getElementById("stepInfo").style.display = "none";
+        document.getElementById("prevBtn").disabled = true;
+        document.getElementById("nextBtn").disabled = true;
+        document.getElementById("progress").textContent = "Ready to start";
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Subarray Sum Visualization</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h2 {
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 2rem;
+      color: #222;
+    }
+    #controls {
+      background: white;
+      padding: 20px 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px 20px;
+      justify-content: center;
+      max-width: 700px;
+      width: 100%;
+      margin-bottom: 40px;
+    }
+    #controls label {
+      flex: 1 0 160px;
+      align-self: center;
+      font-weight: 600;
+      color: #444;
+    }
+    #controls select,
+    #controls input[type="text"] {
+      flex: 2 1 240px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1.5px solid #ccc;
+      font-size: 1rem;
+      transition: border-color 0.25s ease;
+    }
+    #controls select:focus,
+    #controls input[type="text"]:focus {
+      outline: none;
+      border-color: #0078d4;
+      box-shadow: 0 0 5px #0078d4aa;
+    }
+    #startBtn {
+      flex: 1 0 180px;
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      align-self: center;
+    }
+    #startBtn:disabled {
+      background-color: #a0c4ff;
+      cursor: not-allowed;
+    }
+    #startBtn:hover:not(:disabled) {
+      background-color: #005ea2;
+    }
+    #array {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 30px;
+      position: relative;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .box {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.25rem;
+      position: relative;
+      transition: background-color 0.3s ease, opacity 0.3s ease,
+        transform 0.3s ease;
+      user-select: none;
+    }
+    .pointer-label {
+      position: absolute;
+      top: -28px;
+      width: 50px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 4px;
+      padding: 2px 4px;
+      user-select: none;
+    }
+    .pointer-start-label {
+      background-color: #ffcc00;
+      color: #5a4b00;
+      left: 0;
+    }
+    .pointer-end-label {
+      background-color: #00ccff;
+      color: #004a66;
+      left: 0;
+    }
+    .pointer-i-label {
+      background-color: #ff8800;
+      color: #4a2d00;
+      left: 0;
+    }
+    .pointer-j-label {
+      background-color: #0099ff;
+      color: #003366;
+      left: 0;
+    }
+    .pointer-start {
+      background-color: #fff4b8;
+      box-shadow: 0 0 8px 2px #ffcc00aa;
+    }
+    .pointer-end {
+      background-color: #b8f0ff;
+      box-shadow: 0 0 8px 2px #00ccffaa;
+    }
+    .pointer-i {
+      background-color: #ffd8a8;
+      box-shadow: 0 0 8px 2px #ff8800aa;
+    }
+    .pointer-j {
+      background-color: #a8d8ff;
+      box-shadow: 0 0 8px 2px #0099ffaa;
+    }
+    .highlight {
+      background-color: #ff9999 !important;
+      box-shadow: 0 0 15px 4px #ff4444aa !important;
+    }
+    #result {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #222;
+      margin-top: 20px;
+      min-height: 28px;
+      text-align: center;
+      max-width: 700px;
+    }
+    #methodDescription {
+      max-width: 700px;
+      margin-bottom: 40px;
+      font-size: 1rem;
+      color: #555;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Subarray Sum Visualization</h2>
+
+  <div id="methodDescription"></div>
+
+  <div id="array"></div>
+
+  <div id="controls">
+    <label for="problemSelect">Select Problem:</label>
+    <select id="problemSelect">
+      <option value="maxSubarraySum">Maximum Subarray Sum</option>
+      <option value="minSubarraySum">Minimum Subarray Sum</option>
+      <option value="maxAverageSum">Maximum Average Subarray Sum</option>
+    </select>
+
+    <label for="methodSelect">Select Method:</label>
+    <select id="methodSelect">
+      <option value="brute">Brute Force</option>
+      <option value="better">Better</option>
+      <option value="optimal">Optimal</option>
+    </select>
+
+    <label for="inputArray">Array (comma separated):</label>
+    <input
+      type="text"
+      id="inputArray"
+      value="1,-2,3,5,-1,2"
+      autocomplete="off"
+    />
+
+    <button id="startBtn">Start Visualization</button>
+  </div>
+
+  <div id="result"></div>
+
+<script>
+  const arrayContainer = document.getElementById("array");
+  const methodDescription = document.getElementById("methodDescription");
+  const problemSelect = document.getElementById("problemSelect");
+  const methodSelect = document.getElementById("methodSelect");
+  const inputArray = document.getElementById("inputArray");
+  const startBtn = document.getElementById("startBtn");
+  const resultDiv = document.getElementById("result");
+
+  const descriptions = {
+    maxSubarraySum: {
+      brute: "Brute force: Check all subarrays and find max sum (O(n³)).",
+      better: "Better: Use prefix sums to check all subarrays (O(n²)).",
+      optimal: "Optimal: Kadane's algorithm (O(n)).",
+    },
+    minSubarraySum: {
+      brute: "Brute force: Check all subarrays and find min sum (O(n³)).",
+      better: "Better: Use prefix sums to check all subarrays (O(n²)).",
+      optimal: "Optimal: Modified Kadane's algorithm for min sum (O(n)).",
+    },
+    maxAverageSum: {
+      brute: "Brute force: Check all subarrays and find max average (O(n³)).",
+      better: "Better: Use prefix sums to check all subarrays (O(n²)).",
+      optimal: "Optimal: Kadane's algorithm variant for max average (O(n)).",
+    },
+  };
+
+  function renderArray(arr, pointers = {}, highlightIndices = []) {
+    arrayContainer.innerHTML = "";
+    arr.forEach((num, idx) => {
+      const box = document.createElement("div");
+      box.classList.add("box");
+      box.textContent = num;
+
+      for (const [key, val] of Object.entries(pointers)) {
+        if (val === idx) {
+          box.classList.add(`pointer-${key}`);
+          const label = document.createElement("div");
+          label.textContent = key;
+          label.classList.add("pointer-label", `pointer-${key}-label`);
+          box.appendChild(label);
+        }
+      }
+
+      if (highlightIndices.includes(idx)) {
+        box.classList.add("highlight");
+      }
+
+      arrayContainer.appendChild(box);
+    });
+  }
+
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function bruteMaxSubarraySum(arr) {
+    let maxSum = -Infinity;
+    let maxStart = 0;
+    let maxEnd = 0;
+
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = i; j < arr.length; j++) {
+        let currentSum = 0;
+        for (let k = i; k <= j; k++) {
+          renderArray(arr, { i, j, k }, [k]);
+          await delay(400);
+          currentSum += arr[k];
+        }
+        if (currentSum > maxSum) {
+          maxSum = currentSum;
+          maxStart = i;
+          maxEnd = j;
+          renderArray(arr, { i: maxStart, j: maxEnd }, Array.from({length: maxEnd - maxStart + 1}, (_, idx) => maxStart + idx));
+          resultDiv.textContent = `Current max sum: ${maxSum}`;
+          await delay(600);
+        }
+      }
+    }
+    resultDiv.textContent = `Maximum Subarray Sum: ${maxSum} (from index ${maxStart} to ${maxEnd})`;
+  }
+
+  async function betterMaxSubarraySum(arr) {
+    // prefix sums
+    const prefix = [0];
+    for (let i = 0; i < arr.length; i++) {
+      prefix.push(prefix[prefix.length - 1] + arr[i]);
+    }
+    let maxSum = -Infinity;
+    let maxStart = 0;
+    let maxEnd = 0;
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = i; j < arr.length; j++) {
+        renderArray(arr, { i, j }, Array.from({length: j - i + 1}, (_, idx) => i + idx));
+        await delay(600);
+        let currentSum = prefix[j + 1] - prefix[i];
+        if (currentSum > maxSum) {
+          maxSum = currentSum;
+          maxStart = i;
+          maxEnd = j;
+          resultDiv.textContent = `Current max sum: ${maxSum}`;
+          renderArray(arr, { i: maxStart, j: maxEnd }, Array.from({length: maxEnd - maxStart + 1}, (_, idx) => maxStart + idx));
+          await delay(600);
+        }
+      }
+    }
+    resultDiv.textContent = `Maximum Subarray Sum: ${maxSum} (from index ${maxStart} to ${maxEnd})`;
+  }
+
+  async function optimalMaxSubarraySum(arr) {
+    // Kadane's algorithm
+    let maxSoFar = arr[0];
+    let maxEndingHere = arr[0];
+    let start = 0;
+    let end = 0;
+    let s = 0;
+
+    renderArray(arr, { i: 0 }, [0]);
+    await delay(600);
+
+    for (let i = 1; i < arr.length; i++) {
+      renderArray(arr, { i, s }, [i, s]);
+      await delay(600);
+
+      if (arr[i] > maxEndingHere + arr[i]) {
+        maxEndingHere = arr[i];
+        s = i;
+      } else {
+        maxEndingHere = maxEndingHere + arr[i];
+      }
+
+      if (maxEndingHere > maxSoFar) {
+        maxSoFar = maxEndingHere;
+        start = s;
+        end = i;
+      }
+
+      renderArray(arr, { i, s }, Array.from({length: end - start + 1}, (_, idx) => start + idx));
+      resultDiv.textContent = `Current max sum: ${maxSoFar}`;
+      await delay(600);
+    }
+    resultDiv.textContent = `Maximum Subarray Sum: ${maxSoFar} (from index ${start} to ${end})`;
+  }
+
+  // Minimum subarray sum variations (similar structure)
+
+  async function bruteMinSubarraySum(arr) {
+    let minSum = Infinity;
+    let minStart = 0;
+    let minEnd = 0;
+
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = i; j < arr.length; j++) {
+        let currentSum = 0;
+        for (let k = i; k <= j; k++) {
+          renderArray(arr, { i, j, k }, [k]);
+          await delay(400);
+          currentSum += arr[k];
+        }
+        if (currentSum < minSum) {
+          minSum = currentSum;
+          minStart = i;
+          minEnd = j;
+          renderArray(arr, { i: minStart, j: minEnd }, Array.from({length: minEnd - minStart + 1}, (_, idx) => minStart + idx));
+          resultDiv.textContent = `Current min sum: ${minSum}`;
+          await delay(600);
+        }
+      }
+    }
+    resultDiv.textContent = `Minimum Subarray Sum: ${minSum} (from index ${minStart} to ${minEnd})`;
+  }
+
+  async function betterMinSubarraySum(arr) {
+    const prefix = [0];
+    for (let i = 0; i < arr.length; i++) {
+      prefix.push(prefix[prefix.length - 1] + arr[i]);
+    }
+    let minSum = Infinity;
+    let minStart = 0;
+    let minEnd = 0;
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = i; j < arr.length; j++) {
+        renderArray(arr, { i, j }, Array.from({length: j - i + 1}, (_, idx) => i + idx));
+        await delay(600);
+        let currentSum = prefix[j + 1] - prefix[i];
+        if (currentSum < minSum) {
+          minSum = currentSum;
+          minStart = i;
+          minEnd = j;
+          resultDiv.textContent = `Current min sum: ${minSum}`;
+          renderArray(arr, { i: minStart, j: minEnd }, Array.from({length: minEnd - minStart + 1}, (_, idx) => minStart + idx));
+          await delay(600);
+        }
+      }
+    }
+    resultDiv.textContent = `Minimum Subarray Sum: ${minSum} (from index ${minStart} to ${minEnd})`;
+  }
+
+  async function optimalMinSubarraySum(arr) {
+    // Modified Kadane for min sum
+    let minSoFar = arr[0];
+    let minEndingHere = arr[0];
+    let start = 0;
+    let end = 0;
+    let s = 0;
+
+    renderArray(arr, { i: 0 }, [0]);
+    await delay(600);
+
+    for (let i = 1; i < arr.length; i++) {
+      renderArray(arr, { i, s }, [i, s]);
+      await delay(600);
+
+      if (arr[i] < minEndingHere + arr[i]) {
+        minEndingHere = arr[i];
+        s = i;
+      } else {
+        minEndingHere = minEndingHere + arr[i];
+      }
+
+      if (minEndingHere < minSoFar) {
+        minSoFar = minEndingHere;
+        start = s;
+        end = i;
+      }
+
+      renderArray(arr, { i, s }, Array.from({length: end - start + 1}, (_, idx) => start + idx));
+      resultDiv.textContent = `Current min sum: ${minSoFar}`;
+      await delay(600);
+    }
+    resultDiv.textContent = `Minimum Subarray Sum: ${minSoFar} (from index ${start} to ${end})`;
+  }
+
+  // Maximum average subarray sum (brute and better are similar to max sum but calculate average)
+  // Optimal approach: Kadane variant but track length for average
+
+  async function bruteMaxAverageSum(arr) {
+    let maxAvg = -Infinity;
+    let maxStart = 0;
+    let maxEnd = 0;
+
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = i; j < arr.length; j++) {
+        let currentSum = 0;
+        for (let k = i; k <= j; k++) {
+          renderArray(arr, { i, j, k }, [k]);
+          await delay(400);
+          currentSum += arr[k];
+        }
+        let currentAvg = currentSum / (j - i + 1);
+        if (currentAvg > maxAvg) {
+          maxAvg = currentAvg;
+          maxStart = i;
+          maxEnd = j;
+          renderArray(arr, { i: maxStart, j: maxEnd }, Array.from({length: maxEnd - maxStart + 1}, (_, idx) => maxStart + idx));
+          resultDiv.textContent = `Current max average: ${maxAvg.toFixed(2)}`;
+          await delay(600);
+        }
+      }
+    }
+    resultDiv.textContent = `Maximum Average Subarray Sum: ${maxAvg.toFixed(2)} (from index ${maxStart} to ${maxEnd})`;
+  }
+
+  async function betterMaxAverageSum(arr) {
+    const prefix = [0];
+    for (let i = 0; i < arr.length; i++) {
+      prefix.push(prefix[prefix.length - 1] + arr[i]);
+    }
+    let maxAvg = -Infinity;
+    let maxStart = 0;
+    let maxEnd = 0;
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = i; j < arr.length; j++) {
+        renderArray(arr, { i, j }, Array.from({length: j - i + 1}, (_, idx) => i + idx));
+        await delay(600);
+        let currentSum = prefix[j + 1] - prefix[i];
+        let currentAvg = currentSum / (j - i + 1);
+        if (currentAvg > maxAvg) {
+          maxAvg = currentAvg;
+          maxStart = i;
+          maxEnd = j;
+          resultDiv.textContent = `Current max average: ${maxAvg.toFixed(2)}`;
+          renderArray(arr, { i: maxStart, j: maxEnd }, Array.from({length: maxEnd - maxStart + 1}, (_, idx) => maxStart + idx));
+          await delay(600);
+        }
+      }
+    }
+    resultDiv.textContent = `Maximum Average Subarray Sum: ${maxAvg.toFixed(2)} (from index ${maxStart} to ${maxEnd})`;
+  }
+
+  async function optimalMaxAverageSum(arr) {
+    // Kadane variant tracking max average subarray
+    // We use Kadane to find max sum subarray, then calculate average by length
+    // We'll track best average while iterating
+
+    let maxSum = arr[0];
+    let currentSum = arr[0];
+    let start = 0;
+    let end = 0;
+    let tempStart = 0;
+    let maxAvg = arr[0];
+    let maxAvgStart = 0;
+    let maxAvgEnd = 0;
+
+    renderArray(arr, { i: 0 }, [0]);
+    resultDiv.textContent = `Current max average: ${maxAvg.toFixed(2)}`;
+    await delay(600);
+
+    for (let i = 1; i < arr.length; i++) {
+      renderArray(arr, { i, tempStart }, [i, tempStart]);
+      await delay(600);
+
+      if (currentSum + arr[i] < arr[i]) {
+        currentSum = arr[i];
+        tempStart = i;
+      } else {
+        currentSum += arr[i];
+      }
+
+      let length = i - tempStart + 1;
+      let avg = currentSum / length;
+
+      if (avg > maxAvg) {
+        maxAvg = avg;
+        maxAvgStart = tempStart;
+        maxAvgEnd = i;
+      }
+
+      renderArray(arr, { i, tempStart }, Array.from({length: maxAvgEnd - maxAvgStart + 1}, (_, idx) => maxAvgStart + idx));
+      resultDiv.textContent = `Current max average: ${maxAvg.toFixed(2)}`;
+      await delay(600);
+    }
+    resultDiv.textContent = `Maximum Average Subarray Sum: ${maxAvg.toFixed(2)} (from index ${maxAvgStart} to ${maxAvgEnd})`;
+  }
+
+  startBtn.addEventListener("click", async () => {
+    let arr = inputArray.value
+      .split(",")
+      .map((s) => parseFloat(s.trim()))
+      .filter((n) => !isNaN(n));
+
+    if (arr.length === 0) {
+      alert("Please enter a valid array.");
+      return;
+    }
+
+    startBtn.disabled = true;
+    problemSelect.disabled = true;
+    methodSelect.disabled = true;
+    inputArray.disabled = true;
+    resultDiv.textContent = "";
+    renderArray(arr);
+
+    const problem = problemSelect.value;
+    const method = methodSelect.value;
+
+    methodDescription.textContent = descriptions[problem][method];
+
+    switch (problem) {
+      case "maxSubarraySum":
+        if (method === "brute") await bruteMaxSubarraySum(arr);
+        else if (method === "better") await betterMaxSubarraySum(arr);
+        else if (method === "optimal") await optimalMaxSubarraySum(arr);
+        break;
+      case "minSubarraySum":
+        if (method === "brute") await bruteMinSubarraySum(arr);
+        else if (method === "better") await betterMinSubarraySum(arr);
+        else if (method === "optimal") await optimalMinSubarraySum(arr);
+        break;
+      case "maxAverageSum":
+        if (method === "brute") await bruteMaxAverageSum(arr);
+        else if (method === "better") await betterMaxAverageSum(arr);
+        else if (method === "optimal") await optimalMaxAverageSum(arr);
+        break;
+    }
+
+    startBtn.disabled = false;
+    problemSelect.disabled = false;
+    methodSelect.disabled = false;
+    inputArray.disabled = false;
+  });
+
+  // Initial render
+  let initialArr = inputArray.value
+    .split(",")
+    .map((s) => parseFloat(s.trim()))
+    .filter((n) => !isNaN(n));
+  renderArray(initialArr);
+  methodDescription.textContent = descriptions[problemSelect.value][methodSelect.value];
+
+  problemSelect.addEventListener("change", () => {
+    methodDescription.textContent = descriptions[problemSelect.value][methodSelect.value];
+  });
+  methodSelect.addEventListener("change", () => {
+    methodDescription.textContent = descriptions[problemSelect.value][methodSelect.value];
+  });
+</script>
+</body>
+</html>

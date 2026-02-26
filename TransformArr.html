@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>transformArr Visualization</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f9f9f9;
+        text-align: center;
+      }
+      h1 {
+        margin-bottom: 1rem;
+      }
+      #input-array,
+      #accumulator {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+      }
+      .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        padding: 10px 15px;
+        width: 120px;
+        user-select: none;
+        position: relative;
+        transition: background-color 0.5s ease;
+      }
+      .card.current {
+        background-color: #2196f3;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 0 10px 3px #2196f3;
+      }
+      #accumulator {
+        flex-direction: column;
+        align-items: center;
+      }
+      .age-group {
+        background: #e3f2fd;
+        border-radius: 8px;
+        padding: 10px 20px;
+        margin: 8px 0;
+        min-width: 250px;
+        box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+        transition: box-shadow 0.6s ease;
+        position: relative;
+      }
+      .age-group.new {
+        box-shadow: 0 0 15px 6px #4caf50;
+      }
+      .age-label {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .names {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .name-tag {
+        background: #64b5f6;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        opacity: 0;
+        transform: translateY(-10px);
+        animation: fadeInUp 0.5s forwards;
+      }
+      @keyframes fadeInUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      #controls {
+        margin-top: 1.5rem;
+      }
+      button {
+        padding: 10px 25px;
+        font-size: 1rem;
+        background: #2196f3;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        user-select: none;
+      }
+      button:disabled {
+        background: #aaa;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>transformArr Function Visualization</h1>
+    <div>
+      <h3>Input Array</h3>
+      <div id="input-array"></div>
+    </div>
+
+    <div>
+      <h3>Accumulator (Grouped by Age)</h3>
+      <div id="accumulator"></div>
+    </div>
+
+    <div id="controls">
+      <button id="process-btn">Process Next</button>
+    </div>
+
+    <script>
+      const data = [
+        { name: "john", age: 22 },
+        { name: "max", age: 21 },
+        { name: "jehn", age: 22 },
+        { name: "lisa", age: 21 },
+        { name: "anna", age: 23 },
+      ];
+
+      const inputContainer = document.getElementById("input-array");
+      const accContainer = document.getElementById("accumulator");
+      const processBtn = document.getElementById("process-btn");
+
+      let acc = {};
+      let currentIndex = -1;
+
+      // Render input array cards
+      function renderInput() {
+        inputContainer.innerHTML = "";
+        data.forEach((person, idx) => {
+          const card = document.createElement("div");
+          card.classList.add("card");
+          card.id = `input-${idx}`;
+          card.innerHTML = `<div><strong>${person.name}</strong></div><div>Age: ${person.age}</div>`;
+          if (idx === currentIndex) {
+            card.classList.add("current");
+          }
+          inputContainer.appendChild(card);
+        });
+      }
+
+      // Render accumulator groups
+      function renderAccumulator(newAgeGroup = null, newName = null) {
+        accContainer.innerHTML = "";
+        Object.keys(acc)
+          .sort((a, b) => a - b)
+          .forEach((age) => {
+            const group = document.createElement("div");
+            group.classList.add("age-group");
+            if (age === newAgeGroup) {
+              group.classList.add("new");
+              setTimeout(() => group.classList.remove("new"), 1500);
+            }
+            group.innerHTML = `<div class="age-label">Age ${age}</div><div class="names"></div>`;
+            const namesContainer = group.querySelector(".names");
+
+            acc[age].forEach((name) => {
+              const nameTag = document.createElement("div");
+              nameTag.classList.add("name-tag");
+              nameTag.textContent = name;
+              // Animate only the newly added name
+              if (age === newAgeGroup && name === newName) {
+                nameTag.style.animationPlayState = "running";
+              } else {
+                nameTag.style.opacity = "1";
+                nameTag.style.transform = "none";
+                nameTag.style.animation = "none";
+              }
+              namesContainer.appendChild(nameTag);
+            });
+            accContainer.appendChild(group);
+          });
+      }
+
+      function processNext() {
+        if (currentIndex >= 0) {
+          // Remove highlight from previous card
+          document
+            .getElementById(`input-${currentIndex}`)
+            .classList.remove("current");
+        }
+        currentIndex++;
+        if (currentIndex >= data.length) {
+          processBtn.disabled = true;
+          alert("Processing complete!");
+          return;
+        }
+
+        // Highlight current card
+        document
+          .getElementById(`input-${currentIndex}`)
+          .classList.add("current");
+
+        // Process current item
+        const { name, age } = data[currentIndex];
+        if (!acc[age]) {
+          acc[age] = [];
+        }
+        acc[age].push(name);
+
+        // Update accumulator display with animation on new group or new name
+        renderAccumulator(age, name);
+      }
+
+      // Initial render
+      renderInput();
+      renderAccumulator();
+
+      processBtn.addEventListener("click", processNext);
+    </script>
+  </body>
+</html>

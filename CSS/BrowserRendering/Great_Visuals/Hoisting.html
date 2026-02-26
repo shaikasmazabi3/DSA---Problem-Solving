@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fun Frontend: Hoisting & More!</title>
+    <style>
+      /* Reset & basics */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f0f8ff;
+        color: #333;
+      }
+      h1,
+      h2 {
+        text-align: center;
+        color: #004080;
+      }
+      main {
+        max-width: 700px;
+        margin: 1.5rem auto 3rem;
+        padding: 1em;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 0 14px #aaccee88;
+      }
+      section {
+        display: none;
+        padding: 1em;
+      }
+      section.active {
+        display: block;
+        animation: fadeIn 0.6s ease forwards;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(15px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      nav {
+        text-align: center;
+        margin: 1em 0;
+      }
+      button {
+        background: #007acc;
+        color: white;
+        border: none;
+        padding: 0.6em 1.4em;
+        margin: 0 0.4em;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s ease;
+      }
+      button:disabled {
+        background: #a0c4ff88;
+        cursor: not-allowed;
+      }
+      button:hover:not(:disabled) {
+        background: #005fa3;
+      }
+      pre {
+        background: #e0f0ff;
+        padding: 1em;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 1.1rem;
+        line-height: 1.4;
+      }
+      code {
+        font-family: Consolas, monospace;
+        color: #00509e;
+      }
+      .emoji {
+        font-size: 1.8rem;
+        vertical-align: middle;
+      }
+      .highlight {
+        background: #ffe680;
+        border-radius: 4px;
+        padding: 0 4px;
+      }
+      /* Interactive quiz styles */
+      .quiz {
+        margin: 1em 0;
+        background: #d0f0d0;
+        border: 2px solid #4caf50;
+        border-radius: 8px;
+        padding: 1em;
+      }
+      .quiz button {
+        background: #4caf50;
+        margin: 0.3em 0.5em 0.3em 0;
+      }
+      .quiz button.correct {
+        background: #2e7d32;
+      }
+      .quiz button.wrong {
+        background: #c62828;
+      }
+      .feedback {
+        margin-top: 0.6em;
+        font-weight: bold;
+      }
+      /* Diagram styles */
+      .diagram {
+        margin: 1em auto;
+        max-width: 90%;
+        border: 2px solid #007acc;
+        border-radius: 10px;
+        background: #e6f0ff;
+        padding: 1em;
+        user-select: none;
+      }
+      .box {
+        border: 2px solid #004080;
+        background: #cce0ff;
+        border-radius: 8px;
+        padding: 0.8em;
+        margin: 0.5em;
+        text-align: center;
+        cursor: pointer;
+        transition: background 0.4s ease;
+      }
+      .box:hover,
+      .box:focus {
+        background: #99c2ff;
+        outline: none;
+      }
+      .arrow {
+        text-align: center;
+        font-size: 2rem;
+        margin: 0.5em 0;
+        color: #007acc;
+      }
+      /* Animation for hoisting */
+      .hoist-box {
+        position: relative;
+        display: inline-block;
+        margin: 0 0.5em;
+      }
+      .hoist-label {
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #003366;
+        position: absolute;
+        top: -1.5em;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      /* TDZ highlight */
+      .tdz {
+        background: #ffcccc;
+        border: 2px dashed #cc0000;
+        padding: 0.3em 0.6em;
+        border-radius: 5px;
+      }
+      /* Scope boxes */
+      .scope-box {
+        border: 2px solid #004080;
+        border-radius: 10px;
+        padding: 1em;
+        margin: 1em 0;
+        background: #d9eaff;
+      }
+      .scope-title {
+        font-weight: 700;
+        color: #003366;
+        margin-bottom: 0.5em;
+      }
+      /* Accessibility focus */
+      button:focus,
+      .box:focus {
+        outline: 3px solid #0055cc;
+      }
+    </style>
+  </head>
+  <body>
+    <main
+      role="main"
+      aria-label="Interactive lesson on JavaScript hoisting, temporal dead zone, variable shadowing, and scope"
+    >
+      <h1>🧙‍♂️ Fun Frontend Magic: Hoisting & More! ⚙️</h1>
+      <p style="text-align: center; font-style: italic">
+        Learn JavaScript secrets step-by-step with fun animations & quizzes!
+      </p>
+
+      <!-- Slide 1: Introduction -->
+      <section id="slide1" class="active" tabindex="0" aria-live="polite">
+        <h2>Welcome! 📚 What We'll Learn</h2>
+        <p>
+          Imagine JavaScript as a magic mailman 📬 delivering your code
+          instructions. Sometimes, he does tricks like
+          <strong>hoisting</strong> and <strong>shadowing</strong>! Let's
+          explore:
+        </p>
+        <ul>
+          <li>What is <strong>Hoisting</strong>?</li>
+          <li>The <strong>Temporal Dead Zone</strong></li>
+          <li><strong>Variable Shadowing</strong></li>
+          <li>
+            Scope of <code>let</code>, <code>const</code>, and <code>var</code>
+          </li>
+        </ul>
+        <p>Ready? Let’s jump in! 🚀</p>
+      </section>
+
+      <!-- Slide 2: Hoisting -->
+      <section
+        id="slide2"
+        tabindex="0"
+        aria-live="polite"
+        aria-label="Explanation of hoisting with animation"
+      >
+        <h2>1. Hoisting 🪄</h2>
+        <p>
+          Think of hoisting like your magic mailman 📬 who reads all the mail
+          addresses first before delivering the letters.
+        </p>
+        <p>
+          In JavaScript,
+          <strong>variables and functions are "hoisted"</strong> — meaning the
+          browser moves their declarations to the top before running your code!
+        </p>
+
+        <div class="diagram" aria-label="Diagram showing hoisting process">
+          <div class="hoist-box" tabindex="0" aria-describedby="hoist-desc1">
+            <div class="hoist-label">Declaration</div>
+            <pre><code>var magic = "🧙‍♂️";</code></pre>
+          </div>
+          <div class="arrow" aria-hidden="true">⬇️</div>
+          <div class="hoist-box" tabindex="0" aria-describedby="hoist-desc2">
+            <div class="hoist-label">Usage</div>
+            <pre><code>console.log(magic); // ?</code></pre>
+          </div>
+        </div>
+        <p id="hoist-desc1">
+          Variable declared before usage, but declaration is moved to the top.
+        </p>
+        <p id="hoist-desc2">
+          Using the variable after declaration, prints the value.
+        </p>
+
+        <p><strong>Example:</strong></p>
+        <pre><code>console.log(name); // ?<br>var name = "Alice";</code></pre>
+        <p>
+          <em
+            >What do you think prints? Hint: The declaration is hoisted, but the
+            assignment happens later.</em
+          >
+        </p>
+
+        <button
+          id="showAnswerHoist"
+          aria-expanded="false"
+          aria-controls="answerHoist"
+        >
+          Show Answer
+        </button>
+        <p id="answerHoist" hidden>
+          <strong>Answer:</strong> <code>undefined</code>! The variable
+          <code>name</code> is hoisted (declared), but not assigned yet.
+        </p>
+
+        <!-- Quiz -->
+        <div class="quiz" aria-label="Quiz on hoisting">
+          <p><strong>Quiz:</strong> What will this print?</p>
+          <pre><code>console.log(age);<br>let age = 10;</code></pre>
+          <button data-answer="wrong">10</button>
+          <button data-answer="correct">Error</button>
+          <button data-answer="wrong">undefined</button>
+          <p class="feedback" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- Slide 3: Temporal Dead Zone -->
+      <section id="slide3" tabindex="0" aria-live="polite">
+        <h2>2. Temporal Dead Zone (TDZ) ⏳</h2>
+        <p>
+          Imagine a magic box 🕰️ where you can't open the gift until a certain
+          time — trying too early causes an error!
+        </p>
+        <p>
+          Variables declared with <code>let</code> or <code>const</code> are in
+          a <strong>Temporal Dead Zone</strong> before they’re initialized.
+        </p>
+
+        <div class="diagram" aria-label="Diagram showing Temporal Dead Zone">
+          <div class="tdz" tabindex="0" aria-describedby="tdz-desc">
+            TDZ: Can't use variable here!
+          </div>
+          <pre><code>console.log(gift); // Error<br>let gift = "🎁";</code></pre>
+        </div>
+        <p id="tdz-desc">
+          Trying to use <code>gift</code> before it’s ready causes an error.
+        </p>
+
+        <button id="showHintTDZ" aria-expanded="false" aria-controls="hintTDZ">
+          Show Hint
+        </button>
+        <p id="hintTDZ" hidden>
+          Think of it like a wrapped present — you can’t see inside until you
+          unwrap it!
+        </p>
+
+        <!-- Quiz -->
+        <div class="quiz" aria-label="Quiz on Temporal Dead Zone">
+          <p><strong>Quiz:</strong> What happens here?</p>
+          <pre><code>console.log(color);<br>const color = "red";</code></pre>
+          <button data-answer="correct">Error</button>
+          <button data-answer="wrong">"red"</button>
+          <button data-answer="wrong">undefined</button>
+          <p class="feedback" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- Slide 4: Variable Shadowing -->
+      <section id="slide4" tabindex="0" aria-live="polite">
+        <h2>3. Variable Shadowing 🌑</h2>
+        <p>
+          Imagine two flashlights 🔦 in a room — the one closer to you hides the
+          other’s light!
+        </p>
+        <p>
+          In JavaScript, a variable inside a smaller block can "shadow" (hide)
+          the one outside.
+        </p>
+
+        <div
+          class="scope-box"
+          aria-label="Variable shadowing example"
+          tabindex="0"
+        >
+          <div class="scope-title">Outside block</div>
+          <pre><code>let light = "💡";</code></pre>
+          <div class="arrow" aria-hidden="true">⬇️</div>
+          <div class="scope-title">Inside block</div>
+          <pre><code>{<br>  let light = "🔦";<br>  console.log(light); // ?<br>}</code></pre>
+        </div>
+        <p><em>Which light is shown inside the block?</em></p>
+
+        <button
+          id="showAnswerShadow"
+          aria-expanded="false"
+          aria-controls="answerShadow"
+        >
+          Show Answer
+        </button>
+        <p id="answerShadow" hidden>
+          <strong>Answer:</strong> 🔦 (the inside one shadows the outside one)
+        </p>
+
+        <!-- Quiz -->
+        <div class="quiz" aria-label="Quiz on variable shadowing">
+          <p><strong>Quiz:</strong> What prints here?</p>
+          <pre><code>var x = "outside";<br>{<br>  var x = "inside";<br>}<br>console.log(x);</code></pre>
+          <button data-answer="correct">"inside"</button>
+          <button data-answer="wrong">"outside"</button>
+          <button data-answer="wrong">Error</button>
+          <p class="feedback" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- Slide 5: Scope of let, const, var -->
+      <section id="slide5" tabindex="0" aria-live="polite">
+        <h2>
+          4. Scope of <code>let</code>, <code>const</code>, and
+          <code>var</code> 📦
+        </h2>
+        <p>
+          Scope means where a variable can be seen and used — like rooms in a
+          house 🏠.
+        </p>
+
+        <ul>
+          <li>
+            <strong><code>var</code>:</strong> Can be seen in the whole function
+            (function scoped).
+          </li>
+          <li>
+            <strong><code>let</code> & <code>const</code>:</strong> Can only be
+            seen inside the block { } where they are declared (block scoped).
+          </li>
+        </ul>
+
+        <div class="scope-box" tabindex="0" aria-label="Scope example">
+          <pre><code>function fun() {<br>  var a = 1; // function scope<br>  if(true) {<br>    let b = 2; // block scope<br>    const c = 3; // block scope<br>    console.log(a, b, c);<br>  }<br>  console.log(a);<br>  // b or c here? 🤔<br>}</code></pre>
+        </div>
+        <p>
+          <em
+            >Can <code>b</code> or <code>c</code> be used outside the
+            if-block?</em
+          >
+        </p>
+
+        <button
+          id="showAnswerScope"
+          aria-expanded="false"
+          aria-controls="answerScope"
+        >
+          Show Answer
+        </button>
+        <p id="answerScope" hidden>
+          <strong>Answer:</strong> No! <code>b</code> and <code>c</code> only
+          live inside the block. <code>a</code> lives in the whole function.
+        </p>
+
+        <!-- Quiz -->
+        <div class="quiz" aria-label="Quiz on variable scope">
+          <p><strong>Quiz:</strong> What will print?</p>
+          <pre><code>if(true) {<br>  var x = 5;<br>}<br>console.log(x);</code></pre>
+          <button data-answer="correct">5</button>
+          <button data-answer="wrong">Error</button>
+          <button data-answer="wrong">undefined</button>
+          <p class="feedback" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- Navigation -->
+      <nav aria-label="Slide navigation">
+        <button id="prevBtn" disabled aria-label="Previous slide">
+          ⬅️ Previous
+        </button>
+        <button id="nextBtn" aria-label="Next slide">Next ➡️</button>
+      </nav>
+    </main>
+
+    <script>
+      // Slide navigation
+      const slides = document.querySelectorAll("section");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      let currentSlide = 0;
+
+      function showSlide(index) {
+        slides.forEach((s, i) => {
+          s.classList.toggle("active", i === index);
+          s.setAttribute("aria-hidden", i !== index);
+        });
+        prevBtn.disabled = index === 0;
+        nextBtn.disabled = index === slides.length - 1;
+        slides[index].focus();
+        currentSlide = index;
+      }
+      prevBtn.addEventListener("click", () => showSlide(currentSlide - 1));
+      nextBtn.addEventListener("click", () => showSlide(currentSlide + 1));
+
+      // Show/Hide answers and hints toggles
+      function toggleReveal(buttonId, contentId) {
+        const btn = document.getElementById(buttonId);
+        const content = document.getElementById(contentId);
+        btn.addEventListener("click", () => {
+          const expanded = btn.getAttribute("aria-expanded") === "true";
+          btn.setAttribute("aria-expanded", !expanded);
+          if (expanded) {
+            content.hidden = true;
+          } else {
+            content.hidden = false;
+            content.focus();
+          }
+        });
+      }
+      toggleReveal("showAnswerHoist", "answerHoist");
+      toggleReveal("showHintTDZ", "hintTDZ");
+      toggleReveal("showAnswerShadow", "answerShadow");
+      toggleReveal("showAnswerScope", "answerScope");
+
+      // Quiz logic
+      document.querySelectorAll(".quiz").forEach((quiz) => {
+        const buttons = quiz.querySelectorAll("button");
+        const feedback = quiz.querySelector(".feedback");
+
+        buttons.forEach((button) => {
+          button.addEventListener("click", () => {
+            buttons.forEach((b) => (b.disabled = true));
+            if (button.dataset.answer === "correct") {
+              button.classList.add("correct");
+              feedback.textContent = "🎉 Correct! Well done!";
+              feedback.style.color = "#2e7d32";
+            } else {
+              button.classList.add("wrong");
+              feedback.textContent = "❌ Oops, try again!";
+              feedback.style.color = "#c62828";
+            }
+          });
+        });
+      });
+
+      // Keyboard accessibility for boxes
+      document.querySelectorAll(".box").forEach((box) => {
+        box.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            box.click();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

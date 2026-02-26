@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>02 - DOM, CSSOM, Render Tree, Layout & Paint</title>
+    <style>
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: #f0f8ff;
+        margin: 0;
+        color: #333;
+      }
+      .container {
+        max-width: 900px;
+        margin: 2em auto;
+        background: white;
+        padding: 2em;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      }
+      h1,
+      h2 {
+        margin-bottom: 0.5em;
+      }
+      pre {
+        font-family: monospace;
+        background: #e6f7ff;
+        padding: 1em 1.5em;
+        border-radius: 10px;
+        color: #005a9e;
+        white-space: pre;
+      }
+      nav {
+        margin-top: 2em;
+        text-align: center;
+      }
+      nav a {
+        background: #0078d7;
+        color: white;
+        padding: 0.7em 1.5em;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        margin: 0 0.5em;
+        display: inline-block;
+      }
+      nav a:hover {
+        background: #005ea2;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="container"
+      role="main"
+      aria-label="DOM, CSSOM, Render Tree, Layout and Paint"
+    >
+      <h1>DOM, CSSOM, and Render Tree</h1>
+      <p>
+        The browser turns HTML into the <strong>DOM</strong> — a family tree of
+        page elements:
+      </p>
+      <pre>
+html
+├── head
+└── body
+    ├── h1
+    ├── img
+    └── button
+  </pre
+      >
+      <p>It reads CSS and makes the <strong>CSSOM</strong> (style tree).</p>
+      <p>
+        Then it combines DOM + CSSOM into the <strong>Render Tree</strong> to
+        know what to show.
+      </p>
+
+      <h2>Layout (Reflow) and Paint (Repaint)</h2>
+      <p>
+        <strong>Layout</strong> is like placing furniture in a room — the
+        browser figures out where each element goes.
+      </p>
+      <p>
+        <strong>Paint</strong> is coloring and drawing pixels on the screen.
+      </p>
+      <p>
+        If the page changes, the browser might have to do layout and paint
+        again, which can slow things down.
+      </p>
+
+      <nav>
+        <a href="01-intro.html" aria-label="Previous lesson: Intro"
+          >⬅️ Previous</a
+        >
+        <a
+          href="03-lazy-loading-caching.html"
+          aria-label="Next lesson: Lazy Loading and Caching"
+          >Next ➡️</a
+        >
+      </nav>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sliding Window Pattern - Complete Visual Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            color: #667eea;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Content Section */
+        .content {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Concept Section */
+        .concept-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .concept-text {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+            line-height: 1.6;
+        }
+
+        .concept-text strong {
+            color: #667eea;
+        }
+
+        /* Array Visualization */
+        .visualization-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            margin-top: 30px;
+        }
+
+        .array-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            position: relative;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            min-height: 120px;
+        }
+
+        .box {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.3rem;
+            position: relative;
+            transition: all 0.3s ease;
+            user-select: none;
+            border: 3px solid transparent;
+        }
+
+        .box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        .pointer-label {
+            position: absolute;
+            top: -32px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-radius: 4px;
+            padding: 2px 4px;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .pointer-left {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .pointer-right {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .window-box {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 3px solid #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .inside-window {
+            opacity: 1;
+        }
+
+        .outside-window {
+            opacity: 0.4;
+            transform: scale(0.95);
+        }
+
+        /* Info Section */
+        .info-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .info-label {
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: #333;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Algorithm Comparison */
+        .algorithm-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .algo-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .algo-card.optimal {
+            border-left-color: #4CAF50;
+            background: #f1f8f4;
+        }
+
+        .algo-card.brute {
+            border-left-color: #ff6b6b;
+        }
+
+        .algo-card h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .algo-card code {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            display: block;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin-bottom: 10px;
+        }
+
+        .complexity {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        /* Controls */
+        .controls {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 0.95rem;
+        }
+
+        .control-group input,
+        .control-group select {
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-start {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .color-left {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .color-right {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .color-window {
+            background: rgba(102, 126, 234, 0.2);
+            border: 2px solid #667eea;
+        }
+
+        /* Speed Control */
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .speed-control label {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .speed-control input[type="range"] {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .speed-value {
+            font-weight: 700;
+            color: #667eea;
+            min-width: 80px;
+        }
+
+        /* Step Counter */
+        .step-counter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Pattern Recognition Section */
+        .pattern-section {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .pattern-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .pattern-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .pattern-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .pattern-item:before {
+            content: "✓";
+            color: #4CAF50;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .pattern-item.anti:before {
+            content: "✗";
+            color: #ff6b6b;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .comparison-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .complexity-good {
+            color: #4CAF50;
+            font-weight: 700;
+        }
+
+        .complexity-bad {
+            color: #ff6b6b;
+            font-weight: 700;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .keyword {
+            color: #569cd6;
+        }
+
+        .string {
+            color: #ce9178;
+        }
+
+        .function {
+            color: #dcdcaa;
+        }
+
+        .comment {
+            color: #6a9955;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .array-container {
+                gap: 8px;
+            }
+
+            .box {
+                width: 50px;
+                height: 50px;
+                font-size: 1.1rem;
+            }
+
+            .tabs {
+                gap: 5px;
+            }
+
+            .tab-btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px 10px;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                gap: 5px;
+            }
+
+            .tab-btn {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+        }
+
+        .example-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🎯 Sliding Window Pattern</h1>
+            <p>Master the most important pattern for frontend interviews</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'concept')">📚 Concept</button>
+            <button class="tab-btn" onclick="switchTab(event, 'recognition')">🔍 Pattern Recognition</button>
+            <button class="tab-btn" onclick="switchTab(event, 'fixed')">📦 Fixed Window</button>
+            <button class="tab-btn" onclick="switchTab(event, 'dynamic')">📈 Dynamic Window</button>
+            <button class="tab-btn" onclick="switchTab(event, 'comparision')">⚡ Comparison</button>
+        </div>
+
+        <!-- ===== CONCEPT TAB ===== -->
+        <div id="concept" class="tab-content active">
+            <div class="content">
+                <div class="concept-section">
+                    <h2>Understanding Sliding Window</h2>
+                    
+                    <div class="concept-text">
+                        <strong>What is Sliding Window?</strong><br><br>
+                        Sliding Window is a technique where you maintain a window (subarray/substring) 
+                        that slides through the input. Instead of recalculating everything from scratch, 
+                        you smartly add/remove elements from the window edges.
+                    </div>
+
+                    <div class="visualization-title">Real-World Analogy</div>
+                    <div class="concept-text">
+                        Imagine you're looking at a landscape through a <strong>car sunroof</strong>. 
+                        As you drive (right pointer moves), you see new scenery entering. 
+                        As you move past things (left pointer moves), they exit your view. 
+                        You're always looking at a "window" of the landscape.
+                    </div>
+
+                    <div class="visualization-title">Why Sliding Window?</div>
+                    <div class="algorithm-cards">
+                        <div class="algo-card brute">
+                            <h3>❌ Brute Force: O(n²)</h3>
+                            <code>for i in array:
+    for j in array:
+        check(i...j)</code>
+                            <div class="complexity">Too Slow! 🐌</div>
+                        </div>
+
+                        <div class="algo-card optimal">
+                            <h3>✅ Sliding Window: O(n)</h3>
+                            <code>left = 0
+for right in array:
+    add(right)
+    while condition:
+        remove(left)
+        left++</code>
+                            <div class="complexity">Super Fast! 🚀</div>
+                        </div>
+                    </div>
+
+                    <div class="visualization-title">Example: Maximum Sum of K Consecutive Numbers</div>
+                    
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color color-left"></div>
+                            <span>Left Pointer</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color color-right"></div>
+                            <span>Right Pointer</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color color-window"></div>
+                            <span>Window</span>
+                        </div>
+                    </div>
+
+                    <div class="array-container" id="conceptArray"></div>
+                    
+                    <div class="info-section">
+                        <div class="info-row">
+                            <div class="info-item">
+                                <div class="info-label">Current Window:</div>
+                                <div class="info-value" id="conceptWindow">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Window Sum:</div>
+                                <div class="info-value" id="conceptSum">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Maximum So Far:</div>
+                                <div class="info-value" id="conceptMax">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-counter">Step: <span id="conceptStep">0</span></div>
+
+                    <div class="controls">
+                        <div class="control-group">
+                            <label for="conceptInputArray">Array:</label>
+                            <input type="text" id="conceptInputArray" value="1,3,2,6,4,1,2,5,3" />
+                        </div>
+                        <div class="control-group">
+                            <label for="conceptInputK">Window Size (K):</label>
+                            <input type="number" id="conceptInputK" value="3" min="1" />
+                        </div>
+                        <button class="btn-start" id="conceptBtn" onclick="runConceptVisualization()">Start Visualization</button>
+                    </div>
+
+                    <div class="speed-control">
+                        <label for="speedSlider">Animation Speed:</label>
+                        <input type="range" id="speedSlider" min="100" max="2000" value="800" step="100" />
+                        <span class="speed-value" id="speedValue">0.8x</span>
+                    </div>
+
+                    <div class="visualization-title">Key Principles</div>
+                    <div class="pattern-list">
+                        <div class="pattern-item">Each element enters window once (right pointer)</div>
+                        <div class="pattern-item">Each element exits window once (left pointer)</div>
+                        <div class="pattern-item">Window size can be fixed or dynamic</div>
+                        <div class="pattern-item">Total operations = 2n = O(n) ✓</div>
+                        <div class="pattern-item anti">Never recalculate entire window</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PATTERN RECOGNITION TAB ===== -->
+        <div id="recognition" class="tab-content">
+            <div class="content">
+                <div class="concept-section">
+                    <h2>🔍 How to Recognize Sliding Window Problems</h2>
+
+                    <div class="pattern-section">
+                        <h3>✓ Use Sliding Window When:</h3>
+                        <div class="pattern-list">
+                            <div class="pattern-item">Finding <strong>longest/shortest</strong> substring/subarray with condition</div>
+                            <div class="pattern-item">Looking for <strong>maximum/minimum</strong> sum of consecutive elements</div>
+                            <div class="pattern-item">Counting subarrays/substrings with specific property</div>
+                            <div class="pattern-item">Finding <strong>K consecutive</strong> elements satisfying condition</div>
+                            <div class="pattern-item">Input is <strong>contiguous</strong> (substring/subarray, not scattered)</div>
+                            <div class="pattern-item">Can <strong>shrink or expand</strong> window based on condition</div>
+                        </div>
+                    </div>
+
+                    <div class="pattern-section" style="background: #ffe0e0; border-left-color: #ff6b6b;">
+                        <h3>✗ Don't Use Sliding Window When:</h3>
+                        <div class="pattern-list">
+                            <div class="pattern-item anti">Looking for <strong>non-contiguous</strong> subsequences</div>
+                            <div class="pattern-item anti">Need <strong>any two elements</strong> (not consecutive)</div>
+                            <div class="pattern-item anti">Working with <strong>negative numbers</strong> and can't track all</div>
+                            <div class="pattern-item anti">Problem requires <strong>sorting</strong> or <strong>rearranging</strong></div>
+                            <div class="pattern-item anti">Binary search applicable (use that instead)</div>
+                        </div>
+                    </div>
+
+                    <div class="visualization-title">Pattern Recognition Quiz</div>
+                    <p style="margin-bottom: 20px;">For each problem, decide: <strong>Sliding Window or Not?</strong></p>
+
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Problem Description</th>
+                                <th>Answer</th>
+                                <th>Why?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>"Find longest substring without repeating characters"</td>
+                                <td style="color: #4CAF50; font-weight: 700;">✓ YES</td>
+                                <td>Contiguous substring + condition + can shrink window</td>
+                            </tr>
+                            <tr>
+                                <td>"Find if array contains duplicate"</td>
+                                <td style="color: #ff6b6b; font-weight: 700;">✗ NO</td>
+                                <td>Any two elements, not consecutive</td>
+                            </tr>
+                            <tr>
+                                <td>"Find longest subarray with sum ≤ target"</td>
+                                <td style="color: #4CAF50; font-weight: 700;">✓ YES</td>
+                                <td>Contiguous + condition + window can shrink</td>
+                            </tr>
+                            <tr>
+                                <td>"Find Kth largest element"</td>
+                                <td style="color: #ff6b6b; font-weight: 700;">✗ NO</td>
+                                <td>Single element, not subarray</td>
+                            </tr>
+                            <tr>
+                                <td>"Count subarrays with product < K"</td>
+                                <td style="color: #4CAF50; font-weight: 700;">✓ YES</td>
+                                <td>Subarrays + condition + product varies</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="visualization-title">Decision Tree</div>
+                    <div class="code-block">Is problem about substring/subarray?
+  ├─ NO → Not sliding window
+  ├─ YES → Is it CONTIGUOUS?
+      ├─ NO → Not sliding window (use hash map, sorting)
+      ├─ YES → Can I SHRINK/EXPAND window?
+          ├─ NO → Fixed window (still sliding window!)
+          ├─ YES → Can I efficiently update window?
+              ├─ NO → Not sliding window
+              ├─ YES → ✓ USE SLIDING WINDOW!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== FIXED WINDOW TAB ===== -->
+        <div id="fixed" class="tab-content">
+            <div class="content">
+                <div class="concept-section">
+                    <h2>📦 Fixed Size Window</h2>
+
+                    <div class="concept-text">
+                        <strong>Fixed Window:</strong> Window size is constant (e.g., always 3 consecutive elements).
+                        You just slide the window across without changing its size.
+                    </div>
+
+                    <!-- EXAMPLE 1 -->
+                    <div class="example-title">Example 1: Maximum Sum of K Consecutive Numbers</div>
+                    <div class="concept-text">
+                        Find K consecutive numbers with the maximum sum.
+                    </div>
+
+                    <div class="algorithm-cards">
+                        <div class="algo-card brute">
+                            <h3>❌ Brute Force: O(n*k)</h3>
+                            <code>for i in range(n-k+1):
+    sum = 0
+    for j in range(k):
+        sum += arr[i+j]
+    max_avg = max(max_avg, sum)</code>
+                        </div>
+
+                        <div class="algo-card optimal">
+                            <h3>✅ Sliding Window: O(n)</h3>
+                            <code>sum = sum(arr[0:k])
+max_sum = sum
+for i in range(k, n):
+    sum = sum - arr[i-k] + arr[i]
+    max_sum = max(max_sum, sum)</code>
+                        </div>
+                    </div>
+
+                    <div class="array-container" id="fixed1Array"></div>
+                    <div class="info-section" id="fixed1Info"></div>
+                    <div class="step-counter">Step: <span id="fixed1Step">0</span></div>
+
+                    <div class="controls">
+                        <div class="control-group">
+                            <label for="fixed1InputArray">Array:</label>
+                            <input type="text" id="fixed1InputArray" value="1,3,2,6,4" />
+                        </div>
+                        <div class="control-group">
+                            <label for="fixed1InputK">K:</label>
+                            <input type="number" id="fixed1InputK" value="3" min="1" />
+                        </div>
+                        <button class="btn-start" onclick="runFixed1()">Start Visualization</button>
+                    </div>
+
+                    <!-- EXAMPLE 2 -->
+                    <div class="example-title">Example 2: Maximum Average Subarray of Size K</div>
+                    <div class="concept-text">
+                        Find K consecutive numbers with the maximum average.
+                    </div>
+
+                    <div class="array-container" id="fixed2Array"></div>
+                    <div class="info-section" id="fixed2Info"></div>
+                    <div class="step-counter">Step: <span id="fixed2Step">0</span></div>
+
+                    <div class="controls">
+                        <div class="control-group">
+                            <label for="fixed2InputArray">Array:</label>
+                            <input type="text" id="fixed2InputArray" value="1,3,2,6,4,1,2,5" />
+                        </div>
+                        <div class="control-group">
+                            <label for="fixed2InputK">K:</label>
+                            <input type="number" id="fixed2InputK" value="3" min="1" />
+                        </div>
+                        <button class="btn-start" onclick="runFixed2()">Start Visualization</button>
+                    </div>
+
+                    <div class="visualization-title">Key Points for Fixed Window</div>
+                    <div class="pattern-list">
+                        <div class="pattern-item">Window size is constant (K)</div>
+                        <div class="pattern-item">Pre-calculate first window sum/value</div>
+                        <div class="pattern-item">Slide by removing left, adding right</div>
+                        <div class="pattern-item">Much simpler than dynamic window</div>
+                        <div class="pattern-item">Time: O(n), Space: O(1)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== DYNAMIC WINDOW TAB ===== -->
+        <div id="dynamic" class="tab-content">
+            <div class="content">
+                <div class="concept-section">
+                    <h2>📈 Dynamic Size Window</h2>
+
+                    <div class="concept-text">
+                        <strong>Dynamic Window:</strong> Window size changes based on condition.
+                        You expand when condition is satisfied, shrink when violated.
+                    </div>
+
+                    <!-- EXAMPLE 1 -->
+                    <div class="example-title">Example 1: Longest Substring Without Repeating Characters</div>
+                    <div class="concept-text">
+                        Find the longest substring where no character repeats.
+                    </div>
+
+                    <div class="algorithm-cards">
+                        <div class="algo-card brute">
+                            <h3>❌ Brute Force: O(n³)</h3>
+                            <code>for i in range(n):
+    for j in range(i, n):
+        substring = s[i:j+1]
+        if all_unique(substring):
+            max_len = max(max_len, len(substring))</code>
+                        </div>
+
+                        <div class="algo-card optimal">
+                            <h3>✅ Sliding Window: O(n)</h3>
+                            <code>left = 0
+char_map = {}
+max_len = 0
+for right in range(n):
+    if s[right] in char_map:
+        left = max(left, char_map[s[right]] + 1)
+    char_map[s[right]] = right
+    max_len = max(max_len, right - left + 1)</code>
+                        </div>
+                    </div>
+
+                    <div class="array-container" id="dynamic1Array"></div>
+                    <div class="info-section" id="dynamic1Info"></div>
+                    <div class="step-counter">Step: <span id="dynamic1Step">0</span></div>
+
+                    <div class="controls">
+                        <div class="control-group">
+                            <label for="dynamic1InputString">String:</label>
+                            <input type="text" id="dynamic1InputString" value="abcabcbb" />
+                        </div>
+                        <button class="btn-start" onclick="runDynamic1()">Start Visualization</button>
+                    </div>
+
+                    <!-- EXAMPLE 2 -->
+                    <div class="example-title">Example 2: Minimum Window Substring</div>
+                    <div class="concept-text">
+                        Find the shortest substring that contains all characters from target.
+                    </div>
+
+                    <div class="array-container" id="dynamic2Array"></div>
+                    <div class="info-section" id="dynamic2Info"></div>
+                    <div class="step-counter">Step: <span id="dynamic2Step">0</span></div>
+
+                    <div class="controls">
+                        <div class="control-group">
+                            <label for="dynamic2InputString">String:</label>
+                            <input type="text" id="dynamic2InputString" value="ADOBECODEBANC" />
+                        </div>
+                        <div class="control-group">
+                            <label for="dynamic2InputTarget">Target:</label>
+                            <input type="text" id="dynamic2InputTarget" value="ABC" />
+                        </div>
+                        <button class="btn-start" onclick="runDynamic2()">Start Visualization</button>
+                    </div>
+
+                    <div class="visualization-title">Key Points for Dynamic Window</div>
+                    <div class="pattern-list">
+                        <div class="pattern-item">Window size varies based on condition</div>
+                        <div class="pattern-item">Expand right pointer to add elements</div>
+                        <div class="pattern-item">Shrink left pointer when condition violated</div>
+                        <div class="pattern-item">Track window state (frequency map, set, etc)</div>
+                        <div class="pattern-item">Update result after each window change</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== COMPARISON TAB ===== -->
+        <div id="comparision" class="tab-content">
+            <div class="content">
+                <div class="concept-section">
+                    <h2>⚡ Algorithm Comparison</h2>
+
+                    <div class="visualization-title">Fixed vs Dynamic Window</div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Aspect</th>
+                                <th>Fixed Window</th>
+                                <th>Dynamic Window</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Window Size</strong></td>
+                                <td>Constant (K)</td>
+                                <td>Varies based on condition</td>
+                            </tr>
+                            <tr>
+                                <td><strong>When to Use</strong></td>
+                                <td>K consecutive elements given</td>
+                                <td>Find max/min with condition</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Setup</strong></td>
+                                <td>Pre-calculate first K</td>
+                                <td>Initialize left, right pointers</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sliding Logic</strong></td>
+                                <td>Remove left, add right</td>
+                                <td>While loop to shrink/expand</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Complexity</strong></td>
+                                <td><span class="complexity-good">O(n)</span></td>
+                                <td><span class="complexity-good">O(n)</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Space</strong></td>
+                                <td><span class="complexity-good">O(1)</span></td>
+                                <td>O(k) for tracking</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Difficulty</strong></td>
+                                <td><span class="complexity-good">Easy</span></td>
+                                <td>Medium-Hard</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="visualization-title">Time Complexity Comparison</div>
+                    <div class="algorithm-cards">
+                        <div class="algo-card brute">
+                            <h3>Brute Force: O(n²)</h3>
+                            <code>Array: [1,2,3,4,5]
+n=5: 5² = 25 ops
+n=100: 100² = 10,000 ops
+n=1000: 1,000² = 1M ops ⚠️</code>
+                        </div>
+
+                        <div class="algo-card optimal">
+                            <h3>Sliding Window: O(n)</h3>
+                            <code>Array: [1,2,3,4,5]
+n=5: 5 = 5 ops
+n=100: 100 = 100 ops
+n=1000: 1000 = 1k ops ✅</code>
+                        </div>
+                    </div>
+
+                    <div class="visualization-title">Real-World Performance</div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Input Size</th>
+                                <th>Brute Force</th>
+                                <th>Sliding Window</th>
+                                <th>Speedup</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>100 elements</td>
+                                <td>10,000 operations</td>
+                                <td>100 operations</td>
+                                <td><span class="complexity-good">100x faster</span></td>
+                            </tr>
+                            <tr>
+                                <td>1,000 elements</td>
+                                <td>1,000,000 operations</td>
+                                <td>1,000 operations</td>
+                                <td><span class="complexity-good">1,000x faster</span></td>
+                            </tr>
+                            <tr>
+                                <td>10,000 elements</td>
+                                <td>100,000,000 operations</td>
+                                <td>10,000 operations</td>
+                                <td><span class="complexity-good">10,000x faster</span></td>
+                            </tr>
+                            <tr>
+                                <td>1,000,000 elements</td>
+                                <td>1 Trillion ops 💥</td>
+                                <td>1,000,000 operations</td>
+                                <td><span class="complexity-good">1M x faster</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="visualization-title">Interview Tips</div>
+                    <div class="concept-text">
+                        <strong>💡 Key Interview Points:</strong><br><br>
+                        <strong>1. Mention the brute force first</strong> - Shows you understand the problem<br>
+                        <strong>2. Then optimize to sliding window</strong> - Shows advanced thinking<br>
+                        <strong>3. Discuss time/space complexity</strong> - Critical for interviews<br>
+                        <strong>4. Explain why it's O(n)</strong> - Each element enters/exits once<br>
+                        <strong>5. Walk through example</strong> - Trace through code step-by-step<br>
+                        <strong>6. Mention edge cases</strong> - Empty, single element, all same
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(event, tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active class from buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Speed control
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            const speed = (2000 - e.target.value) / 1000;
+            document.getElementById('speedValue').textContent = speed.toFixed(1) + 'x';
+        });
+
+        function getDelay() {
+            return 2000 - parseInt(document.getElementById('speedSlider').value);
+        }
+
+        // Helper to create array visualization
+        function createArrayViz(containerId, arr, leftIdx = -1, rightIdx = -1, windowIndices = []) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            container.style.display = 'flex';
+            container.style.gap = '12px';
+            container.style.justifyContent = 'center';
+            container.style.flexWrap = 'wrap';
+            container.style.alignItems = 'center';
+
+            arr.forEach((val, idx) => {
+                const box = document.createElement('div');
+                box.className = 'box';
+                box.textContent = val;
+
+                if (windowIndices.includes(idx)) {
+                    box.classList.add('window-box');
+                } else if (leftIdx >= 0 && rightIdx >= 0 && (idx < leftIdx || idx > rightIdx)) {
+                    box.classList.add('outside-window');
+                }
+
+                if (idx === leftIdx) {
+                    const label = document.createElement('div');
+                    label.className = 'pointer-label pointer-left';
+                    label.textContent = 'left';
+                    box.appendChild(label);
+                }
+
+                if (idx === rightIdx) {
+                    const label = document.createElement('div');
+                    label.className = 'pointer-label pointer-right';
+                    label.textContent = 'right';
+                    box.appendChild(label);
+                }
+
+                container.appendChild(box);
+            });
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ===== CONCEPT VISUALIZATION =====
+        async function runConceptVisualization() {
+            const input = document.getElementById('conceptInputArray').value;
+            const k = parseInt(document.getElementById('conceptInputK').value);
+            const arr = input.split(',').map(x => parseInt(x.trim()));
+
+            if (arr.length < k || k < 1) {
+                alert('Invalid! Array length must be >= K');
+                return;
+            }
+
+            document.getElementById('conceptBtn').disabled = true;
+
+            let maxSum = 0;
+            let currentSum = 0;
+
+            // First window
+            for (let i = 0; i < k; i++) {
+                currentSum += arr[i];
+            }
+            maxSum = currentSum;
+
+            let windowIndices = Array.from({length: k}, (_, i) => i);
+            createArrayViz('conceptArray', arr, 0, k - 1, windowIndices);
+            document.getElementById('conceptWindow').textContent = arr.slice(0, k).join(', ');
+            document.getElementById('conceptSum').textContent = currentSum.toString();
+            document.getElementById('conceptMax').textContent = maxSum.toString();
+            document.getElementById('conceptStep').textContent = '1';
+
+            await delay(getDelay());
+
+            // Slide window
+            for (let i = k; i < arr.length; i++) {
+                currentSum = currentSum - arr[i - k] + arr[i];
+                maxSum = Math.max(maxSum, currentSum);
+
+                windowIndices = Array.from({length: k}, (_, j) => i - k + 1 + j);
+                createArrayViz('conceptArray', arr, i - k + 1, i, windowIndices);
+                document.getElementById('conceptWindow').textContent = arr.slice(i - k + 1, i + 1).join(', ');
+                document.getElementById('conceptSum').textContent = currentSum.toString();
+                document.getElementById('conceptMax').textContent = maxSum.toString();
+                document.getElementById('conceptStep').textContent = (i - k + 2).toString();
+
+                await delay(getDelay());
+            }
+
+            document.getElementById('conceptBtn').disabled = false;
+        }
+
+        // ===== FIXED WINDOW 1 =====
+        async function runFixed1() {
+            const input = document.getElementById('fixed1InputArray').value;
+            const k = parseInt(document.getElementById('fixed1InputK').value);
+            const arr = input.split(',').map(x => parseInt(x.trim()));
+
+            if (arr.length < k) {
+                alert('Array length must be >= K');
+                return;
+            }
+
+            let maxSum = 0, currentSum = 0;
+
+            for (let i = 0; i < k; i++) currentSum += arr[i];
+            maxSum = currentSum;
+
+            let windowIndices = Array.from({length: k}, (_, i) => i);
+            createArrayViz('fixed1Array', arr, 0, k - 1, windowIndices);
+            document.getElementById('fixed1Info').innerHTML = `
+                <div class="info-row">
+                    <div class="info-item">
+                        <div class="info-label">Current Window:</div>
+                        <div class="info-value">\${arr.slice(0, k).join(', ')}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Window Sum:</div>
+                        <div class="info-value">{currentSum}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Max Sum So Far:</div>
+                        <div class="info-value">{maxSum}</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('fixed1Step').textContent = '1';
+
+            await delay(getDelay());
+
+            for (let i = k; i < arr.length; i++) {
+                currentSum = currentSum - arr[i - k] + arr[i];
+                maxSum = Math.max(maxSum, currentSum);
+
+                windowIndices = Array.from({length: k}, (_, j) => i - k + 1 + j);
+                createArrayViz('fixed1Array', arr, i - k + 1, i, windowIndices);
+                document.getElementById('fixed1Info').innerHTML = `
+                    <div class="info-row">
+                        <div class="info-item">
+                            <div class="info-label">Current Window:</div>
+                            <div class="info-value">\${arr.slice(i - k + 1, i + 1).join(', ')}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Window Sum:</div>
+                            <div class="info-value">\${currentSum}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Max Sum So Far:</div>
+                            <div class="info-value">\${maxSum}</div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('fixed1Step').textContent = (i - k + 2).toString();
+
+                await delay(getDelay());
+            }
+        }
+
+        // ===== FIXED WINDOW 2 =====
+        async function runFixed2() {
+            const input = document.getElementById('fixed2InputArray').value;
+            const k = parseInt(document.getElementById('fixed2InputK').value);
+            const arr = input.split(',').map(x => parseInt(x.trim()));
+
+            if (arr.length < k) {
+                alert('Array length must be >= K');
+                return;
+            }
+
+            let maxAvg = 0, currentSum = 0;
+
+            for (let i = 0; i < k; i++) currentSum += arr[i];
+            maxAvg = currentSum / k;
+
+            let windowIndices = Array.from({length: k}, (_, i) => i);
+            createArrayViz('fixed2Array', arr, 0, k - 1, windowIndices);
+            document.getElementById('fixed2Info').innerHTML = `
+                <div class="info-row">
+                    <div class="info-item">
+                        <div class="info-label">Current Window:</div>
+                        <div class="info-value">\${arr.slice(0, k).join(', ')}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Window Sum:</div>
+                        <div class="info-value">\${currentSum}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Max Average So Far:</div>
+                        <div class="info-value">\${maxAvg.toFixed(2)}</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('fixed2Step').textContent = '1';
+
+            await delay(getDelay());
+
+            for (let i = k; i < arr.length; i++) {
+                currentSum = currentSum - arr[i - k] + arr[i];
+                const avg = currentSum / k;
+                maxAvg = Math.max(maxAvg, avg);
+
+                windowIndices = Array.from({length: k}, (_, j) => i - k + 1 + j);
+                createArrayViz('fixed2Array', arr, i - k + 1, i, windowIndices);
+                document.getElementById('fixed2Info').innerHTML = `
+                    <div class="info-row">
+                        <div class="info-item">
+                            <div class="info-label">Current Window:</div>
+                            <div class="info-value">\${arr.slice(i - k + 1, i + 1).join(', ')}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Window Sum:</div>
+                            <div class="info-value">\${currentSum}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Max Average So Far:</div>
+                            <div class="info-value">\${maxAvg.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('fixed2Step').textContent = (i - k + 2).toString();
+
+                await delay(getDelay());
+            }
+        }
+
+        // ===== DYNAMIC WINDOW 1: Longest Substring Without Repeating =====
+        async function runDynamic1() {
+            const s = document.getElementById('dynamic1InputString').value;
+            const arr = s.split('');
+
+            let maxLen = 0;
+            let left = 0;
+            let charMap = {};
+            let step = 0;
+
+            for (let right = 0; right < arr.length; right++) {
+                step++;
+
+                if (arr[right] in charMap && charMap[arr[right]] >= left) {
+                    left = charMap[arr[right]] + 1;
+                }
+
+                charMap[arr[right]] = right;
+                const currentLen = right - left + 1;
+                maxLen = Math.max(maxLen, currentLen);
+
+                const windowIndices = Array.from({length: currentLen}, (_, i) => left + i);
+                createArrayViz('dynamic1Array', arr, left, right, windowIndices);
+
+                document.getElementById('dynamic1Info').innerHTML = `
+                    <div class="info-row">
+                        <div class="info-item">
+                            <div class="info-label">Current Window:</div>
+                            <div class="info-value">"\${arr.slice(left, right + 1).join('')}"</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Window Length:</div>
+                            <div class="info-value">\${currentLen}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Max Length So Far:</div>
+                            <div class="info-value">\${maxLen}</div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('dynamic1Step').textContent = step.toString();
+
+                await delay(getDelay());
+            }
+        }
+
+        // ===== DYNAMIC WINDOW 2: Minimum Window Substring =====
+        async function runDynamic2() {
+            const s = document.getElementById('dynamic2InputString').value;
+            const t = document.getElementById('dynamic2InputTarget').value;
+            const arr = s.split('');
+
+            const tCount = {};
+            for (let char of t) {
+                tCount[char] = (tCount[char] || 0) + 1;
+            }
+
+            let left = 0;
+            let minLen = Infinity;
+            let minStart = 0;
+            let formed = 0;
+            let sCount = {};
+            let step = 0;
+
+            for (let right = 0; right < arr.length; right++) {
+                step++;
+                const char = arr[right];
+                sCount[char] = (sCount[char] || 0) + 1;
+
+                if (char in tCount && sCount[char] === tCount[char]) {
+                    formed++;
+                }
+
+                while (left <= right && formed === Object.keys(tCount).length) {
+                    const len = right - left + 1;
+                    if (len < minLen) {
+                        minLen = len;
+                        minStart = left;
+                    }
+
+                    const leftChar = arr[left];
+                    sCount[leftChar]--;
+                    if (leftChar in tCount && sCount[leftChar] < tCount[leftChar]) {
+                        formed--;
+                    }
+                    left++;
+                }
+
+                const windowIndices = Array.from({length: right - left + 2}, (_, i) => left - 1 + i)
+                    .filter(i => i >= 0 && i <= right);
+                createArrayViz('dynamic2Array', arr, Math.max(0, left - 1), right, windowIndices);
+
+                const bestMatch = minLen === Infinity ? '-' : arr.slice(minStart, minStart + minLen).join('');
+
+                document.getElementById('dynamic2Info').innerHTML = `
+                    <div class="info-row">
+                        <div class="info-item">
+                            <div class="info-label">Current Window:</div>
+                            <div class="info-value">"\${arr.slice(Math.max(0, left - 1), right + 1).join('')}"</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Target:</div>
+                            <div class="info-value">"\${t}"</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Best Match:</div>
+                            <div class="info-value">"\${bestMatch}"</div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('dynamic2Step').textContent = step.toString();
+
+                await delay(getDelay());
+            }
+        }
+    </script>
+</body>
+</html>

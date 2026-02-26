@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JavaScript Variables for Kids & Beginners 🌟</title>
+    <style>
+      /* Reset & Base */
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f8ff;
+        color: #333;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #app {
+        max-width: 600px;
+        width: 90vw;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        background: linear-gradient(90deg, #4a90e2, #50e3c2);
+        color: white;
+        padding: 1rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      main {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      section {
+        display: none;
+        flex-direction: column;
+        gap: 1rem;
+        animation: fadeIn 0.8s ease forwards;
+      }
+
+      section.active {
+        display: flex;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .emoji {
+        font-size: 1.6rem;
+      }
+
+      p {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      pre {
+        background: #e8f1f8;
+        border-radius: 8px;
+        padding: 1rem;
+        font-size: 1rem;
+        overflow-x: auto;
+        font-family: "Courier New", Courier, monospace;
+        user-select: all;
+      }
+
+      code {
+        color: #d6336c;
+        font-weight: 600;
+      }
+
+      button {
+        background: #4a90e2;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover,
+      button:focus {
+        background: #357abd;
+        outline: none;
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #f7f9fc;
+      }
+
+      .quiz {
+        background: #f9f9f9;
+        border: 2px solid #4a90e2;
+        border-radius: 8px;
+        padding: 1rem;
+      }
+
+      .quiz h3 {
+        margin-top: 0;
+      }
+
+      .quiz button {
+        margin-top: 0.6rem;
+        background: #50e3c2;
+      }
+
+      .quiz button:hover,
+      .quiz button:focus {
+        background: #38b89d;
+      }
+
+      .feedback {
+        margin-top: 0.5rem;
+        font-weight: 700;
+      }
+
+      .correct {
+        color: green;
+      }
+
+      .wrong {
+        color: red;
+      }
+
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Interactive Diagram styles */
+      .box {
+        border: 2px solid #4a90e2;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        position: relative;
+        cursor: pointer;
+        background: #d0e7ff;
+        transition: background-color 0.3s ease;
+      }
+      .box:hover,
+      .box:focus {
+        background: #a6cdfd;
+        outline: none;
+      }
+      .arrow {
+        width: 40px;
+        height: 40px;
+        border-left: 4px solid #4a90e2;
+        border-bottom: 4px solid #4a90e2;
+        transform: rotate(-45deg);
+        margin: 0 auto;
+      }
+      .hidden-text {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+      }
+      .hidden-text.show {
+        max-height: 200px;
+      }
+
+      /* Accessibility focus */
+      button:focus-visible,
+      .box:focus-visible {
+        outline: 3px solid #50e3c2;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="app"
+      role="main"
+      aria-label="JavaScript Variables Interactive Lesson"
+    >
+      <header>🌟 JavaScript Variables for Kids & Beginners</header>
+
+      <main>
+        <!-- Slide 1 -->
+        <section
+          class="active"
+          aria-live="polite"
+          aria-label="Introduction to JavaScript Variables"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">⚙️</span> What is a Variable?
+          </h2>
+          <p>
+            Imagine a <strong>box</strong> 📦 where you can store your toys or
+            treasures. A <em>variable</em> in JavaScript is like that box — it
+            holds information for you to use later!
+          </p>
+          <p>
+            We give each box a name so we know what’s inside. For example, a box
+            named <code>xyz</code> can hold the number <code>1234</code>.
+          </p>
+          <pre><code>xyz = 1234;</code></pre>
+          <p>
+            But how does JavaScript know what kind of box it is? Let’s find out!
+          </p>
+          <button aria-label="Go to next slide" onclick="nextSlide()">
+            Next ➡️
+          </button>
+        </section>
+
+        <!-- Slide 2 -->
+        <section
+          aria-live="polite"
+          aria-label="Declaring Variables with var, let, const"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">📦</span> Declaring
+            Variables: var, let, and const
+          </h2>
+          <p>
+            In JavaScript, you can create boxes using <code>var</code>,
+            <code>let</code>, or <code>const</code>. They are like different
+            types of boxes:
+          </p>
+          <ul>
+            <li>
+              <strong>var</strong>: Old-school box 📼 — you can change what’s
+              inside and even re-create the box again.
+            </li>
+            <li>
+              <strong>let</strong>: Newer box 📦 — you can change the content,
+              but can’t create the same box twice in the same place.
+            </li>
+            <li>
+              <strong>const</strong>: Locked box 🔒 — once you put something
+              inside, you can’t change it.
+            </li>
+          </ul>
+          <pre><code>var name = "Alice";  // Can be changed and re-declared
+let age = 10;          // Can be changed, but no re-declare in same scope
+const birthday = "Jan 1"; // Cannot be changed</code></pre>
+          <button
+            aria-label="Show quiz for this slide"
+            onclick="toggleQuiz('quiz1')"
+          >
+            Take Quiz 📝
+          </button>
+          <div id="quiz1" class="quiz" hidden>
+            <h3>
+              Quiz: Which box can you NOT change after putting something inside?
+            </h3>
+            <button onclick="checkAnswer(this, 'const')">var</button>
+            <button onclick="checkAnswer(this, 'const')">let</button>
+            <button onclick="checkAnswer(this, 'const')">const</button>
+            <p class="feedback" aria-live="polite"></p>
+          </div>
+          <button aria-label="Go to next slide" onclick="nextSlide()">
+            Next ➡️
+          </button>
+        </section>
+
+        <!-- Slide 3 -->
+        <section
+          aria-live="polite"
+          aria-label="What happens if you skip var, let, or const?"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">❓</span> What if you forget
+            <code>var</code>, <code>let</code>, or <code>const</code>?
+          </h2>
+          <p>
+            If you write <code>xyz = 1234;</code> without saying
+            <code>var</code>, <code>let</code>, or <code>const</code>,
+            JavaScript creates a special kind of box in the
+            <strong>global space</strong>.
+          </p>
+          <p>
+            This is like leaving your toy box out in the living room where
+            everyone can grab it — it’s usually not a good idea because it can
+            cause confusion or mistakes!
+          </p>
+          <div
+            class="box"
+            tabindex="0"
+            role="button"
+            aria-pressed="false"
+            aria-label="Click to learn more about global variables"
+            onclick="toggleDetails(this)"
+          >
+            Global Variable Box 🌍<br />
+            <small>Click or press Enter to learn more</small>
+            <div class="hidden-text" aria-hidden="true">
+              <p>
+                Inside a function, forgetting <code>var</code>,
+                <code>let</code>, or <code>const</code> makes the variable
+                global, which means it can be accessed anywhere in your code —
+                even where you don’t want it to be!
+              </p>
+              <p>
+                This can cause bugs that are hard to find. Always
+                <strong>declare your variables properly</strong> to keep your
+                code neat and safe.
+              </p>
+            </div>
+          </div>
+          <button
+            aria-label="Show quiz for this slide"
+            onclick="toggleQuiz('quiz2')"
+          >
+            Take Quiz 📝
+          </button>
+          <div id="quiz2" class="quiz" hidden>
+            <h3>
+              Quiz: What happens if you forget <code>var</code>,
+              <code>let</code>, or <code>const</code> inside a function?
+            </h3>
+            <button onclick="checkAnswer(this, 'global')">
+              It becomes a global variable
+            </button>
+            <button onclick="checkAnswer(this, 'local')">It stays local</button>
+            <button onclick="checkAnswer(this, 'error')">
+              JavaScript gives an error
+            </button>
+            <p class="feedback" aria-live="polite"></p>
+          </div>
+          <button aria-label="Go to next slide" onclick="nextSlide()">
+            Next ➡️
+          </button>
+        </section>
+
+        <!-- Slide 4 -->
+        <section aria-live="polite" aria-label="Summary and Best Practices">
+          <h2>
+            <span class="emoji" aria-hidden="true">🎉</span> Summary & Best Tips
+          </h2>
+          <ul>
+            <li>
+              Always <strong>declare</strong> your variables with
+              <code>var</code>, <code>let</code>, or <code>const</code>.
+            </li>
+            <li>
+              Use <code>const</code> when you don’t want the value to change.
+            </li>
+            <li>
+              Use <code>let</code> when you want to change the value later.
+            </li>
+            <li>
+              Avoid creating global variables by accident — it can cause bugs!
+            </li>
+          </ul>
+          <p>
+            Think of your code like a tidy room — keep your boxes labeled and in
+            the right place! 🧹✨
+          </p>
+          <button aria-label="Restart the lesson" onclick="restartLesson()">
+            Restart 🔄
+          </button>
+        </section>
+      </main>
+
+      <nav aria-label="Slide navigation">
+        <button aria-label="Previous slide" onclick="prevSlide()">
+          ⬅️ Previous
+        </button>
+        <button aria-label="Next slide" onclick="nextSlide()">Next ➡️</button>
+      </nav>
+    </div>
+
+    <script>
+      let currentSlide = 0;
+      const sections = document.querySelectorAll("main section");
+
+      function showSlide(index) {
+        if (index < 0) index = sections.length - 1;
+        if (index >= sections.length) index = 0;
+        sections.forEach((sec, i) => {
+          sec.classList.toggle("active", i === index);
+          // Hide quizzes when changing slides
+          const quizzes = sec.querySelectorAll(".quiz");
+          quizzes.forEach((q) => (q.hidden = true));
+          const feedbacks = sec.querySelectorAll(".feedback");
+          feedbacks.forEach((f) => (f.textContent = ""));
+        });
+        currentSlide = index;
+      }
+
+      function nextSlide() {
+        showSlide(currentSlide + 1);
+      }
+
+      function prevSlide() {
+        showSlide(currentSlide - 1);
+      }
+
+      function restartLesson() {
+        showSlide(0);
+      }
+
+      function toggleQuiz(id) {
+        const quiz = document.getElementById(id);
+        if (quiz) {
+          quiz.hidden = !quiz.hidden;
+          if (!quiz.hidden) {
+            // Focus first button in quiz for accessibility
+            const btn = quiz.querySelector("button");
+            if (btn) btn.focus();
+          }
+        }
+      }
+
+      function checkAnswer(button, correctAnswer) {
+        const quiz = button.closest(".quiz");
+        const feedback = quiz.querySelector(".feedback");
+        const userAnswer = button.textContent.toLowerCase();
+        const isCorrect = userAnswer.includes(correctAnswer);
+        if (isCorrect) {
+          feedback.textContent = "Correct! 🎉";
+          feedback.className = "feedback correct";
+        } else {
+          feedback.textContent = "Try again! ❌";
+          feedback.className = "feedback wrong";
+        }
+      }
+
+      // Toggle details in box on click or keyboard
+      function toggleDetails(box) {
+        const hiddenText = box.querySelector(".hidden-text");
+        if (!hiddenText) return;
+        const isShown = hiddenText.classList.toggle("show");
+        box.setAttribute("aria-pressed", isShown);
+        hiddenText.setAttribute("aria-hidden", !isShown);
+      }
+
+      // Keyboard support for box toggling
+      document.querySelectorAll(".box").forEach((box) => {
+        box.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggleDetails(box);
+          }
+        });
+      });
+
+      // Initialize first slide
+      showSlide(currentSlide);
+    </script>
+  </body>
+</html>

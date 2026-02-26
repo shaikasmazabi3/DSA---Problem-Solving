@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Accessibility Tree & SEO Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f4ff;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      header {
+        background: #2563eb;
+        color: white;
+        padding: 1rem 2rem;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      #main {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+      #leftPanel,
+      #rightPanel {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      #leftPanel {
+        background: white;
+        border-right: 2px solid #e0e7ff;
+      }
+      #rightPanel {
+        background: white;
+        border-left: 2px solid #e0e7ff;
+      }
+      h2 {
+        color: #2563eb;
+        margin-bottom: 10px;
+      }
+      ul.tree {
+        list-style: none;
+        padding-left: 20px;
+      }
+      ul.tree li {
+        position: relative;
+        margin: 5px 0;
+        cursor: default;
+        padding-left: 18px;
+        user-select: none;
+      }
+      ul.tree li::before {
+        content: "";
+        position: absolute;
+        left: 5px;
+        top: 10px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #60a5fa;
+        opacity: 0.3;
+        transition: opacity 0.3s ease;
+      }
+      ul.tree li.highlight {
+        background-color: #bfdbfe;
+        border-radius: 6px;
+      }
+      .attribute {
+        color: #d97706;
+        font-style: italic;
+        margin-left: 8px;
+      }
+      .aria {
+        color: #16a34a;
+        font-style: italic;
+        margin-left: 8px;
+      }
+      #descriptions {
+        font-size: 1rem;
+        line-height: 1.4;
+        background: #dbeafe;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        min-height: 120px;
+      }
+      #controls {
+        margin-top: 15px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+      }
+      button {
+        background: #2563eb;
+        border: none;
+        color: white;
+        padding: 10px 16px;
+        font-size: 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      button:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <header>Accessibility Tree & SEO Visualization</header>
+
+    <div id="main">
+      <div id="leftPanel">
+        <h2>DOM Tree</h2>
+        <ul id="domTree" class="tree"></ul>
+      </div>
+      <div id="rightPanel">
+        <h2>Accessibility Tree</h2>
+        <ul id="accessTree" class="tree"></ul>
+        <div id="descriptions">
+          Use the buttons to explore how semantic HTML and ARIA attributes build
+          the accessibility tree and benefit SEO.
+        </div>
+        <div id="controls">
+          <button id="prevBtn" disabled>Previous</button>
+          <button id="nextBtn">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const domTreeEl = document.getElementById("domTree");
+      const accessTreeEl = document.getElementById("accessTree");
+      const descriptionsEl = document.getElementById("descriptions");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      // Sample DOM tree with attributes and ARIA
+      const domData = [
+        {
+          name: "html",
+          attrs: {},
+          children: [
+            {
+              name: "body",
+              attrs: {},
+              children: [
+                {
+                  name: "nav",
+                  attrs: { role: "navigation" },
+                  children: [
+                    {
+                      name: "ul",
+                      attrs: {},
+                      children: [
+                        {
+                          name: "li",
+                          attrs: {},
+                          children: [
+                            {
+                              name: "a",
+                              attrs: { href: "#", "aria-label": "Home" },
+                              children: [{ name: "#text", content: "Home" }],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  name: "main",
+                  attrs: {},
+                  children: [
+                    {
+                      name: "article",
+                      attrs: {},
+                      children: [
+                        {
+                          name: "h1",
+                          attrs: {},
+                          children: [
+                            { name: "#text", content: "Welcome to Our Site" },
+                          ],
+                        },
+                        {
+                          name: "p",
+                          attrs: {},
+                          children: [
+                            {
+                              name: "#text",
+                              content: "This is an example paragraph.",
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  name: "button",
+                  attrs: { "aria-pressed": "false" },
+                  children: [{ name: "#text", content: "Click me" }],
+                },
+                {
+                  name: "div",
+                  attrs: { style: "display:none" },
+                  children: [{ name: "#text", content: "Hidden content" }],
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      // Accessibility tree excludes hidden elements and includes ARIA roles
+      const accessibilityDataSteps = [
+        {
+          desc: "Step 1: The accessibility tree is derived from the DOM, excluding hidden elements like the <div> with display:none.",
+          accessTree: [
+            {
+              name: "html",
+              children: [
+                {
+                  name: "body",
+                  children: [
+                    {
+                      name: "navigation",
+                      role: "navigation",
+                      children: [
+                        {
+                          name: "list",
+                          children: [
+                            {
+                              name: "listitem",
+                              children: [
+                                {
+                                  name: "link",
+                                  ariaLabel: "Home",
+                                  children: [
+                                    { name: "#text", content: "Home" },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      name: "main",
+                      children: [
+                        {
+                          name: "article",
+                          children: [
+                            {
+                              name: "heading",
+                              level: 1,
+                              children: [
+                                {
+                                  name: "#text",
+                                  content: "Welcome to Our Site",
+                                },
+                              ],
+                            },
+                            {
+                              name: "paragraph",
+                              children: [
+                                {
+                                  name: "#text",
+                                  content: "This is an example paragraph.",
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      name: "button",
+                      ariaPressed: "false",
+                      children: [{ name: "#text", content: "Click me" }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          desc: "Step 2: Semantic HTML elements like <nav>, <article>, <button> and ARIA attributes enhance accessibility and SEO by providing meaningful context.",
+          accessTree: [
+            {
+              name: "html",
+              children: [
+                {
+                  name: "body",
+                  children: [
+                    {
+                      name: "navigation",
+                      role: "navigation",
+                      children: [
+                        {
+                          name: "list",
+                          children: [
+                            {
+                              name: "listitem",
+                              children: [
+                                {
+                                  name: "link",
+                                  ariaLabel: "Home",
+                                  children: [
+                                    { name: "#text", content: "Home" },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      name: "main",
+                      children: [
+                        {
+                          name: "article",
+                          children: [
+                            {
+                              name: "heading",
+                              level: 1,
+                              children: [
+                                {
+                                  name: "#text",
+                                  content: "Welcome to Our Site",
+                                },
+                              ],
+                            },
+                            {
+                              name: "paragraph",
+                              children: [
+                                {
+                                  name: "#text",
+                                  content: "This is an example paragraph.",
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      name: "button",
+                      ariaPressed: "false",
+                      children: [{ name: "#text", content: "Click me" }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      let currentStep = 0;
+
+      // Render DOM tree recursively
+      function renderTree(nodes, container, type) {
+        container.innerHTML = "";
+        function createNodeEl(node) {
+          const li = document.createElement("li");
+
+          if (node.name === "#text") {
+            li.textContent = `"${node.content}" (text node)`;
+            li.style.fontStyle = "italic";
+            li.style.color = "#374151";
+          } else {
+            let text = `<${node.name}>`;
+            if (
+              type === "dom" &&
+              node.attrs &&
+              Object.keys(node.attrs).length
+            ) {
+              const attrSpan = document.createElement("span");
+              attrSpan.className = "attribute";
+              attrSpan.textContent =
+                " " +
+                Object.entries(node.attrs)
+                  .map(([k, v]) => `${k}="${v}"`)
+                  .join(" ");
+              li.appendChild(document.createTextNode(text));
+              li.appendChild(attrSpan);
+              text = "";
+            } else if (type === "access") {
+              if (node.role) text += ` (role="${node.role}")`;
+              if (node.ariaLabel) text += ` (aria-label="${node.ariaLabel}")`;
+              if (node.ariaPressed)
+                text += ` (aria-pressed="${node.ariaPressed}")`;
+              if (node.level) text += ` (level=${node.level})`;
+              li.textContent = text;
+            } else {
+              li.textContent = text;
+            }
+          }
+
+          if (node.children && node.children.length) {
+            const ul = document.createElement("ul");
+            ul.className = "tree";
+            node.children.forEach((child) =>
+              ul.appendChild(createNodeEl(child)),
+            );
+            li.appendChild(ul);
+          }
+          return li;
+        }
+        nodes.forEach((node) => container.appendChild(createNodeEl(node)));
+      }
+
+      function updateUI() {
+        const step = accessibilityDataSteps[currentStep];
+        renderTree(domData, domTreeEl, "dom");
+        renderTree(step.accessTree, accessTreeEl, "access");
+        descriptionsEl.textContent = step.desc;
+
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep === accessibilityDataSteps.length - 1;
+      }
+
+      prevBtn.addEventListener("click", () => {
+        if (currentStep > 0) {
+          currentStep--;
+          updateUI();
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (currentStep < accessibilityDataSteps.length - 1) {
+          currentStep++;
+          updateUI();
+        }
+      });
+
+      updateUI();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advanced CSS Concepts Interactive Presentation - Part 3</title>
+    <style>
+      /* Base styles */
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #121212;
+        color: #eee;
+        overflow-x: hidden;
+        user-select: none;
+      }
+      .container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 1rem 2rem;
+        background: #1e1e1e;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+        position: relative;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #f0a500;
+        margin-bottom: 0.5rem;
+      }
+      p {
+        line-height: 1.5;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+      code {
+        background: #333;
+        padding: 0.2em 0.4em;
+        border-radius: 4px;
+        font-family: monospace;
+        color: #f0a500;
+      }
+      /* Slide styles */
+      .slide {
+        display: none;
+        opacity: 0;
+        transform: translateX(50px);
+        transition: all 0.6s ease;
+      }
+      .slide.active {
+        display: block;
+        opacity: 1;
+        transform: translateX(0);
+      }
+      /* Navigation controls */
+      .nav-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      button {
+        background: #f0a500;
+        border: none;
+        color: #121212;
+        font-weight: bold;
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s ease;
+        user-select: none;
+      }
+      button:hover {
+        background: #d18e00;
+      }
+      button:disabled {
+        background: #555;
+        cursor: not-allowed;
+      }
+      /* Progress bar */
+      .progress-bar {
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        margin-top: 1rem;
+        overflow: hidden;
+      }
+      .progress-bar-inner {
+        height: 100%;
+        background: #f0a500;
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+      /* Utility CSS demo */
+      .demo-container {
+        background: #222;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 0 10px #00b894;
+        color: #eee;
+      }
+      .demo-button {
+        cursor: pointer;
+        font-weight: bold;
+        border-radius: 6px;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
+        user-select: none;
+        display: inline-block;
+        margin: 0.5rem 0;
+      }
+      /* Tailwind-like utility classes */
+      .bg-blue-500 {
+        background-color: #3b82f6;
+      }
+      .bg-red-500 {
+        background-color: #ef4444;
+      }
+      .text-white {
+        color: #fff;
+      }
+      .text-black {
+        color: #121212;
+      }
+      .font-bold {
+        font-weight: 700;
+      }
+      .py-2 {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      }
+      .px-4 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      .rounded {
+        border-radius: 0.25rem;
+      }
+      .text-center {
+        text-align: center;
+      }
+      /* Interactive controls */
+      .utility-controls {
+        margin-top: 1rem;
+      }
+      select,
+      label {
+        margin-right: 1rem;
+        font-size: 1rem;
+      }
+      /* Responsive */
+      @media (max-width: 600px) {
+        .container {
+          padding: 1rem;
+          margin: 1rem;
+        }
+        p {
+          font-size: 1rem;
+        }
+        button {
+          padding: 0.5rem 1rem;
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="container"
+      role="main"
+      aria-label="Advanced CSS Concepts Presentation Part 3"
+    >
+      <!-- Slide 7 -->
+      <section
+        class="slide active"
+        aria-live="polite"
+        aria-atomic="true"
+        id="slide-7"
+      >
+        <h1>Utility-First CSS Frameworks (e.g., Tailwind CSS)</h1>
+        <p>
+          Utility-first CSS frameworks provide many small, reusable classes that
+          apply single CSS properties.
+        </p>
+
+        <div class="demo-container" aria-label="Utility CSS demo">
+          <h3>Example Button with Utility Classes</h3>
+          <button
+            id="demoBtn"
+            class="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+          >
+            Click me
+          </button>
+
+          <div class="utility-controls" aria-label="Change button styles">
+            <label for="bgColor">Background Color:</label>
+            <select id="bgColor" aria-controls="demoBtn">
+              <option value="bg-blue-500" selected>Blue</option>
+              <option value="bg-red-500">Red</option>
+            </select>
+
+            <label for="textColor">Text Color:</label>
+            <select id="textColor" aria-controls="demoBtn">
+              <option value="text-white" selected>White</option>
+              <option value="text-black">Black</option>
+            </select>
+
+            <label for="fontWeight">Font Weight:</label>
+            <select id="fontWeight" aria-controls="demoBtn">
+              <option value="font-bold" selected>Bold</option>
+              <option value="">Normal</option>
+            </select>
+
+            <label for="rounded">Rounded Corners:</label>
+            <select id="rounded" aria-controls="demoBtn">
+              <option value="rounded" selected>Yes</option>
+              <option value="">No</option>
+            </select>
+          </div>
+
+          <p>
+            <strong>Explanation:</strong> Each class applies one style property.
+            Combining these classes creates the final design.
+          </p>
+        </div>
+
+        <h3>What makes Utility-First CSS powerful?</h3>
+        <ul>
+          <li>Small, composable classes for individual properties.</li>
+          <li>Rapid prototyping without writing custom CSS.</li>
+          <li>Predictable and low-specificity styles, easier overrides.</li>
+          <li>Encourages consistent design system usage.</li>
+        </ul>
+
+        <h3>Comparison with Traditional CSS</h3>
+        <pre><code>
+/* Traditional CSS */
+.btn {
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+
+/* Utility-first HTML */
+&lt;button class="bg-blue-500 text-white font-bold py-2 px-4 rounded"&gt;Click me&lt;/button&gt;
+    </code></pre>
+      </section>
+
+      <!-- Navigation -->
+      <div class="nav-buttons" role="navigation" aria-label="Slide navigation">
+        <button id="prevBtn" aria-label="Previous Slide">Previous</button>
+        <button id="playPauseBtn" aria-label="Play Presentation">Play</button>
+        <button id="nextBtn" aria-label="Next Slide">Next</button>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-bar" aria-hidden="true">
+        <div class="progress-bar-inner"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const slides = document.querySelectorAll(".slide");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const playPauseBtn = document.getElementById("playPauseBtn");
+        const progressBar = document.querySelector(".progress-bar-inner");
+        let current = 0;
+        let playing = false;
+        let timer = null;
+        const slideCount = slides.length;
+        const slideDuration = 10000; // 10 seconds per slide
+
+        function showSlide(index) {
+          slides.forEach((slide, i) => {
+            slide.classList.toggle("active", i === index);
+          });
+          current = index;
+          prevBtn.disabled = current === 0;
+          nextBtn.disabled = current === slideCount - 1;
+          updateProgress();
+        }
+
+        function nextSlide() {
+          if (current < slideCount - 1) {
+            showSlide(current + 1);
+          } else {
+            pausePresentation();
+          }
+        }
+
+        function prevSlide() {
+          if (current > 0) {
+            showSlide(current - 1);
+          }
+        }
+
+        function playPresentation() {
+          playing = true;
+          playPauseBtn.textContent = "Pause";
+          timer = setInterval(() => {
+            if (current < slideCount - 1) {
+              nextSlide();
+            } else {
+              pausePresentation();
+            }
+          }, slideDuration);
+        }
+
+        function pausePresentation() {
+          playing = false;
+          playPauseBtn.textContent = "Play";
+          clearInterval(timer);
+        }
+
+        function togglePlayPause() {
+          if (playing) {
+            pausePresentation();
+          } else {
+            playPresentation();
+          }
+        }
+
+        function updateProgress() {
+          const percent = ((current + 1) / slideCount) * 100;
+          progressBar.style.width = percent + "%";
+        }
+
+        // Event listeners for navigation
+        prevBtn.addEventListener("click", () => {
+          pausePresentation();
+          prevSlide();
+        });
+        nextBtn.addEventListener("click", () => {
+          pausePresentation();
+          nextSlide();
+        });
+        playPauseBtn.addEventListener("click", togglePlayPause);
+
+        // Keyboard navigation support
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowRight") {
+            pausePresentation();
+            nextSlide();
+          } else if (e.key === "ArrowLeft") {
+            pausePresentation();
+            prevSlide();
+          } else if (e.key === " ") {
+            e.preventDefault();
+            togglePlayPause();
+          }
+        });
+
+        // Initialize first slide
+        showSlide(0);
+
+        // Utility CSS demo controls
+        const demoBtn = document.getElementById("demoBtn");
+        const bgColorSelect = document.getElementById("bgColor");
+        const textColorSelect = document.getElementById("textColor");
+        const fontWeightSelect = document.getElementById("fontWeight");
+        const roundedSelect = document.getElementById("rounded");
+
+        function updateDemoButton() {
+          demoBtn.className = ""; // reset all classes
+          demoBtn.classList.add(bgColorSelect.value);
+          demoBtn.classList.add(textColorSelect.value);
+          if (fontWeightSelect.value)
+            demoBtn.classList.add(fontWeightSelect.value);
+          if (roundedSelect.value) demoBtn.classList.add(roundedSelect.value);
+        }
+
+        bgColorSelect.addEventListener("change", updateDemoButton);
+        textColorSelect.addEventListener("change", updateDemoButton);
+        fontWeightSelect.addEventListener("change", updateDemoButton);
+        roundedSelect.addEventListener("change", updateDemoButton);
+
+        updateDemoButton();
+      })();
+    </script>
+  </body>
+</html>

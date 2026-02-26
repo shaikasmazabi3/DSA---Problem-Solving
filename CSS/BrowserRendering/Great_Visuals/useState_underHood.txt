@@ -1,0 +1,72 @@
+Whenever I take a React interview, I start with one deceptively simple question:
+
+👉 “Walk me through what actually happens when you call setState (useState) in React.”
+
+Surprisingly, most developers struggle here — not because it’s hard, but because it requires conceptual clarity, not memorization.
+
+Here’s the real lifecycle of setState (useState) every React developer should understand 👇
+
+🔄 How setState (useState) Really Works in React
+
+1️⃣ Initial Render
+
+• useState(initialValue) runs
+• React stores the state internally
+• Component renders using this initial value
+
+2️⃣ State Update Is Triggered
+
+• setState(newValue) is called
+• Triggered by events, API responses, timers, or effects
+
+3️⃣ Update Is Scheduled (Not Immediate)
+
+• State does not update synchronously
+• React queues the update
+• Multiple updates may be batched for performance
+
+4️⃣ New State Is Calculated
+
+• Passing a value → replaces previous state
+• Passing a function → receives previous state
+• Functional updates prevent stale state bugs
+
+5️⃣ Re-render Phase
+
+• Component function executes again
+• useState now returns updated state
+• JSX is recalculated
+
+6️⃣ Reconciliation
+
+• React compares old vs new Virtual DOM
+• Determines the minimum UI changes
+
+7️⃣ Commit Phase
+
+• Only required changes hit the real DOM
+• UI updates become visible
+
+8️⃣ Effects Run
+
+• useEffect hooks execute after DOM updates
+• Effects depending on updated state are triggered
+
+9️⃣ Component Settles
+
+• Component waits for the next state or prop change
+• Cycle repeats on the next update
+
+🧠 Why interviewers love this question
+
+Because it tests whether you understand: • Asynchronous updates
+• Batching
+• Rendering vs committing
+• Virtual DOM & reconciliation
+• Effect timing
+
+This single explanation separates React users from React engineers.
+
+
+
+https://blog.isquaredsoftware.com/2020/05/blogged-answers-a-mostly-complete-guide-to-react-rendering-behavior/

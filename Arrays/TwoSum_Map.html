@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>twoSum Map Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f7fa;
+        color: #333;
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      h2 {
+        margin-bottom: 30px;
+        font-weight: 700;
+        font-size: 2rem;
+        color: #222;
+      }
+      #array {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 30px;
+        position: relative;
+      }
+      .box {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        position: relative;
+        transition: background-color 0.3s ease, opacity 0.3s ease;
+        user-select: none;
+      }
+      .pointer-label {
+        position: absolute;
+        top: -28px;
+        width: 50px;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 4px;
+        padding: 2px 4px;
+        user-select: none;
+      }
+      .pointer-i-label {
+        background-color: #ffcc00;
+        color: #5a4b00;
+        left: 0;
+      }
+      .pointer-i {
+        background-color: #fff4b8;
+        box-shadow: 0 0 8px 2px #ffcc00aa;
+      }
+      #mapContainer {
+        width: 100%;
+        max-width: 600px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+      #mapContainer h3 {
+        margin-top: 0;
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 15px;
+      }
+      .map-entry {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border-radius: 6px;
+        background-color: #e3f2fd;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #1565c0;
+      }
+      #info {
+        margin-bottom: 20px;
+        max-width: 600px;
+        text-align: center;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #222;
+        min-height: 28px;
+      }
+      #controls {
+        background: white;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px 20px;
+        justify-content: center;
+        max-width: 600px;
+        width: 100%;
+      }
+      #controls label {
+        flex: 1 0 120px;
+        align-self: center;
+        font-weight: 600;
+        color: #444;
+      }
+      #controls input[type="text"],
+      #controls input[type="number"] {
+        flex: 2 1 180px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1.5px solid #ccc;
+        font-size: 1rem;
+        transition: border-color 0.25s ease;
+      }
+      #controls input[type="text"]:focus,
+      #controls input[type="number"]:focus {
+        outline: none;
+        border-color: #0078d4;
+        box-shadow: 0 0 5px #0078d4aa;
+      }
+      #startBtn {
+        flex: 1 0 160px;
+        background-color: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      #startBtn:disabled {
+        background-color: #a0c4ff;
+        cursor: not-allowed;
+      }
+      #startBtn:hover:not(:disabled) {
+        background-color: #005ea2;
+      }
+      @media (max-width: 480px) {
+        #controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        #controls label,
+        #controls input,
+        #startBtn {
+          flex: none;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>twoSum Map Visualization</h2>
+
+    <div id="array"></div>
+
+    <div id="mapContainer">
+      <h3>Map Contents (value → index)</h3>
+      <div id="mapEntries"></div>
+    </div>
+
+    <div id="info"></div>
+
+    <div id="controls">
+      <label for="inputArray">Array (comma separated):</label>
+      <input type="text" id="inputArray" value="2,6,5,8" autocomplete="off" />
+
+      <label for="inputTarget">Target sum:</label>
+      <input type="number" id="inputTarget" value="14" autocomplete="off" />
+
+      <button id="startBtn">Start Visualization</button>
+    </div>
+
+    <script>
+      const arrayContainer = document.getElementById("array");
+      const mapEntriesContainer = document.getElementById("mapEntries");
+      const info = document.getElementById("info");
+      const startBtn = document.getElementById("startBtn");
+      const inputArray = document.getElementById("inputArray");
+      const inputTarget = document.getElementById("inputTarget");
+
+      function renderArray(arr, currentIndex = -1) {
+        arrayContainer.innerHTML = "";
+        arr.forEach((val, idx) => {
+          const box = document.createElement("div");
+          box.className = "box";
+          box.textContent = val;
+          if (idx === currentIndex) {
+            box.classList.add("pointer-i");
+            const label = document.createElement("div");
+            label.textContent = "i";
+            label.className = "pointer-label pointer-i-label";
+            box.appendChild(label);
+          }
+          arrayContainer.appendChild(box);
+        });
+      }
+
+      function renderMap(map) {
+        mapEntriesContainer.innerHTML = "";
+        if (map.size === 0) {
+          mapEntriesContainer.textContent = "Map is empty.";
+          return;
+        }
+        for (const [key, value] of map.entries()) {
+          const entry = document.createElement("div");
+          entry.className = "map-entry";
+          entry.textContent = `Key: ${key} → Value: ${value}`;
+          mapEntriesContainer.appendChild(entry);
+        }
+      }
+
+      function delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      async function visualizeTwoSum(arr, target) {
+        startBtn.disabled = true;
+        info.textContent = "";
+        let map = new Map();
+
+        for (let i = 0; i < arr.length; i++) {
+          renderArray(arr, i);
+          const expected = target - arr[i];
+          info.textContent = `Checking if map has complement ${expected} for arr[${i}] = ${arr[i]}`;
+
+          renderMap(map);
+          await delay(1500);
+
+          if (map.has(expected)) {
+            info.textContent = `Found complement! arr[${map.get(
+              expected
+            )}] = ${expected} and arr[${i}] = ${arr[i]} sum to ${target}`;
+            renderMap(map);
+            renderArray(arr, i);
+            startBtn.disabled = false;
+            return [map.get(expected), i];
+          } else {
+            info.textContent = `Complement not found. Storing arr[${i}] = ${arr[i]} in the map.`;
+            map.set(arr[i], i);
+            renderMap(map);
+            await delay(1500);
+          }
+        }
+
+        info.textContent = "No pair found with the target sum.";
+        startBtn.disabled = false;
+        return null;
+      }
+
+      startBtn.addEventListener("click", async () => {
+        const arr = inputArray.value
+          .split(",")
+          .map((v) => parseInt(v.trim()))
+          .filter((v) => !isNaN(v));
+        const target = parseInt(inputTarget.value);
+
+        if (arr.length < 2) {
+          alert("Please enter at least two numbers in the array.");
+          return;
+        }
+        if (isNaN(target)) {
+          alert("Please enter a valid target number.");
+          return;
+        }
+
+        await visualizeTwoSum(arr, target);
+      });
+
+      // Initial render
+      renderArray([]);
+      renderMap(new Map());
+    </script>
+  </body>
+</html>

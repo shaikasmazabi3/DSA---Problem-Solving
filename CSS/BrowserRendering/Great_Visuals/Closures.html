@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JavaScript Closures & Garbage Collection Visualized 🌟</title>
+<style>
+  /* Reset */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f8ff;
+    color: #222;
+    margin: 0;
+    overflow-x: hidden;
+    line-height: 1.5;
+  }
+  h1, h2, h3 {
+    margin-top: 0;
+  }
+  main {
+    max-width: 900px;
+    margin: 2rem auto 4rem;
+    padding: 0 1rem;
+  }
+  .slide {
+    display: none;
+    animation: fadein 0.6s ease forwards;
+  }
+  .slide.active {
+    display: block;
+  }
+  @keyframes fadein {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+  /* Navigation */
+  nav {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    gap: 1rem;
+  }
+  button {
+    background: #007acc;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:disabled {
+    background: #cccccc;
+    cursor: default;
+  }
+  button:hover:not(:disabled) {
+    background: #005fa3;
+  }
+  /* Code styling */
+  pre {
+    background: #282c34;
+    color: #abb2bf;
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 1rem;
+    margin: 1rem 0;
+  }
+  code {
+    font-family: 'Source Code Pro', monospace, monospace;
+  }
+  /* Visual diagram containers */
+  .diagram {
+    margin: 1rem 0 2rem;
+    position: relative;
+    user-select: none;
+  }
+  .box {
+    border: 3px solid #007acc;
+    border-radius: 10px;
+    padding: 1rem;
+    background: #e6f0ff;
+    box-shadow: 0 0 6px rgba(0,122,204,0.3);
+    position: relative;
+    transition: box-shadow 0.3s ease;
+  }
+  .box.highlight {
+    box-shadow: 0 0 12px 3px #ff9900;
+    border-color: #ff9900;
+  }
+  .box-title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #004a99;
+  }
+  .arrow {
+    position: absolute;
+    width: 60px;
+    height: 2px;
+    background: #007acc;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%);
+  }
+  .arrow::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-left-color: #007acc;
+  }
+  /* Interactive parts */
+  .clickable {
+    cursor: pointer;
+    color: #004a99;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+  .clickable:hover, .clickable:focus {
+    color: #ff9900;
+    outline: none;
+  }
+  /* Quiz styling */
+  .quiz {
+    background: #fff9e6;
+    border: 2px solid #ffcc00;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+  .quiz button {
+    background: #ffcc00;
+    color: #333;
+    margin-top: 0.5rem;
+  }
+  .quiz-feedback {
+    margin-top: 0.5rem;
+    font-weight: bold;
+  }
+  .correct {
+    color: green;
+  }
+  .incorrect {
+    color: red;
+  }
+  /* Animations for GC and Memoization */
+  .memory-box {
+    border: 2px dashed #007acc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    background: #d9eaff;
+    position: relative;
+    min-height: 80px;
+  }
+  .memory-box h4 {
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+  }
+  .memory-item {
+    background: #007acc;
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    display: inline-block;
+    margin: 0.2rem 0.3rem 0.2rem 0;
+    font-size: 0.9rem;
+    user-select: none;
+    transition: opacity 0.5s ease;
+  }
+  .memory-item.removed {
+    opacity: 0.3;
+    text-decoration: line-through;
+  }
+  /* Progress bars for performance */
+  .progress-bar {
+    background: #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 18px;
+    margin: 0.5rem 0 1rem;
+  }
+  .progress-fill {
+    background: #007acc;
+    height: 100%;
+    width: 0%;
+    transition: width 1.2s ease;
+  }
+  /* Accessibility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    border: 0;
+  }
+</style>
+</head>
+<body>
+<main role="main" aria-label="JavaScript Closures and Garbage Collection Interactive Lesson">
+
+<h1>JavaScript Closures & Garbage Collection Visualized 🌟</h1>
+<p>Welcome! Let's explore how <strong>closures</strong> work in JavaScript, understand the <em>scope chain</em>, <em>execution contexts</em>, and see how <em>garbage collection</em> and <em>memoization</em> help your code run efficiently.</p>
+
+<section id="slides-container" aria-live="polite">
+
+<!-- Slide 1 -->
+<article class="slide active" id="slide-1" tabindex="0" aria-label="Introduction to Closures">
+  <h2>What is a Closure? 🤔</h2>
+  <p>Imagine a <strong>closure</strong> as a magic backpack 🎒 that a function carries around. It keeps the variables it needs safe, even after the function has finished running!</p>
+  <p>In JavaScript, a closure lets an <em>inner function</em> remember and access variables from an <em>outer function</em>, even when the outer function is done.</p>
+  <p><strong>Example:</strong></p>
+  <pre><code>function outer() {
+  let secret = "🎉 Surprise!";
+  function inner() {
+    console.log(secret);
+  }
+  return inner;
+}
+const magic = outer();
+magic(); // What will this print?</code></pre>
+  <button aria-expanded="false" aria-controls="slide1-answer" class="toggle-answer-btn">Show answer</button>
+  <div id="slide1-answer" hidden>
+    <p><strong>Answer:</strong> It prints <code>🎉 Surprise!</code> because the inner function remembers the <code>secret</code> variable from the outer function's scope!</p>
+  </div>
+</article>
+
+<!-- Slide 2 -->
+<article class="slide" id="slide-2" tabindex="0" aria-label="Execution Contexts and Lexical Environment">
+  <h2>Execution Contexts & Lexical Environment ⚙️</h2>
+  <p>Every time a function runs, JavaScript creates an <strong>execution context</strong> — like a workspace 🛠️ where variables and functions live while running.</p>
+  <p>Inside this workspace, there's a <strong>Lexical Environment</strong> — think of it as a box 📦 holding all variables and functions defined in that function.</p>
+  <p>When functions are nested, each has its own Lexical Environment but can also access the outer ones — this is called the <em>scope chain</em>.</p>
+  
+  <div class="diagram" aria-label="Diagram showing outer and inner execution contexts and their lexical environments">
+    <div class="box" id="outer-context" tabindex="0" aria-describedby="outer-desc">
+      <div class="box-title">Outer Execution Context</div>
+      <div>Lexical Environment:</div>
+      <ul>
+        <li>secret = "🎉 Surprise!"</li>
+        <li>inner = function</li>
+      </ul>
+    </div>
+    <div class="arrow" style="top: 40%; left: 50%;"></div>
+    <div class="box" id="inner-context" tabindex="0" aria-describedby="inner-desc" style="margin-top: 1rem;">
+      <div class="box-title">Inner Execution Context</div>
+      <div>Lexical Environment:</div>
+      <ul>
+        <li>Access to <em>secret</em> from outer</li>
+      </ul>
+    </div>
+  </div>
+  <p>Click the boxes to highlight their variables and see how the inner function accesses the outer scope!</p>
+</article>
+
+<!-- Slide 3 -->
+<article class="slide" id="slide-3" tabindex="0" aria-label="Scope Chain and Closure Visualization">
+  <h2>Scope Chain & Closure Visualized 🔗</h2>
+  <p>Let's see how the scope chain works in a closure with an interactive diagram.</p>
+  <div class="diagram" aria-label="Interactive closure scope chain diagram">
+    <svg id="scope-chain-svg" width="600" height="300" role="img" aria-labelledby="scopeChainTitle" tabindex="0" style="border: 1px solid #007acc; border-radius: 12px; background: #e6f0ff;">
+      <title id="scopeChainTitle">Closure scope chain visualization</title>
+      <!-- Outer function box -->
+      <rect id="outerBox" x="50" y="50" width="200" height="120" fill="#007acc" rx="15" ry="15" />
+      <text x="150" y="80" text-anchor="middle" fill="#fff" font-weight="bold" font-size="18">Outer Function</text>
+      <text id="outerVar" x="150" y="110" text-anchor="middle" fill="#cce4ff" font-size="14">secret = "🎉 Surprise!"</text>
+      <text id="outerInnerFn" x="150" y="140" text-anchor="middle" fill="#cce4ff" font-size="14">inner()</text>
+      
+      <!-- Arrow to inner -->
+      <line x1="250" y1="110" x2="350" y2="110" stroke="#007acc" stroke-width="3" marker-end="url(#arrowhead)" />
+      
+      <!-- Inner function box -->
+      <rect id="innerBox" x="350" y="50" width="200" height="120" fill="#ff9900" rx="15" ry="15" />
+      <text x="450" y="80" text-anchor="middle" fill="#fff" font-weight="bold" font-size="18">Inner Function</text>
+      <text id="innerVar" x="450" y="110" text-anchor="middle" fill="#ffe0b3" font-size="14">Accesses secret</text>
+      <text id="innerConsole" x="450" y="140" text-anchor="middle" fill="#ffe0b3" font-size="14">console.log(secret)</text>
+      
+      <!-- Scope chain line -->
+      <line id="scopeChainLine" x1="450" y1="170" x2="150" y2="170" stroke="#ff9900" stroke-width="2" stroke-dasharray="5,5" />
+      
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+          refX="10" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#007acc" />
+        </marker>
+      </defs>
+    </svg>
+  </div>
+  <p>Hover over the <span class="clickable" tabindex="0" role="button" aria-pressed="false" id="toggleOuter">Outer Function</span> or <span class="clickable" tabindex="0" role="button" aria-pressed="false" id="toggleInner">Inner Function</span> boxes to highlight variables and scope chain.</p>
+</article>
+
+<!-- Slide 4 -->
+<article class="slide" id="slide-4" tabindex="0" aria-label="Garbage Collection in JavaScript">
+  <h2>Garbage Collection ♻️</h2>
+  <p>JavaScript automatically cleans up memory by removing variables and functions that are no longer needed — this is called <strong>garbage collection</strong>.</p>
+  <p>Closures can keep variables alive longer because the inner function holds a reference to the outer function's variables.</p>
+  <div class="memory-box" aria-label="Memory box showing variables and garbage collection">
+    <h4>Memory Box</h4>
+    <div id="memoryItems">
+      <span class="memory-item" id="secretVar">secret = "🎉 Surprise!"</span>
+      <span class="memory-item" id="innerFn">inner function</span>
+      <span class="memory-item" id="outerFn">outer function (finished)</span>
+    </div>
+  </div>
+  <button id="gcBtn" aria-live="polite">Run Garbage Collection</button>
+  <p id="gcStatus" aria-live="polite"></p>
+  <p>Watch how variables are removed or kept based on references!</p>
+</article>
+
+<!-- Slide 5 -->
+<article class="slide" id="slide-5" tabindex="0" aria-label="JavaScript Memoization Explained">
+  <h2>Memoization 💾</h2>
+  <p>Memoization is like a magic notebook 📓 where your function writes down answers to problems it already solved, so it doesn’t have to do the work again!</p>
+  <p>This speeds up your code by <em>caching</em> results.</p>
+  <pre><code>function memoize(fn) {
+  const cache = {};
+  return function(arg) {
+    if (cache[arg]) {
+      console.log("⚡ From cache!");
+      return cache[arg];
+    }
+    const result = fn(arg);
+    cache[arg] = result;
+    return result;
+  };
+}
+
+const square = memoize(x =&gt; x * x);
+console.log(square(4)); // Calculates and caches
+console.log(square(4)); // Returns cached result</code></pre>
+  <div class="memory-box" aria-label="Memoization cache visualization" style="min-height: 100px;">
+    <h4>Cache</h4>
+    <div id="memoCache"></div>
+  </div>
+  <button id="memoBtn">Run Memoized Function</button>
+</article>
+
+<!-- Slide 6 -->
+<article class="slide" id="slide-6" tabindex="0" aria-label="Quiz on Closures">
+  <h2>Quiz Time! 🎉</h2>
+  <p>Which statement is true about closures?</p>
+  <div class="quiz" role="radiogroup" aria-labelledby="quiz1-label">
+    <label><input type="radio" name="quiz1" value="a" /> Closures allow inner functions to access variables of outer functions even after they finish.</label><br/>
+    <label><input type="radio" name="quiz1" value="b" /> Closures delete all variables after the outer function finishes.</label><br/>
+    <label><input type="radio" name="quiz1" value="c" /> Closures only work with global variables.</label>
+  </div>
+  <button id="quiz1-submit">Submit Answer</button>
+  <p id="quiz1-feedback" aria-live="polite"></p>
+</article>
+
+</section>
+
+<nav aria-label="Slide navigation">
+  <button id="prevBtn" aria-label="Previous slide" disabled>⬅️ Prev</button>
+  <button id="nextBtn" aria-label="Next slide">Next ➡️</button>
+</nav>
+
+</main>
+
+<script>
+  // Slide navigation logic
+  const slides = document.querySelectorAll('.slide');
+  let currentSlide = 0;
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === index);
+      if(i === index) slide.focus();
+    });
+    currentSlide = index;
+    prevBtn.disabled = index === 0;
+    nextBtn.disabled = index === slides.length -1;
+  }
+
+  prevBtn.addEventListener('click', () => {
+    if(currentSlide > 0) showSlide(currentSlide - 1);
+  });
+  nextBtn.addEventListener('click', () => {
+    if(currentSlide < slides.length -1) showSlide(currentSlide + 1);
+  });
+
+  // Keyboard navigation for slides: left/right arrows
+  document.addEventListener('keydown', e => {
+    if(e.key === 'ArrowRight' && currentSlide < slides.length -1) {
+      showSlide(currentSlide + 1);
+    }
+    else if(e.key === 'ArrowLeft' && currentSlide > 0) {
+      showSlide(currentSlide - 1);
+    }
+  });
+
+  // Toggle answer on Slide 1
+  const toggleBtn = document.querySelector('#slide-1 .toggle-answer-btn');
+  const answerDiv = document.getElementById('slide1-answer');
+  toggleBtn.addEventListener('click', () => {
+    const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+    toggleBtn.setAttribute('aria-expanded', !expanded);
+    if(answerDiv.hidden) {
+      answerDiv.hidden = false;
+      toggleBtn.textContent = 'Hide answer';
+    } else {
+      answerDiv.hidden = true;
+      toggleBtn.textContent = 'Show answer';
+    }
+  });
+
+  // Slide 2 interactive boxes highlighting
+  const outerContext = document.getElementById('outer-context');
+  const innerContext = document.getElementById('inner-context');
+  outerContext.addEventListener('click', () => {
+    outerContext.classList.toggle('highlight');
+    innerContext.classList.remove('highlight');
+  });
+  innerContext.addEventListener('click', () => {
+    innerContext.classList.toggle('highlight');
+    outerContext.classList.remove('highlight');
+  });
+
+  // Slide 3 scope chain hover interactive
+  const outerBox = document.getElementById('outerBox');
+  const innerBox = document.getElementById('innerBox');
+  const scopeChainLine = document.getElementById('scopeChainLine');
+  const toggleOuter = document.getElementById('toggleOuter');
+  const toggleInner = document.getElementById('toggleInner');
+
+  function highlightOuter(on) {
+    if(on) {
+      outerBox.setAttribute('fill', '#005fa3');
+      outerBox.style.filter = 'drop-shadow(0 0 8px #ff9900)';
+      scopeChainLine.setAttribute('stroke', '#ff9900');
+      scopeChainLine.setAttribute('stroke-width', '3');
+      toggleOuter.setAttribute('aria-pressed', 'true');
+    } else {
+      outerBox.setAttribute('fill', '#007acc');
+      outerBox.style.filter = 'none';
+      scopeChainLine.setAttribute('stroke', '#ff9900');
+      scopeChainLine.setAttribute('stroke-width', '2');
+      toggleOuter.setAttribute('aria-pressed', 'false');
+    }
+  }
+  function highlightInner(on) {
+    if(on) {
+      innerBox.setAttribute('fill', '#cc7a00');
+      innerBox.style.filter = 'drop-shadow(0 0 8px #ff9900)';
+      scopeChainLine.setAttribute('stroke', '#ff9900');
+      scopeChainLine.setAttribute('stroke-width', '3');
+      toggleInner.setAttribute('aria-pressed', 'true');
+    } else {
+      innerBox.setAttribute('fill', '#ff9900');
+      innerBox.style.filter = 'none';
+      scopeChainLine.setAttribute('stroke', '#ff9900');
+      scopeChainLine.setAttribute('stroke-width', '2');
+      toggleInner.setAttribute('aria-pressed', 'false');
+    }
+  }
+
+  outerBox.addEventListener('mouseenter', () => highlightOuter(true));
+  outerBox.addEventListener('mouseleave', () => highlightOuter(false));
+  innerBox.addEventListener('mouseenter', () => highlightInner(true));
+  innerBox.addEventListener('mouseleave', () => highlightInner(false));
+  toggleOuter.addEventListener('click', () => {
+    const pressed = toggleOuter.getAttribute('aria-pressed') === 'true';
+    highlightOuter(!pressed);
+  });
+  toggleInner.addEventListener('click', () => {
+    const pressed = toggleInner.getAttribute('aria-pressed') === 'true';
+    highlightInner(!pressed);
+  });
+
+  // Slide 4 Garbage Collection simulation
+  const gcBtn = document.getElementById('gcBtn');
+  const gcStatus = document.getElementById('gcStatus');
+  const secretVar = document.getElementById('secretVar');
+  const innerFn = document.getElementById('innerFn');
+  const outerFn = document.getElementById('outerFn');
+
+  let gcRunCount = 0;
+  gcBtn.addEventListener('click', () => {
+    gcRunCount++;
+    if(gcRunCount === 1) {
+      // First GC: outer function finished but inner holds reference, so secret stays
+      gcStatus.textContent = "Garbage Collection run: Outer function finished, but 'secret' and 'inner function' are still kept because inner function references them.";
+      secretVar.classList.remove('removed');
+      innerFn.classList.remove('removed');
+      outerFn.classList.add('removed');
+    } else if(gcRunCount === 2) {
+      // Second GC: inner function reference removed, secret can be collected
+      gcStatus.textContent = "Garbage Collection run: Inner function reference removed, so 'secret' variable is now collected (removed from memory).";
+      secretVar.classList.add('removed');
+      innerFn.classList.add('removed');
+    } else {
+      gcStatus.textContent = "Garbage Collection complete. Refresh page to reset.";
+      gcBtn.disabled = true;
+    }
+  });
+
+  // Slide 5 Memoization simulation
+  const memoCache = document.getElementById('memoCache');
+  const memoBtn = document.getElementById('memoBtn');
+
+  function memoize(fn) {
+    const cache = {};
+    return function(arg) {
+      if(cache[arg]) {
+        addCacheItem(arg, true);
+        return cache[arg];
+      }
+      const result = fn(arg);
+      cache[arg] = result;
+      addCacheItem(arg, false);
+      return result;
+    };
+  }
+
+  function addCacheItem(key, fromCache) {
+    const span = document.createElement('span');
+    span.className = 'memory-item';
+    span.textContent = `Input: ${key} ${fromCache ? '⚡ (from cache)' : '(calculated)'}`;
+    memoCache.appendChild(span);
+  }
+
+  const square = memoize(x => x * x);
+
+  memoBtn.addEventListener('click', () => {
+    const inputs = [4, 4, 5];
+    const input = inputs[Math.floor(Math.random() * inputs.length)];
+    console.log(square(input));
+    square(input);
+  });
+
+  // Slide 6 Quiz logic
+  const quiz1Submit = document.getElementById('quiz1-submit');
+  const quiz1Feedback = document.getElementById('quiz1-feedback');
+
+  quiz1Submit.addEventListener('click', () => {
+    const options = document.querySelectorAll('input[name="quiz1"]');
+    let selected = null;
+    options.forEach(opt => { if(opt.checked) selected = opt.value; });
+    if(!selected) {
+      quiz1Feedback.textContent = "Please select an answer before submitting.";
+      quiz1Feedback.className = 'quiz-feedback incorrect';
+      return;
+    }
+    if(selected === 'a') {
+      quiz1Feedback.textContent = "Correct! Closures allow inner functions to access outer variables even after the outer function finishes.";
+      quiz1Feedback.className = 'quiz-feedback correct';
+    } else {
+      quiz1Feedback.textContent = "Oops! That's not right. Try again.";
+      quiz1Feedback.className = 'quiz-feedback incorrect';
+    }
+  });
+
+</script>
+
+</body>
+</html>

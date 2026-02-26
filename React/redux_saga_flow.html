@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Enhanced Redux Saga Architecture & Flow Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 20px;
+        background: #f9fafb;
+        color: #222;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+      #container {
+        display: flex;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      #diagram {
+        flex: 1;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        background: white;
+        padding: 20px;
+        margin-right: 30px;
+        position: relative;
+      }
+      svg {
+        width: 100%;
+        height: 650px;
+      }
+      .box {
+        fill: #007acc;
+        stroke: #005fa3;
+        stroke-width: 2;
+        rx: 12;
+        ry: 12;
+        cursor: pointer;
+        transition: fill 0.3s ease, filter 0.3s ease;
+      }
+      .box.highlight {
+        fill: #66b3ff;
+        filter: drop-shadow(0 0 8px #66b3ff);
+      }
+      .box-label {
+        fill: white;
+        font-size: 18px;
+        font-weight: 600;
+        pointer-events: none;
+        user-select: none;
+      }
+      .tooltip {
+        position: absolute;
+        background: #007acc;
+        color: white;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
+        z-index: 10;
+      }
+      .arrow {
+        stroke: #007acc;
+        stroke-width: 4;
+        marker-end: url(#arrowhead);
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
+      }
+      .arrow.highlight {
+        opacity: 1;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          stroke-width: 4;
+          opacity: 1;
+        }
+        50% {
+          stroke-width: 6;
+          opacity: 0.7;
+        }
+      }
+      #steps {
+        flex: 1;
+        max-width: 520px;
+        overflow-y: auto;
+        max-height: 650px;
+      }
+      .step {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+        padding: 16px;
+        margin-bottom: 18px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      .step:hover {
+        background: #e6f0ff;
+      }
+      .step.active {
+        border-left: 6px solid #007acc;
+        background: #cce4ff;
+      }
+      .step-title {
+        font-weight: 700;
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+      pre {
+        background: #272822;
+        color: #f8f8f2;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        overflow-x: auto;
+        user-select: text;
+      }
+      #navButtons {
+        text-align: center;
+        margin-top: 12px;
+      }
+      button {
+        background: #007acc;
+        border: none;
+        color: white;
+        padding: 10px 18px;
+        font-size: 16px;
+        border-radius: 8px;
+        margin: 0 10px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 122, 204, 0.5);
+        transition: background 0.3s ease;
+      }
+      button:disabled {
+        background: #a3c9ff;
+        cursor: default;
+        box-shadow: none;
+      }
+      button:hover:not(:disabled) {
+        background: #005fa3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Enhanced Redux Saga Architecture & Flow Visualization</h1>
+
+    <div id="container">
+      <div id="diagram">
+        <svg
+          viewBox="0 0 900 650"
+          aria-label="Redux Saga Architecture Diagram"
+          role="img"
+        >
+          <!-- Boxes -->
+          <rect
+            id="store"
+            class="box"
+            x="50"
+            y="270"
+            width="160"
+            height="100"
+          />
+          <text
+            x="130"
+            y="320"
+            class="box-label"
+            text-anchor="middle"
+            alignment-baseline="middle"
+          >
+            Redux Store
+          </text>
+
+          <rect
+            id="middleware"
+            class="box"
+            x="300"
+            y="270"
+            width="180"
+            height="100"
+          />
+          <text
+            x="390"
+            y="320"
+            class="box-label"
+            text-anchor="middle"
+            alignment-baseline="middle"
+          >
+            Saga Middleware
+          </text>
+
+          <rect
+            id="watcher"
+            class="box"
+            x="600"
+            y="170"
+            width="220"
+            height="80"
+          />
+          <text
+            x="710"
+            y="210"
+            class="box-label"
+            text-anchor="middle"
+            alignment-baseline="middle"
+          >
+            Watcher Saga
+          </text>
+
+          <rect
+            id="worker"
+            class="box"
+            x="600"
+            y="370"
+            width="220"
+            height="80"
+          />
+          <text
+            x="710"
+            y="410"
+            class="box-label"
+            text-anchor="middle"
+            alignment-baseline="middle"
+          >
+            Worker Saga
+          </text>
+
+          <rect
+            id="effects"
+            class="box"
+            x="600"
+            y="500"
+            width="220"
+            height="80"
+          />
+          <text
+            x="710"
+            y="540"
+            class="box-label"
+            text-anchor="middle"
+            alignment-baseline="middle"
+          >
+            Saga Effects
+          </text>
+
+          <!-- Arrows -->
+          <line
+            id="arrow-store-middleware"
+            class="arrow"
+            x1="210"
+            y1="320"
+            x2="300"
+            y2="320"
+          />
+          <line
+            id="arrow-middleware-watcher"
+            class="arrow"
+            x1="480"
+            y1="310"
+            x2="600"
+            y2="210"
+          />
+          <line
+            id="arrow-watcher-worker"
+            class="arrow"
+            x1="720"
+            y1="250"
+            x2="720"
+            y2="370"
+          />
+          <line
+            id="arrow-worker-middleware"
+            class="arrow"
+            x1="600"
+            y1="410"
+            x2="480"
+            y2="410"
+          />
+          <line
+            id="arrow-middleware-store"
+            class="arrow"
+            x1="480"
+            y1="370"
+            x2="210"
+            y2="370"
+          />
+          <line
+            id="arrow-worker-effects"
+            class="arrow"
+            x1="720"
+            y1="450"
+            x2="720"
+            y2="500"
+          />
+
+          <defs>
+            <marker
+              id="arrowhead"
+              markerWidth="10"
+              markerHeight="7"
+              refX="10"
+              refY="3.5"
+              orient="auto"
+            >
+              <polygon points="0 0, 10 3.5, 0 7" fill="#007acc" />
+            </marker>
+          </defs>
+        </svg>
+
+        <div id="tooltip" class="tooltip"></div>
+      </div>
+
+      <div id="steps">
+        <div
+          class="step active"
+          data-step="0"
+          data-highlight="store"
+          data-arrow=""
+        >
+          <div class="step-title">Redux Store</div>
+          <p>
+            The Redux store holds the application state and dispatches actions.
+          </p>
+          <pre><code>const store = createStore(reducer, applyMiddleware(sagaMiddleware));</code></pre>
+        </div>
+
+        <div
+          class="step"
+          data-step="1"
+          data-highlight="middleware"
+          data-arrow="arrow-store-middleware arrow-middleware-store"
+        >
+          <div class="step-title">Saga Middleware</div>
+          <p>
+            The saga middleware intercepts dispatched actions and forwards them
+            to sagas.
+          </p>
+          <pre><code>const sagaMiddleware = createSagaMiddleware();
+const store = createStore(
+  reducer,
+  applyMiddleware(sagaMiddleware)
+);
+sagaMiddleware.run(rootSaga);</code></pre>
+        </div>
+
+        <div
+          class="step"
+          data-step="2"
+          data-highlight="watcher"
+          data-arrow="arrow-middleware-watcher"
+        >
+          <div class="step-title">Watcher Saga</div>
+          <p>
+            Watcher sagas listen for specific actions and trigger worker sagas.
+          </p>
+          <pre><code>function* watchFetchData() {
+  yield takeEvery('FETCH_REQUESTED', fetchData);
+}</code></pre>
+        </div>
+
+        <div
+          class="step"
+          data-step="3"
+          data-highlight="worker"
+          data-arrow="arrow-watcher-worker arrow-worker-middleware"
+        >
+          <div class="step-title">Worker Saga</div>
+          <p>
+            Worker sagas perform async tasks like API calls and dispatch
+            success/failure actions.
+          </p>
+          <pre><code>function* fetchData(action) {
+  try {
+    const data = yield call(Api.fetchUser, action.payload.userId);
+    yield put({ type: 'FETCH_SUCCEEDED', data });
+  } catch (e) {
+    yield put({ type: 'FETCH_FAILED', message: e.message });
+  }
+}</code></pre>
+        </div>
+
+        <div
+          class="step"
+          data-step="4"
+          data-highlight="effects"
+          data-arrow="arrow-worker-effects"
+        >
+          <div class="step-title">Saga Effects</div>
+          <p>
+            Core effects like <code>call</code>, <code>put</code>,
+            <code>take</code>, and <code>fork</code> control the saga flow
+            declaratively.
+          </p>
+          <pre><code>yield call(api.fetchData);
+yield put({ type: 'ACTION_TYPE' });
+yield take('ACTION_TYPE');
+yield fork(workerSaga);</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="navButtons">
+      <button id="prevBtn" disabled>Previous</button>
+      <button id="nextBtn">Next</button>
+    </div>
+
+    <script>
+      const steps = document.querySelectorAll("#steps .step");
+      const boxes = {
+        store: document.getElementById("store"),
+        middleware: document.getElementById("middleware"),
+        watcher: document.getElementById("watcher"),
+        worker: document.getElementById("worker"),
+        effects: document.getElementById("effects"),
+      };
+      const arrows = {
+        "arrow-store-middleware": document.getElementById(
+          "arrow-store-middleware"
+        ),
+        "arrow-middleware-watcher": document.getElementById(
+          "arrow-middleware-watcher"
+        ),
+        "arrow-watcher-worker": document.getElementById("arrow-watcher-worker"),
+        "arrow-worker-middleware": document.getElementById(
+          "arrow-worker-middleware"
+        ),
+        "arrow-middleware-store": document.getElementById(
+          "arrow-middleware-store"
+        ),
+        "arrow-worker-effects": document.getElementById("arrow-worker-effects"),
+      };
+
+      let currentStep = 0;
+
+      // Tooltip handling
+      const tooltip = document.getElementById("tooltip");
+      const diagram = document.getElementById("diagram");
+      const tooltipTexts = {
+        store:
+          "The Redux store holds the application state and dispatches actions.",
+        middleware:
+          "The saga middleware intercepts dispatched actions and forwards them to sagas.",
+        watcher:
+          "Watcher sagas listen for specific actions and trigger worker sagas.",
+        worker:
+          "Worker sagas perform async tasks like API calls and dispatch success/failure actions.",
+        effects:
+          "Saga effects like call, put, take, fork control the saga flow declaratively.",
+      };
+
+      Object.entries(boxes).forEach(([key, box]) => {
+        box.addEventListener("mousemove", (e) => {
+          tooltip.style.left = e.pageX + 15 + "px";
+          tooltip.style.top = e.pageY + 15 + "px";
+          tooltip.textContent = tooltipTexts[key];
+          tooltip.style.opacity = "1";
+        });
+        box.addEventListener("mouseleave", () => {
+          tooltip.style.opacity = "0";
+        });
+      });
+
+      function updateVisualization() {
+        steps.forEach((step, i) => {
+          step.classList.toggle("active", i === currentStep);
+        });
+
+        // Remove highlight from all boxes and arrows
+        Object.values(boxes).forEach((box) =>
+          box.classList.remove("highlight")
+        );
+        Object.values(arrows).forEach((arrow) =>
+          arrow.classList.remove("highlight")
+        );
+
+        // Highlight current step boxes
+        const highlightBox = steps[currentStep].dataset.highlight;
+        if (highlightBox && boxes[highlightBox]) {
+          boxes[highlightBox].classList.add("highlight");
+        }
+
+        // Highlight arrows for current step
+        const arrowIds = steps[currentStep].dataset.arrow
+          .split(" ")
+          .filter((id) => id.length);
+        arrowIds.forEach((id) => {
+          if (arrows[id]) arrows[id].classList.add("highlight");
+        });
+
+        // Enable/disable nav buttons
+        document.getElementById("prevBtn").disabled = currentStep === 0;
+        document.getElementById("nextBtn").disabled =
+          currentStep === steps.length - 1;
+      }
+
+      document.getElementById("prevBtn").addEventListener("click", () => {
+        if (currentStep > 0) {
+          currentStep--;
+          updateVisualization();
+          scrollStepIntoView();
+        }
+      });
+
+      document.getElementById("nextBtn").addEventListener("click", () => {
+        if (currentStep < steps.length - 1) {
+          currentStep++;
+          updateVisualization();
+          scrollStepIntoView();
+        }
+      });
+
+      // Allow clicking step to jump
+      steps.forEach((step, index) => {
+        step.addEventListener("click", () => {
+          currentStep = index;
+          updateVisualization();
+          scrollStepIntoView();
+        });
+      });
+
+      // Scroll active step into view smoothly
+      function scrollStepIntoView() {
+        const activeStep = steps[currentStep];
+        activeStep.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      // Initialize
+      updateVisualization();
+    </script>
+  </body>
+</html>

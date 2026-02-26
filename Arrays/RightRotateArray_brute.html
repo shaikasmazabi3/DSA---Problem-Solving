@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Right Rotate Visualization with j Loop Start/End Highlight</title>
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  h2 {
+    margin-bottom: 30px;
+    font-weight: 700;
+    font-size: 2rem;
+    color: #222;
+  }
+  #tempStorage {
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: 1.25rem;
+    min-height: 60px;
+  }
+  #array {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+    position: relative;
+  }
+  .box {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+    position: relative;
+    transition: background-color 0.3s ease, opacity 0.3s ease, border-bottom 0.3s ease;
+    user-select: none;
+  }
+  .pointer-label {
+    position: absolute;
+    top: -28px;
+    width: 50px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 2px 4px;
+    user-select: none;
+  }
+  .pointer-i-label {
+    background-color: #ffcc00;
+    color: #5a4b00;
+    left: 0;
+  }
+  .pointer-j-label {
+    background-color: #00ccff;
+    color: #004a66;
+    left: 0;
+  }
+  .pointer-i {
+    background-color: #fff4b8;
+    box-shadow: 0 0 8px 2px #ffcc00aa;
+  }
+  .pointer-j {
+    background-color: #b8f0ff;
+    box-shadow: 0 0 8px 2px #00ccffaa;
+  }
+  /* Border bottom highlight for inner loop start and end */
+  .inner-loop-start {
+    border-bottom: 4px solid #004a66;
+  }
+  .inner-loop-end {
+    border-bottom: 4px solid #00ccff;
+  }
+  /* Loop coverage highlights */
+  .outer-loop-coverage {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-color: #fff4b8aa;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: -1;
+    transition: left 0.5s ease, width 0.5s ease;
+  }
+  .inner-loop-coverage {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-color: #b8f0ffaa;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: -1;
+    transition: left 0.5s ease, width 0.5s ease;
+  }
+  #controls {
+    background: white;
+    padding: 20px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px 20px;
+    justify-content: center;
+    max-width: 600px;
+    width: 100%;
+  }
+  #controls label {
+    flex: 1 0 120px;
+    align-self: center;
+    font-weight: 600;
+    color: #444;
+  }
+  #controls input[type="text"],
+  #controls input[type="number"] {
+    flex: 2 1 180px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1.5px solid #ccc;
+    font-size: 1rem;
+    transition: border-color 0.25s ease;
+  }
+  #controls input[type="text"]:focus,
+  #controls input[type="number"]:focus {
+    outline: none;
+    border-color: #0078d4;
+    box-shadow: 0 0 5px #0078d4aa;
+  }
+  #startBtn {
+    flex: 1 0 160px;
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #startBtn:disabled {
+    background-color: #a0c4ff;
+    cursor: not-allowed;
+  }
+  #startBtn:hover:not(:disabled) {
+    background-color: #005ea2;
+  }
+</style>
+</head>
+<body>
+  <h2>Right Rotate Array Visualization with j Loop Start/End Highlight</h2>
+  <div id="tempStorage">Temp Storage: <span id="tempValue">-</span></div>
+  <div id="array" style="position: relative;"></div>
+  <div id="controls">
+    <label for="inputArray">Array (comma separated):</label>
+    <input type="text" id="inputArray" value="1,2,3,4,5,6,7,8,9,10" autocomplete="off" />
+    <label for="inputTarget">Rotate Right by:</label>
+    <input type="number" id="inputTarget" value="2" min="0" autocomplete="off" />
+    <button id="startBtn">Start Rotation</button>
+  </div>
+
+<script>
+  const arrayContainer = document.getElementById("array");
+  const tempValue = document.getElementById("tempValue");
+  const startBtn = document.getElementById("startBtn");
+  const inputArray = document.getElementById("inputArray");
+  const inputTarget = document.getElementById("inputTarget");
+
+  let outerHighlight, innerHighlight;
+
+  function createHighlight(className) {
+    const div = document.createElement("div");
+    div.classList.add(className);
+    arrayContainer.appendChild(div);
+    return div;
+  }
+
+  function clearHighlights() {
+    if (outerHighlight) {
+      outerHighlight.remove();
+      outerHighlight = null;
+    }
+    if (innerHighlight) {
+      innerHighlight.remove();
+      innerHighlight = null;
+    }
+  }
+
+  function updateHighlight(highlight, startIdx, endIdx) {
+    if (!highlight) return;
+    const boxes = arrayContainer.querySelectorAll(".box");
+    if (startIdx > endIdx || boxes.length === 0) {
+      highlight.style.width = "0px";
+      return;
+    }
+    const left = boxes[startIdx].offsetLeft;
+    const rightBox = boxes[endIdx];
+    const right = rightBox.offsetLeft + rightBox.offsetWidth;
+    highlight.style.left = left + "px";
+    highlight.style.width = (right - left) + "px";
+  }
+
+  function renderArray(arr, i = -1, j = -1, innerStart = -1, innerEnd = -1) {
+    arrayContainer.innerHTML = "";
+    clearHighlights();
+
+    arr.forEach((val, idx) => {
+      const box = document.createElement("div");
+      box.classList.add("box");
+      box.textContent = val;
+
+      if (idx === i) box.classList.add("pointer-i");
+      if (idx === j) box.classList.add("pointer-j");
+
+      if (idx === i) {
+        const labelI = document.createElement("div");
+        labelI.textContent = "i";
+        labelI.classList.add("pointer-label", "pointer-i-label");
+        box.appendChild(labelI);
+      }
+      if (idx === j) {
+        const labelJ = document.createElement("div");
+        labelJ.textContent = "j";
+        labelJ.classList.add("pointer-label", "pointer-j-label");
+        box.appendChild(labelJ);
+      }
+
+      if (idx === innerStart) {
+        box.classList.add("inner-loop-start");
+      }
+      if (idx === innerEnd) {
+        box.classList.add("inner-loop-end");
+      }
+
+      arrayContainer.appendChild(box);
+    });
+
+    if (!outerHighlight) outerHighlight = createHighlight("outer-loop-coverage");
+    if (!innerHighlight) innerHighlight = createHighlight("inner-loop-coverage");
+
+    if (i >= 0) {
+      updateHighlight(outerHighlight, i, arr.length - 1);
+    } else {
+      updateHighlight(outerHighlight, 0, -1);
+    }
+
+    if (j >= 0) {
+      updateHighlight(innerHighlight, j, arr.length - 2);
+    } else {
+      updateHighlight(innerHighlight, 0, -1);
+    }
+  }
+
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function rightRotateVisualization(arr, target) {
+    target = target % arr.length;
+    for (let i = 0; i < target; i++) {
+      tempValue.textContent = arr[arr.length - 1];
+      renderArray(arr, i, arr.length - 1, arr.length - 1, 1); // highlight start and end of inner loop
+      await delay(600);
+
+      let temp = arr[arr.length - 1];
+      for (let j = arr.length - 1; j > 0; j--) {
+        arr[j] = arr[j - 1];
+        tempValue.textContent = temp;
+        renderArray(arr, i, j - 1, j, 1); // update inner loop start highlight dynamically
+        await delay(300);
+      }
+      arr[0] = temp;
+      tempValue.textContent = "-";
+      renderArray(arr, -1, -1);
+      await delay(600);
+    }
+  }
+
+  startBtn.addEventListener("click", async () => {
+    startBtn.disabled = true;
+    let arr = inputArray.value.split(",").map(Number);
+    let target = parseInt(inputTarget.value, 10);
+    await rightRotateVisualization(arr, target);
+    startBtn.disabled = false;
+  });
+
+  // Initial render
+  renderArray([], -1, -1);
+  tempValue.textContent = "-";
+</script>
+</body>
+</html>

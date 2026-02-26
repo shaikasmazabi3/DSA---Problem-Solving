@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>How React Works Under the Hood - Interactive Lesson</title>
+    <style>
+      :root {
+        --color-bg: #f0f8ff;
+        --color-primary: #0077cc;
+        --color-secondary: #ff6f61;
+        --color-accent: #ffca28;
+        --color-text: #333;
+        --color-light: #fff;
+        --color-dark: #222;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        line-height: 1.5;
+        user-select: none;
+      }
+      main {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 1rem;
+        background: var(--color-light);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgb(0 0 0 / 0.1);
+      }
+      h1,
+      h2,
+      h3 {
+        color: var(--color-primary);
+        margin-top: 1rem;
+      }
+      h1 {
+        font-size: 2rem;
+        text-align: center;
+      }
+      h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.3rem;
+      }
+      p {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+      .slide {
+        display: none;
+        animation: fadeIn 0.8s ease forwards;
+      }
+      .slide.active {
+        display: block;
+      }
+      nav {
+        text-align: center;
+        margin-top: 1rem;
+      }
+      button {
+        background-color: var(--color-primary);
+        border: none;
+        color: var(--color-light);
+        padding: 0.6rem 1.2rem;
+        margin: 0 0.3rem;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        box-shadow: 0 3px 8px rgb(0 119 204 / 0.5);
+        transition: background-color 0.3s ease;
+      }
+      button:hover,
+      button:focus {
+        background-color: var(--color-secondary);
+        outline: none;
+      }
+      .emoji {
+        font-size: 2rem;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+      }
+      .code {
+        background-color: #e8f0fe;
+        border-left: 4px solid var(--color-primary);
+        padding: 0.5rem 1rem;
+        font-family: monospace;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 5px;
+        white-space: pre-wrap;
+      }
+      .diagram {
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .tree-node {
+        display: inline-block;
+        padding: 0.6rem 1rem;
+        margin: 0.4rem;
+        border-radius: 10px;
+        background-color: var(--color-accent);
+        color: var(--color-dark);
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.3s ease;
+      }
+      .tree-node:hover,
+      .tree-node:focus {
+        background-color: var(--color-secondary);
+        color: var(--color-light);
+        outline: none;
+      }
+      .arrow {
+        display: inline-block;
+        margin: 0 0.2rem;
+        font-size: 1.3rem;
+        vertical-align: middle;
+      }
+      .highlight {
+        background-color: var(--color-secondary);
+        color: white;
+      }
+      .progress-bar {
+        width: 100%;
+        background-color: #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        height: 20px;
+        margin: 0.5rem 0 1rem;
+      }
+      .progress-fill {
+        height: 100%;
+        width: 0;
+        background-color: var(--color-primary);
+        transition: width 1.5s ease;
+      }
+      .quiz {
+        background-color: #fff8e1;
+        border: 2px solid var(--color-accent);
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+      }
+      .quiz button {
+        background-color: var(--color-accent);
+        color: var(--color-dark);
+        margin-top: 0.5rem;
+      }
+      .quiz-feedback {
+        margin-top: 0.5rem;
+        font-weight: 600;
+      }
+      .hidden {
+        display: none;
+      }
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      /* Interactive tree styles */
+      .tree-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .tree-level {
+        display: flex;
+        justify-content: center;
+        margin: 0.6rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main
+      role="main"
+      aria-label="Interactive lesson on how React works under the hood"
+    >
+      <h1>How React Works Under the Hood 🚀</h1>
+
+      <!-- Slide 1: Welcome -->
+      <section
+        id="slide1"
+        class="slide active"
+        tabindex="0"
+        aria-live="polite"
+        aria-label="Introduction slide"
+      >
+        <h2>Welcome! Let's Explore React 🖥️⚙️</h2>
+        <p>
+          React helps build websites by making changes super fast and smooth.
+          But how does it do that? 🤔
+        </p>
+        <p>We’ll learn 3 cool ideas that make React a magic helper:</p>
+        <ul>
+          <li><strong>Reconciliation:</strong> The Real Workhorse 🛠️</li>
+          <li><strong>React Fiber:</strong> The Secret Engine 🧩</li>
+          <li>
+            <strong>Concurrent Rendering:</strong> React Thinking Ahead ⏩
+          </li>
+        </ul>
+        <button aria-label="Go to next slide" id="next1">Start Learning</button>
+      </section>
+
+      <!-- Slide 2: Reconciliation -->
+      <section
+        id="slide2"
+        class="slide"
+        tabindex="0"
+        aria-live="polite"
+        aria-label="Reconciliation explained"
+      >
+        <h2>
+          <span class="emoji" aria-hidden="true">🛠️</span>Reconciliation: The
+          Real Workhorse
+        </h2>
+        <p>Imagine your webpage is like a big coloring book 📖.</p>
+        <p>
+          When something changes, React doesn’t redraw the whole book! It
+          carefully checks which pages need new colors. This checking process is
+          called <strong>Reconciliation</strong>.
+        </p>
+        <div
+          class="diagram"
+          aria-label="Animated tree comparison showing old and new page trees"
+        >
+          <div class="tree-container" role="tree" aria-live="polite">
+            <!-- Old tree -->
+            <div class="tree-level" aria-label="Old page tree">
+              <div class="tree-node" tabindex="0" aria-selected="false">
+                Home
+              </div>
+              <span class="arrow" aria-hidden="true">➡️</span>
+              <div class="tree-node" tabindex="0" aria-selected="false">
+                About
+              </div>
+              <span class="arrow" aria-hidden="true">➡️</span>
+              <div class="tree-node" tabindex="0" aria-selected="false">
+                Contact
+              </div>
+            </div>
+            <p>Old page tree</p>
+            <!-- New tree -->
+            <div class="tree-level" aria-label="New page tree">
+              <div class="tree-node" tabindex="0" aria-selected="false">
+                Home
+              </div>
+              <span class="arrow" aria-hidden="true">➡️</span>
+              <div
+                class="tree-node highlight"
+                tabindex="0"
+                aria-selected="true"
+              >
+                About (changed)
+              </div>
+              <span class="arrow" aria-hidden="true">➡️</span>
+              <div class="tree-node" tabindex="0" aria-selected="false">
+                Contact
+              </div>
+            </div>
+            <p>New page tree with change</p>
+          </div>
+        </div>
+        <p>
+          React finds the changed parts and updates only those, saving time and
+          energy! ⚡
+        </p>
+        <button aria-label="Show quiz for Reconciliation" id="quizBtn1">
+          Take a Quick Quiz
+        </button>
+        <div
+          class="quiz hidden"
+          id="quiz1"
+          role="region"
+          aria-live="polite"
+          aria-label="Reconciliation quiz"
+        >
+          <p>What does React do when something changes on your webpage?</p>
+          <button data-answer="wrong">Redraws everything</button>
+          <button data-answer="correct">
+            Checks and updates only the changed parts
+          </button>
+          <button data-answer="wrong">Ignores the changes</button>
+          <div class="quiz-feedback" aria-live="assertive"></div>
+        </div>
+        <nav>
+          <button aria-label="Go to previous slide" id="prev2">Back</button>
+          <button aria-label="Go to next slide" id="next2">Next</button>
+        </nav>
+      </section>
+
+      <!-- Slide 3: React Fiber -->
+      <section
+        id="slide3"
+        class="slide"
+        tabindex="0"
+        aria-live="polite"
+        aria-label="React Fiber explained"
+      >
+        <h2>
+          <span class="emoji" aria-hidden="true">🧩</span>React Fiber: The
+          Secret Engine
+        </h2>
+        <p>React Fiber is like a super smart robot 🤖 inside React.</p>
+        <p>
+          It breaks big tasks into tiny pieces and works on them little by
+          little, so your webpage stays fast and doesn’t freeze.
+        </p>
+        <div
+          class="diagram"
+          aria-label="Animated progress bar showing React Fiber working in chunks"
+        >
+          <div
+            class="progress-bar"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <div class="progress-fill" id="fiberProgress"></div>
+          </div>
+          <p>Fiber works in small steps, like a robot taking little breaks.</p>
+        </div>
+        <p>
+          Think of Fiber as a clever helper that keeps React speedy and
+          responsive! ⚙️
+        </p>
+        <button aria-label="Show quiz for React Fiber" id="quizBtn2">
+          Take a Quick Quiz
+        </button>
+        <div
+          class="quiz hidden"
+          id="quiz2"
+          role="region"
+          aria-live="polite"
+          aria-label="React Fiber quiz"
+        >
+          <p>What does React Fiber do?</p>
+          <button data-answer="correct">
+            Breaks work into small chunks to keep things fast
+          </button>
+          <button data-answer="wrong">Draws pictures on the screen</button>
+          <button data-answer="wrong">Deletes old webpage pages</button>
+          <div class="quiz-feedback" aria-live="assertive"></div>
+        </div>
+        <nav>
+          <button aria-label="Go to previous slide" id="prev3">Back</button>
+          <button aria-label="Go to next slide" id="next3">Next</button>
+        </nav>
+      </section>
+
+      <!-- Slide 4: Concurrent Rendering -->
+      <section
+        id="slide4"
+        class="slide"
+        tabindex="0"
+        aria-live="polite"
+        aria-label="Concurrent Rendering explained"
+      >
+        <h2>
+          <span class="emoji" aria-hidden="true">⏩</span>Concurrent Rendering:
+          React Thinking Ahead
+        </h2>
+        <p>
+          Concurrent rendering means React can do many things at once — like a
+          juggler 🤹‍♂️ keeping many balls in the air.
+        </p>
+        <p>
+          React doesn’t wait to finish one thing before starting another. It
+          plans ahead and keeps your webpage smooth and fast.
+        </p>
+        <div
+          class="diagram"
+          aria-label="Animated juggling balls representing tasks React handles concurrently"
+        >
+          <div style="font-size: 3rem; margin: 1rem 0" aria-hidden="true">
+            🎈&nbsp;&nbsp;🎉&nbsp;&nbsp;⚙️&nbsp;&nbsp;📄&nbsp;&nbsp;🎨
+          </div>
+          <p>
+            React juggles tasks like updating HTML 📄, styling 🎨, and
+            JavaScript ⚙️ all at once.
+          </p>
+        </div>
+        <p>
+          This way, your page stays lively and ready for you to click, scroll,
+          or type without waiting! 🏃‍♀️💨
+        </p>
+        <button aria-label="Show quiz for Concurrent Rendering" id="quizBtn3">
+          Take a Quick Quiz
+        </button>
+        <div
+          class="quiz hidden"
+          id="quiz3"
+          role="region"
+          aria-live="polite"
+          aria-label="Concurrent Rendering quiz"
+        >
+          <p>What is concurrent rendering good for?</p>
+          <button data-answer="wrong">Making your page slower</button>
+          <button data-answer="correct">
+            Helping React do many things smoothly at the same time
+          </button>
+          <button data-answer="wrong">Stopping React from working</button>
+          <div class="quiz-feedback" aria-live="assertive"></div>
+        </div>
+        <nav>
+          <button aria-label="Go to previous slide" id="prev4">Back</button>
+          <button aria-label="Go to next slide" id="next4">Next</button>
+        </nav>
+      </section>
+
+      <!-- Slide 5: Why Understanding Matters -->
+      <section
+        id="slide5"
+        class="slide"
+        tabindex="0"
+        aria-live="polite"
+        aria-label="Why understanding React internals matters"
+      >
+        <h2>So… When Does This Matter in Your Work? 🤔</h2>
+        <ul>
+          <li>
+            You want your websites to be <strong>fast and smooth</strong> for
+            everyone.
+          </li>
+          <li>
+            You need to <strong>fix bugs</strong> or make big changes without
+            breaking things.
+          </li>
+          <li>
+            You want to <strong>write better React code</strong> that uses these
+            magic tricks well.
+          </li>
+          <li>
+            You want to understand why React sometimes feels slow and how to
+            <strong>make it better</strong>.
+          </li>
+        </ul>
+        <p>
+          Knowing how React works inside helps you be a React superhero! 🦸‍♂️🦸‍♀️
+        </p>
+        <button aria-label="Restart lesson" id="restart">Start Over</button>
+      </section>
+    </main>
+
+    <script>
+      // Slide navigation logic
+      const slides = document.querySelectorAll(".slide");
+      let currentSlide = 0;
+
+      function showSlide(index) {
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
+        slides.forEach((slide, i) => {
+          slide.classList.toggle("active", i === index);
+          if (i === index) slide.focus();
+        });
+        currentSlide = index;
+        if (currentSlide === 2) startFiberProgress();
+        else resetFiberProgress();
+      }
+
+      // Buttons for navigation
+      document
+        .getElementById("next1")
+        .addEventListener("click", () => showSlide(1));
+      document
+        .getElementById("prev2")
+        .addEventListener("click", () => showSlide(0));
+      document
+        .getElementById("next2")
+        .addEventListener("click", () => showSlide(2));
+      document
+        .getElementById("prev3")
+        .addEventListener("click", () => showSlide(1));
+      document
+        .getElementById("next3")
+        .addEventListener("click", () => showSlide(3));
+      document
+        .getElementById("prev4")
+        .addEventListener("click", () => showSlide(2));
+      document
+        .getElementById("next4")
+        .addEventListener("click", () => showSlide(4));
+      document
+        .getElementById("restart")
+        .addEventListener("click", () => showSlide(0));
+
+      // Quiz toggles and logic
+      function setupQuiz(quizBtnId, quizId) {
+        const btn = document.getElementById(quizBtnId);
+        const quiz = document.getElementById(quizId);
+        btn.addEventListener("click", () => {
+          quiz.classList.toggle("hidden");
+          btn.textContent = quiz.classList.contains("hidden")
+            ? "Take a Quick Quiz"
+            : "Hide Quiz";
+        });
+
+        quiz.querySelectorAll("button").forEach((option) => {
+          option.addEventListener("click", () => {
+            const feedback = quiz.querySelector(".quiz-feedback");
+            if (option.dataset.answer === "correct") {
+              feedback.textContent = "🎉 Correct! Great job!";
+              feedback.style.color = "green";
+            } else {
+              feedback.textContent = "❌ Oops, try again!";
+              feedback.style.color = "red";
+            }
+          });
+        });
+      }
+
+      setupQuiz("quizBtn1", "quiz1");
+      setupQuiz("quizBtn2", "quiz2");
+      setupQuiz("quizBtn3", "quiz3");
+
+      // Fiber progress bar animation
+      const fiberProgress = document.getElementById("fiberProgress");
+      let fiberInterval = null;
+
+      function startFiberProgress() {
+        let width = 0;
+        fiberProgress.style.width = "0%";
+        fiberProgress.parentElement.setAttribute("aria-valuenow", 0);
+        fiberInterval = setInterval(() => {
+          if (width >= 100) {
+            clearInterval(fiberInterval);
+            fiberProgress.style.backgroundColor = "var(--color-secondary)";
+          } else {
+            width += 2;
+            fiberProgress.style.width = width + "%";
+            fiberProgress.parentElement.setAttribute("aria-valuenow", width);
+          }
+        }, 50);
+      }
+      function resetFiberProgress() {
+        clearInterval(fiberInterval);
+        fiberProgress.style.width = "0%";
+        fiberProgress.style.backgroundColor = "var(--color-primary)";
+        fiberProgress.parentElement.setAttribute("aria-valuenow", 0);
+      }
+
+      // Keyboard accessibility for tree nodes (simulate focus highlight)
+      const treeNodes = document.querySelectorAll(".tree-node");
+      treeNodes.forEach((node) => {
+        node.addEventListener("click", () => {
+          treeNodes.forEach((n) => n.classList.remove("highlight"));
+          node.classList.add("highlight");
+        });
+        node.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            node.click();
+          }
+        });
+      });
+
+      // Start on slide 1
+      showSlide(0);
+    </script>
+  </body>
+</html>

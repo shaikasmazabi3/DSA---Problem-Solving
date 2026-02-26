@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JavaScript Event Loop for Kids - Interactive Visual</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Comic+Neue&display=swap");
+      body {
+        font-family: "Comic Neue", cursive, sans-serif;
+        background: #f0f8ff;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+        user-select: none;
+      }
+      h1 {
+        text-align: center;
+        color: #2a52be;
+        margin-bottom: 10px;
+      }
+      .container {
+        max-width: 960px;
+        margin: auto;
+      }
+      .section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(42, 82, 190, 0.15);
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+      .title {
+        font-weight: 700;
+        font-size: 1.5em;
+        color: #1e40af;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
+      /* Visual area */
+      #visual {
+        position: relative;
+        height: 420px; /* increased height for more vertical space */
+        border: 3px dashed #2a52be;
+        border-radius: 15px;
+        background: #e6f0ff;
+        overflow: visible;
+        padding: 30px 20px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 40px 60px;
+      }
+
+      /* Blocks */
+      .block {
+        width: 220px; /* increased width */
+        min-height: 130px; /* increased height */
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(42, 82, 190, 0.2);
+        color: white;
+        font-weight: 700;
+        font-size: 1.15em;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 15px 20px;
+        user-select: none;
+        position: relative;
+        box-sizing: border-box;
+      }
+
+      /* Specific blocks */
+      #callstack {
+        background: linear-gradient(135deg, #ff6f91, #ff9671);
+      }
+      #callbackqueue {
+        background: linear-gradient(135deg, #00b894, #55efc4);
+      }
+      #webapis {
+        background: linear-gradient(135deg, #0984e3, #74b9ff);
+      }
+      #eventloop {
+        background: linear-gradient(135deg, #fdcb6e, #ffeaa7);
+        color: #2d3436;
+        font-weight: 900;
+      }
+
+      /* Icons inside blocks */
+      .icon {
+        font-size: 3em; /* bigger icon */
+        margin-bottom: 10px;
+      }
+
+      /* Queue and stack lists */
+      .list {
+        margin-top: 12px;
+        font-size: 1rem;
+        text-align: center;
+        min-height: 70px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: rgba(255 255 255 / 0.3);
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .list span {
+        display: inline-block;
+        background: rgba(255 255 255 / 0.85);
+        color: #2d3436;
+        margin-right: 8px;
+        padding: 6px 14px;
+        border-radius: 16px;
+        font-weight: 700;
+        user-select: none;
+      }
+
+      /* Code display */
+      pre {
+        background: #dfe6e9;
+        border-radius: 12px;
+        padding: 15px;
+        font-size: 1.1rem;
+        overflow-x: auto;
+        box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      /* Step highlight */
+      .highlight {
+        background-color: #ffeaa7;
+        border-radius: 8px;
+        padding: 2px 6px;
+        display: inline-block;
+        width: 100%;
+      }
+
+      /* Arrows SVG */
+      #arrows-svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        width: 100%;
+        height: 420px;
+        overflow: visible;
+        z-index: 0;
+      }
+
+      /* Quiz styles */
+      #quiz {
+        text-align: center;
+      }
+      #quiz h2 {
+        color: #0984e3;
+      }
+      .question {
+        font-weight: 700;
+        font-size: 1.2em;
+        margin-bottom: 12px;
+      }
+      .answers {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+      button.answer {
+        background: #74b9ff;
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 10px 18px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        min-width: 120px;
+      }
+      button.answer:hover {
+        background: #0984e3;
+      }
+      button.correct {
+        background: #00b894 !important;
+        cursor: default;
+      }
+      button.wrong {
+        background: #d63031 !important;
+        cursor: default;
+      }
+      #quiz-feedback {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-top: 10px;
+        min-height: 28px;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 700px) {
+        #visual {
+          height: auto;
+          flex-direction: column;
+          gap: 40px 0;
+        }
+        .block {
+          width: 90%;
+          max-width: 360px;
+          min-height: auto;
+          padding: 20px;
+          font-size: 1.25em;
+        }
+        .list {
+          min-height: auto;
+          white-space: normal;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>JavaScript Event Loop for Kids</h1>
+
+      <div class="section" aria-label="Code example section">
+        <div class="title">Watch how JavaScript handles code!</div>
+        <pre id="code-block" tabindex="0">
+// Sample code we'll explore:
+console.log('Start');
+
+setTimeout(() => {
+  console.log('Timeout done!');
+}, 2000);
+
+console.log('End');
+    </pre
+        >
+
+        <div
+          id="visual"
+          aria-label="Visual explanation of JavaScript Event Loop"
+        >
+          <!-- Blocks -->
+          <div
+            class="block"
+            id="callstack"
+            aria-live="polite"
+            aria-atomic="true"
+            role="region"
+            aria-label="Call Stack"
+          >
+            <div><span class="icon" aria-hidden="true">🧱</span>Call Stack</div>
+            <div class="list" id="stack-list">empty</div>
+          </div>
+          <div
+            class="block"
+            id="callbackqueue"
+            aria-live="polite"
+            aria-atomic="true"
+            role="region"
+            aria-label="Callback Queue"
+          >
+            <div>
+              <span class="icon" aria-hidden="true">📥</span>Callback Queue
+            </div>
+            <div class="list" id="queue-list">empty</div>
+          </div>
+          <div
+            class="block"
+            id="webapis"
+            aria-live="polite"
+            aria-atomic="true"
+            role="region"
+            aria-label="Web APIs"
+          >
+            <div><span class="icon" aria-hidden="true">🌐</span>Web APIs</div>
+            <div class="list" id="webapi-list">empty</div>
+          </div>
+          <div
+            class="block"
+            id="eventloop"
+            aria-live="polite"
+            aria-atomic="true"
+            role="region"
+            aria-label="Event Loop"
+          >
+            <div><span class="icon" aria-hidden="true">🔄</span>Event Loop</div>
+            <div style="font-size: 1rem; margin-top: 10px">
+              Checks & moves tasks
+            </div>
+          </div>
+
+          <!-- Arrows SVG -->
+          <svg id="arrows-svg" aria-hidden="true" focusable="false">
+            <defs>
+              <marker
+                id="arrowhead"
+                markerWidth="12"
+                markerHeight="8"
+                refX="0"
+                refY="4"
+                orient="auto"
+              >
+                <polygon points="0 0, 12 4, 0 8" fill="#2a52be" />
+              </marker>
+            </defs>
+            <!-- Call Stack to Event Loop -->
+            <line
+              x1="240"
+              y1="115"
+              x2="390"
+              y2="150"
+              stroke="#2a52be"
+              stroke-width="4"
+              marker-end="url(#arrowhead)"
+            />
+            <!-- Web APIs to Event Loop -->
+            <line
+              x1="720"
+              y1="115"
+              x2="570"
+              y2="150"
+              stroke="#2a52be"
+              stroke-width="4"
+              marker-end="url(#arrowhead)"
+            />
+            <!-- Callback Queue to Event Loop -->
+            <line
+              x1="240"
+              y1="305"
+              x2="570"
+              y2="180"
+              stroke="#2a52be"
+              stroke-width="4"
+              marker-end="url(#arrowhead)"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <div
+        class="section"
+        id="steps-section"
+        aria-label="Step by step explanation"
+      >
+        <div class="title">Step-by-step Explanation</div>
+        <div
+          id="steps"
+          style="
+            font-size: 1.1rem;
+            line-height: 1.6;
+            min-height: 140px;
+            user-select: none;
+          "
+          tabindex="0"
+        ></div>
+        <div style="text-align: center; margin-top: 15px">
+          <button id="prev-step" disabled aria-label="Previous step">
+            ⬅️ Previous
+          </button>
+          <button id="next-step" aria-label="Next step">Next ➡️</button>
+        </div>
+      </div>
+
+      <div class="section" id="quiz" aria-label="Quiz section">
+        <h2>Quiz Time! 🧠</h2>
+        <div id="quiz-question" class="question" tabindex="0"></div>
+        <div id="quiz-answers" class="answers"></div>
+        <div
+          id="quiz-feedback"
+          role="alert"
+          aria-live="assertive"
+          style="min-height: 28px"
+        ></div>
+        <button
+          id="next-question"
+          style="display: none; margin-top: 10px"
+          aria-label="Next quiz question"
+        >
+          Next Question ➡️
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // Variables for UI elements
+      const stackList = document.getElementById("stack-list");
+      const queueList = document.getElementById("queue-list");
+      const webapiList = document.getElementById("webapi-list");
+      const stepsDiv = document.getElementById("steps");
+      const prevBtn = document.getElementById("prev-step");
+      const nextBtn = document.getElementById("next-step");
+
+      // Step data for explanation
+      const steps = [
+        {
+          text: "1. JavaScript starts running the code from top to bottom. It puts 'console.log(\"Start\")' on the Call Stack.",
+          stack: ["console.log('Start')"],
+          queue: [],
+          webapi: [],
+          highlightLine: 1,
+        },
+        {
+          text: "2. It runs 'console.log(\"Start\")', so 'Start' appears in the console. Then it removes this task from the Call Stack.",
+          stack: [],
+          queue: [],
+          webapi: [],
+          highlightLine: 1,
+          log: "Start",
+        },
+        {
+          text: "3. JavaScript sees 'setTimeout' and sends the callback function to the Web APIs with a 2000ms timer.",
+          stack: ["setTimeout(...)"],
+          queue: [],
+          webapi: ["Callback waiting (2s timer)"],
+          highlightLine: 3,
+        },
+        {
+          text: "4. While the timer runs in Web APIs, JavaScript continues and puts 'console.log(\"End\")' on the Call Stack.",
+          stack: ["console.log('End')"],
+          queue: [],
+          webapi: ["Callback waiting (2s timer)"],
+          highlightLine: 7,
+        },
+        {
+          text: "5. It runs 'console.log(\"End\")', so 'End' appears in the console. Then removes it from the Call Stack.",
+          stack: [],
+          queue: [],
+          webapi: ["Callback waiting (2s timer)"],
+          highlightLine: 7,
+          log: "End",
+        },
+        {
+          text: "6. After 2 seconds, the timer finishes. Web APIs move the callback function to the Callback Queue.",
+          stack: [],
+          queue: ["setTimeout callback"],
+          webapi: [],
+          highlightLine: 3,
+        },
+        {
+          text: "7. The Event Loop checks if Call Stack is empty. Since it is, it moves the callback from the Callback Queue to the Call Stack.",
+          stack: ["setTimeout callback"],
+          queue: [],
+          webapi: [],
+          highlightLine: 3,
+        },
+        {
+          text: "8. JavaScript runs the callback: 'console.log(\"Timeout done!\")'. 'Timeout done!' appears in the console. Then removes it from Call Stack.",
+          stack: [],
+          queue: [],
+          webapi: [],
+          highlightLine: 3,
+          log: "Timeout done!",
+        },
+        {
+          text: "All done! JavaScript finished running the code and handled the timer callback asynchronously!",
+          stack: [],
+          queue: [],
+          webapi: [],
+          highlightLine: null,
+        },
+      ];
+
+      let currentStep = 0;
+      let consoleLogs = [];
+
+      // Update UI based on step
+      function updateStep() {
+        const step = steps[currentStep];
+
+        // Update text
+        stepsDiv.textContent = step.text;
+
+        // Update call stack
+        stackList.innerHTML = step.stack.length
+          ? step.stack.map((task) => `<span>${task}</span>`).join("")
+          : "<span>empty</span>";
+        // Update callback queue
+        queueList.innerHTML = step.queue.length
+          ? step.queue.map((task) => `<span>${task}</span>`).join("")
+          : "<span>empty</span>";
+        // Update web APIs
+        webapiList.innerHTML = step.webapi.length
+          ? step.webapi.map((task) => `<span>${task}</span>`).join("")
+          : "<span>empty</span>";
+
+        // Highlight code line
+        highlightCodeLine(step.highlightLine);
+
+        // Show console logs
+        if (step.log) {
+          consoleLogs.push(step.log);
+          showConsoleLogs();
+        }
+
+        // Enable/disable buttons
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep === steps.length - 1;
+      }
+
+      // Highlight code line in pre block
+      function highlightCodeLine(lineNum) {
+        const code = document.getElementById("code-block");
+        const lines = code.textContent.split("\n");
+        const highlighted = lines
+          .map((line, i) => {
+            if (i === lineNum) return `<span class="highlight">${line}</span>`;
+            return line;
+          })
+          .join("\n");
+        code.innerHTML = highlighted;
+      }
+
+      // Show console logs below visual
+      function showConsoleLogs() {
+        let logArea = document.getElementById("console-logs");
+        if (!logArea) {
+          logArea = document.createElement("div");
+          logArea.id = "console-logs";
+          logArea.style.background = "#dfe6e9";
+          logArea.style.borderRadius = "12px";
+          logArea.style.padding = "10px";
+          logArea.style.marginTop = "15px";
+          logArea.style.fontFamily = "monospace";
+          logArea.style.fontSize = "1rem";
+          logArea.style.minHeight = "40px";
+          logArea.style.color = "#2d3436";
+          document.querySelector(".section").appendChild(logArea);
+        }
+        logArea.textContent = "Console Output: " + consoleLogs.join(" | ");
+      }
+
+      prevBtn.addEventListener("click", () => {
+        if (currentStep > 0) {
+          currentStep--;
+          updateStep();
+        }
+      });
+      nextBtn.addEventListener("click", () => {
+        if (currentStep < steps.length - 1) {
+          currentStep++;
+          updateStep();
+        }
+      });
+
+      // Initialize first step
+      updateStep();
+
+      // --- Quiz Section ---
+      const quizQuestions = [
+        {
+          question: "What does the Call Stack do?",
+          answers: [
+            { text: "Runs tasks one by one", correct: true },
+            { text: "Stores waiting callbacks", correct: false },
+            { text: "Runs timers and APIs", correct: false },
+          ],
+        },
+        {
+          question: "Where does a callback go after the timer finishes?",
+          answers: [
+            { text: "Call Stack", correct: false },
+            { text: "Callback Queue", correct: true },
+            { text: "Web APIs", correct: false },
+          ],
+        },
+        {
+          question:
+            "Who moves tasks from the Callback Queue to the Call Stack?",
+          answers: [
+            { text: "Web APIs", correct: false },
+            { text: "Event Loop", correct: true },
+            { text: "JavaScript Engine", correct: false },
+          ],
+        },
+        {
+          question: "Can JavaScript run two tasks at the same time?",
+          answers: [
+            { text: "Yes, always", correct: false },
+            { text: "No, one at a time", correct: true },
+            { text: "Only for timers", correct: false },
+          ],
+        },
+      ];
+
+      let quizIndex = 0;
+      const quizQuestionEl = document.getElementById("quiz-question");
+      const quizAnswersEl = document.getElementById("quiz-answers");
+      const quizFeedbackEl = document.getElementById("quiz-feedback");
+      const nextQuestionBtn = document.getElementById("next-question");
+
+      function loadQuizQuestion() {
+        quizFeedbackEl.textContent = "";
+        nextQuestionBtn.style.display = "none";
+        quizAnswersEl.innerHTML = "";
+
+        const q = quizQuestions[quizIndex];
+        quizQuestionEl.textContent = q.question;
+
+        q.answers.forEach((answer) => {
+          const btn = document.createElement("button");
+          btn.classList.add("answer");
+          btn.textContent = answer.text;
+          btn.setAttribute("aria-pressed", "false");
+          btn.addEventListener("click", () =>
+            selectAnswer(btn, answer.correct),
+          );
+          quizAnswersEl.appendChild(btn);
+        });
+      }
+
+      function selectAnswer(button, isCorrect) {
+        // Disable all buttons
+        [...quizAnswersEl.children].forEach((btn) => {
+          btn.disabled = true;
+          btn.setAttribute("aria-pressed", "true");
+        });
+        if (isCorrect) {
+          button.classList.add("correct");
+          quizFeedbackEl.textContent = "✅ Correct! Well done!";
+        } else {
+          button.classList.add("wrong");
+          quizFeedbackEl.textContent = "❌ Oops! Try again next time.";
+        }
+        nextQuestionBtn.style.display = "inline-block";
+      }
+
+      nextQuestionBtn.addEventListener("click", () => {
+        quizIndex++;
+        if (quizIndex >= quizQuestions.length) {
+          quizQuestionEl.textContent = "🎉 You finished the quiz! Great job!";
+          quizAnswersEl.innerHTML = "";
+          nextQuestionBtn.style.display = "none";
+          quizFeedbackEl.textContent = "";
+          return;
+        }
+        loadQuizQuestion();
+      });
+
+      loadQuizQuestion();
+    </script>
+  </body>
+</html>

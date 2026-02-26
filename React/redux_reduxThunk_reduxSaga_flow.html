@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      Interactive Redux, Redux Thunk & Redux Saga Architecture Visualization
+    </title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        margin: 20px;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+      .container {
+        display: flex;
+        justify-content: space-around;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+      .box {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+        width: 320px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+      }
+      .title {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #333;
+      }
+      .step {
+        background: #e7f3ff;
+        margin: 12px 0;
+        padding: 10px;
+        border-left: 5px solid #2196f3;
+        border-radius: 4px;
+        position: relative;
+        opacity: 0.4;
+        transition: opacity 0.3s, background-color 0.3s, border-color 0.3s;
+        user-select: none;
+      }
+      .step.active {
+        opacity: 1;
+        background: #d0e8ff;
+        border-color: #0b75c9;
+        font-weight: bold;
+      }
+      .arrow {
+        text-align: center;
+        font-size: 24px;
+        margin: 8px 0;
+        color: #888;
+      }
+      /* Animation pulse for active step */
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 5px 3px rgba(33, 150, 243, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 10px 5px rgba(33, 150, 243, 0.8);
+        }
+        100% {
+          box-shadow: 0 0 5px 3px rgba(33, 150, 243, 0.5);
+        }
+      }
+      .highlight {
+        animation: pulse 2s infinite;
+      }
+      /* Controls */
+      .controls {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      button {
+        background-color: #2196f3;
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.3s;
+      }
+      button:hover:not(:disabled) {
+        background-color: #0b75c9;
+      }
+      button:disabled {
+        background-color: #a0c4ff;
+        cursor: not-allowed;
+      }
+      /* Responsive */
+      @media (max-width: 1000px) {
+        .container {
+          flex-direction: column;
+          align-items: center;
+        }
+        .box {
+          width: 90%;
+          max-width: 400px;
+        }
+      }
+      code {
+        background: #eef6ff;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      Interactive Redux, Redux Thunk & Redux Saga Architecture Visualization
+    </h1>
+
+    <div class="container">
+      <!-- Plain Redux -->
+      <div class="box" id="reduxBox">
+        <div class="title">Plain Redux</div>
+        <div class="step" id="reduxStep1">
+          1. UI dispatches a synchronous action
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="reduxStep2">2. Action reaches reducer</div>
+        <div class="arrow">↓</div>
+        <div class="step" id="reduxStep3">
+          3. Reducer updates state synchronously
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="reduxStep4">
+          4. UI re-renders with updated state
+        </div>
+        <div class="controls">
+          <button id="reduxPrev" disabled>Previous</button>
+          <button id="reduxNext">Next</button>
+        </div>
+      </div>
+
+      <!-- Redux Thunk -->
+      <div class="box" id="thunkBox">
+        <div class="title">Redux Thunk Middleware</div>
+        <div class="step" id="thunkStep1">
+          1. UI dispatches a thunk (function)
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="thunkStep2">2. Thunk middleware intercepts</div>
+        <div class="arrow">↓</div>
+        <div class="step" id="thunkStep3">
+          3. Thunk performs async calls (e.g., API)
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="thunkStep4">
+          4. Thunk dispatches synchronous actions on success/failure
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="thunkStep5">
+          5. Reducers update state accordingly
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="thunkStep6">
+          6. UI re-renders with updated state
+        </div>
+        <div class="controls">
+          <button id="thunkPrev" disabled>Previous</button>
+          <button id="thunkNext">Next</button>
+        </div>
+      </div>
+
+      <!-- Redux Saga -->
+      <div class="box" id="sagaBox">
+        <div class="title">Redux Saga Middleware</div>
+        <div class="step" id="sagaStep1">
+          1. UI dispatches an action (e.g., <code>FETCH_REQUEST</code>)
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="sagaStep2">
+          2. Saga middleware listens for action
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="sagaStep3">
+          3. Saga runs generator function handling side effects
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="sagaStep4">
+          4. Saga performs async calls with <code>call()</code>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="sagaStep5">
+          5. Saga dispatches success/failure actions with <code>put()</code>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="sagaStep6">
+          6. Reducers update state accordingly
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step" id="sagaStep7">
+          7. UI re-renders with updated state
+        </div>
+        <div class="controls">
+          <button id="sagaPrev" disabled>Previous</button>
+          <button id="sagaNext">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Utility function to update steps display for each architecture
+      function setupStepper(stepsIds, prevBtnId, nextBtnId) {
+        let currentIndex = 0;
+
+        const steps = stepsIds.map((id) => document.getElementById(id));
+        const prevBtn = document.getElementById(prevBtnId);
+        const nextBtn = document.getElementById(nextBtnId);
+
+        function updateSteps() {
+          steps.forEach((step, idx) => {
+            if (idx === currentIndex) {
+              step.classList.add("active", "highlight");
+            } else {
+              step.classList.remove("active", "highlight");
+            }
+          });
+          prevBtn.disabled = currentIndex === 0;
+          nextBtn.disabled = currentIndex === steps.length - 1;
+        }
+
+        prevBtn.addEventListener("click", () => {
+          if (currentIndex > 0) {
+            currentIndex--;
+            updateSteps();
+          }
+        });
+
+        nextBtn.addEventListener("click", () => {
+          if (currentIndex < steps.length - 1) {
+            currentIndex++;
+            updateSteps();
+          }
+        });
+
+        // Initialize display
+        updateSteps();
+      }
+
+      // Setup steppers for each architecture
+      setupStepper(
+        ["reduxStep1", "reduxStep2", "reduxStep3", "reduxStep4"],
+        "reduxPrev",
+        "reduxNext"
+      );
+      setupStepper(
+        [
+          "thunkStep1",
+          "thunkStep2",
+          "thunkStep3",
+          "thunkStep4",
+          "thunkStep5",
+          "thunkStep6",
+        ],
+        "thunkPrev",
+        "thunkNext"
+      );
+      setupStepper(
+        [
+          "sagaStep1",
+          "sagaStep2",
+          "sagaStep3",
+          "sagaStep4",
+          "sagaStep5",
+          "sagaStep6",
+          "sagaStep7",
+        ],
+        "sagaPrev",
+        "sagaNext"
+      );
+    </script>
+  </body>
+</html>

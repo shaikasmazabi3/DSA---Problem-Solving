@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reverse Array Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f7fa;
+        color: #333;
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      h2 {
+        margin-bottom: 20px;
+        font-weight: 700;
+        font-size: 2rem;
+        color: #222;
+      }
+      #controls {
+        background: white;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px 20px;
+        justify-content: center;
+        max-width: 700px;
+        width: 100%;
+        margin-bottom: 40px;
+      }
+      #controls label {
+        flex: 1 0 140px;
+        align-self: center;
+        font-weight: 600;
+        color: #444;
+      }
+      #controls select,
+      #controls input[type="text"] {
+        flex: 2 1 240px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1.5px solid #ccc;
+        font-size: 1rem;
+        transition: border-color 0.25s ease;
+      }
+      #controls select:focus,
+      #controls input[type="text"]:focus {
+        outline: none;
+        border-color: #0078d4;
+        box-shadow: 0 0 5px #0078d4aa;
+      }
+      #startBtn {
+        flex: 1 0 180px;
+        background-color: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        align-self: center;
+      }
+      #startBtn:disabled {
+        background-color: #a0c4ff;
+        cursor: not-allowed;
+      }
+      #startBtn:hover:not(:disabled) {
+        background-color: #005ea2;
+      }
+      #array,
+      #newArray {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 30px;
+        position: relative;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .box {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        position: relative;
+        transition: background-color 0.3s ease, opacity 0.3s ease,
+          transform 0.3s ease;
+        user-select: none;
+      }
+      .pointer-label {
+        position: absolute;
+        top: -28px;
+        width: 50px;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 4px;
+        padding: 2px 4px;
+        user-select: none;
+      }
+      .pointer-start-label {
+        background-color: #ffcc00;
+        color: #5a4b00;
+        left: 0;
+      }
+      .pointer-end-label {
+        background-color: #00ccff;
+        color: #004a66;
+        left: 0;
+      }
+      .pointer-i-label {
+        background-color: #ff8800;
+        color: #4a2d00;
+        left: 0;
+      }
+      .pointer-j-label {
+        background-color: #0099ff;
+        color: #003366;
+        left: 0;
+      }
+      .pointer-start {
+        background-color: #fff4b8;
+        box-shadow: 0 0 8px 2px #ffcc00aa;
+      }
+      .pointer-end {
+        background-color: #b8f0ff;
+        box-shadow: 0 0 8px 2px #00ccffaa;
+      }
+      .pointer-i {
+        background-color: #ffd8a8;
+        box-shadow: 0 0 8px 2px #ff8800aa;
+      }
+      .pointer-j {
+        background-color: #a8d8ff;
+        box-shadow: 0 0 8px 2px #0099ffaa;
+      }
+      .swap-highlight {
+        transform: scale(1.1);
+        background-color: #ff9999 !important;
+        box-shadow: 0 0 15px 4px #ff4444aa !important;
+      }
+      #newArrayTitle {
+        font-weight: 600;
+        margin-top: 8px;
+        margin-bottom: 50px;
+        color: #222;
+        text-align: center;
+      }
+      #newArray {
+        min-height: 60px;
+      }
+      #methodDescription {
+        max-width: 700px;
+        margin-bottom: 40px;
+        font-size: 1rem;
+        color: #555;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Array Reverse Visualization</h2>
+
+    <div id="methodDescription"></div>
+
+    <div id="array"></div>
+
+    <div id="newArrayTitle" style="display: none">
+      New Array (for bruteReverse):
+    </div>
+    <div id="newArray"></div>
+    <div id="controls">
+      <label for="methodSelect">Select Method:</label>
+      <select id="methodSelect">
+        <option value="bruteReverse">bruteReverse (push from end)</option>
+        <option value="betterReverse">
+          betterReverse (two pointers, temp swap)
+        </option>
+        <option value="bestReverse">
+          bestReverse (two pointers, destructuring swap)
+        </option>
+      </select>
+
+      <label for="inputArray">Array (comma separated):</label>
+      <input
+        type="text"
+        id="inputArray"
+        value="1,2,3,4,5,6,7,8,9,10"
+        autocomplete="off"
+      />
+
+      <button id="startBtn">Start Visualization</button>
+    </div>
+
+    <script>
+      const arrayContainer = document.getElementById("array");
+      const newArrayContainer = document.getElementById("newArray");
+      const newArrayTitle = document.getElementById("newArrayTitle");
+      const methodSelect = document.getElementById("methodSelect");
+      const inputArray = document.getElementById("inputArray");
+      const startBtn = document.getElementById("startBtn");
+      const methodDescription = document.getElementById("methodDescription");
+
+      const descriptions = {
+        bruteReverse:
+          "bruteReverse creates a new array by pushing elements from the end of the original array.",
+        betterReverse:
+          "betterReverse uses two pointers and swaps elements in place using a temporary variable.",
+        bestReverse:
+          "bestReverse uses two pointers and swaps elements in place using destructuring assignment.",
+      };
+
+      methodSelect.addEventListener("change", () => {
+        methodDescription.textContent = descriptions[methodSelect.value];
+        if (methodSelect.value === "bruteReverse") {
+          newArrayTitle.style.display = "block";
+        } else {
+          newArrayTitle.style.display = "none";
+          newArrayContainer.innerHTML = "";
+        }
+      });
+
+      // Initial description
+      methodDescription.textContent = descriptions[methodSelect.value];
+      if (methodSelect.value === "bruteReverse") {
+        newArrayTitle.style.display = "block";
+      } else {
+        newArrayTitle.style.display = "none";
+      }
+
+      // Helper to render an array with optional pointers and swap highlights
+      function renderArray(container, arr, pointers = {}, swapIndices = []) {
+        container.innerHTML = "";
+        arr.forEach((num, idx) => {
+          const box = document.createElement("div");
+          box.classList.add("box");
+          box.textContent = num;
+
+          // Add pointer classes and labels
+          for (const [key, val] of Object.entries(pointers)) {
+            if (val === idx) {
+              box.classList.add(`pointer-${key}`);
+              const label = document.createElement("div");
+              label.textContent = key;
+              label.classList.add("pointer-label", `pointer-${key}-label`);
+              box.appendChild(label);
+            }
+          }
+
+          // Highlight swap indices
+          if (swapIndices.includes(idx)) {
+            box.classList.add("swap-highlight");
+          }
+
+          container.appendChild(box);
+        });
+      }
+
+      // Animate bruteReverse: push elements from end to new array
+      async function visualizeBruteReverse(arr) {
+        newArrayTitle.style.display = "block";
+        newArrayContainer.innerHTML = "";
+        let newArr = [];
+
+        for (let i = arr.length - 1; i >= 0; i--) {
+          renderArray(arrayContainer, arr, { i }, [i]);
+          renderArray(newArrayContainer, newArr);
+          await delay(800);
+
+          // Push current element to newArr
+          newArr.push(arr[i]);
+          renderArray(arrayContainer, arr, { i });
+          renderArray(newArrayContainer, newArr, { push: newArr.length - 1 }, [
+            newArr.length - 1,
+          ]);
+          await delay(800);
+        }
+
+        // Final render
+        renderArray(arrayContainer, arr);
+        renderArray(newArrayContainer, newArr);
+      }
+
+      // Animate betterReverse: two pointers, swap with temp
+      async function visualizeBetterReverse(arr) {
+        newArrayTitle.style.display = "none";
+        let start = 0;
+        let end = arr.length - 1;
+
+        while (start <= end) {
+          renderArray(arrayContainer, arr, { start, end }, [start, end]);
+          await delay(800);
+
+          // Swap with temp
+          let temp = arr[start];
+          arr[start] = arr[end];
+          arr[end] = temp;
+
+          renderArray(arrayContainer, arr, { start, end }, [start, end]);
+          await delay(800);
+
+          start++;
+          end--;
+        }
+
+        renderArray(arrayContainer, arr);
+      }
+
+      // Animate bestReverse: two pointers, swap with destructuring
+      async function visualizeBestReverse(arr) {
+        newArrayTitle.style.display = "none";
+        let start = 0;
+        let end = arr.length - 1;
+
+        while (start <= end) {
+          renderArray(arrayContainer, arr, { start, end }, [start, end]);
+          await delay(800);
+
+          // Swap with destructuring
+          [arr[start], arr[end]] = [arr[end], arr[start]];
+
+          renderArray(arrayContainer, arr, { start, end }, [start, end]);
+          await delay(800);
+
+          start++;
+          end--;
+        }
+
+        renderArray(arrayContainer, arr);
+      }
+
+      // Utility delay function
+      function delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      startBtn.addEventListener("click", async () => {
+        const arr = inputArray.value
+          .split(",")
+          .map((s) => parseInt(s.trim()))
+          .filter((n) => !isNaN(n));
+        if (arr.length === 0) {
+          alert("Please enter a valid array.");
+          return;
+        }
+        startBtn.disabled = true;
+        methodSelect.disabled = true;
+        inputArray.disabled = true;
+
+        switch (methodSelect.value) {
+          case "bruteReverse":
+            await visualizeBruteReverse([...arr]); // Use a copy to avoid mutation
+            break;
+          case "betterReverse":
+            await visualizeBetterReverse([...arr]);
+            break;
+          case "bestReverse":
+            await visualizeBestReverse([...arr]);
+            break;
+        }
+
+        startBtn.disabled = false;
+        methodSelect.disabled = false;
+        inputArray.disabled = false;
+      });
+
+      // Initial render
+      renderArray(
+        arrayContainer,
+        inputArray.value
+          .split(",")
+          .map((s) => parseInt(s.trim()))
+          .filter((n) => !isNaN(n))
+      );
+    </script>
+  </body>
+</html>

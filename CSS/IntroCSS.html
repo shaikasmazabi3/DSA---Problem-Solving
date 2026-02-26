@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advanced CSS Concepts Interactive Presentation</title>
+    <style>
+      /* Reset and base styles */
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #121212;
+        color: #eee;
+        overflow-x: hidden;
+        user-select: none;
+      }
+      .container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 1rem 2rem;
+        background: #1e1e1e;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+        position: relative;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #f0a500;
+        margin-bottom: 0.5rem;
+      }
+      p {
+        line-height: 1.5;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+      code {
+        background: #333;
+        padding: 0.2em 0.4em;
+        border-radius: 4px;
+        font-family: monospace;
+        color: #f0a500;
+      }
+      /* Slide styles */
+      .slide {
+        display: none;
+        opacity: 0;
+        transform: translateX(50px);
+        transition: all 0.6s ease;
+      }
+      .slide.active {
+        display: block;
+        opacity: 1;
+        transform: translateX(0);
+      }
+      /* Navigation controls */
+      .nav-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      button {
+        background: #f0a500;
+        border: none;
+        color: #121212;
+        font-weight: bold;
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s ease;
+        user-select: none;
+      }
+      button:hover {
+        background: #d18e00;
+      }
+      button:disabled {
+        background: #555;
+        cursor: not-allowed;
+      }
+      /* Progress bar */
+      .progress-bar {
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        margin-top: 1rem;
+        overflow: hidden;
+      }
+      .progress-bar-inner {
+        height: 100%;
+        background: #f0a500;
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+      /* Highlight boxes */
+      .highlight {
+        background: #333;
+        border-left: 4px solid #f0a500;
+        padding: 0.6rem 1rem;
+        margin: 1rem 0;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-family: monospace;
+      }
+      /* Animation for code blocks */
+      @keyframes fadeInSlide {
+        0% {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .code-animated {
+        animation: fadeInSlide 0.6s ease forwards;
+      }
+      /* Responsive */
+      @media (max-width: 600px) {
+        .container {
+          padding: 1rem;
+          margin: 1rem;
+        }
+        p {
+          font-size: 1rem;
+        }
+        button {
+          padding: 0.5rem 1rem;
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="container"
+      role="main"
+      aria-label="Advanced CSS Concepts Presentation"
+    >
+      <!-- Slide content -->
+      <section
+        class="slide active"
+        aria-live="polite"
+        aria-atomic="true"
+        id="slide-1"
+      >
+        <h1>Introduction to CSS and Its Role in Rendering</h1>
+        <p>
+          <strong>CSS (Cascading Style Sheets)</strong> defines how HTML
+          elements are visually presented on the screen.
+        </p>
+        <p>
+          Browsers parse HTML to build the <code>DOM</code> tree and CSS to
+          build the <code>CSSOM</code> tree. These combine into the
+          <strong>Render Tree</strong> which is painted onto the screen.
+        </p>
+        <p>
+          This separation of content and style allows flexible and maintainable
+          UI design.
+        </p>
+      </section>
+
+      <section class="slide" aria-live="polite" aria-atomic="true" id="slide-2">
+        <h1>The CSS Cascade and Priority</h1>
+        <p>
+          The <strong>cascade</strong> determines which CSS rules apply when
+          multiple rules target the same element.
+        </p>
+        <p><strong>Priority order (highest to lowest):</strong></p>
+        <ul>
+          <li>Inline styles (e.g., <code>style="..."</code>)</li>
+          <li>ID selectors (<code>#id</code>)</li>
+          <li>
+            Class, attribute, pseudo-class selectors (<code>.class</code>,
+            <code>[attr]</code>, <code>:hover</code>)
+          </li>
+          <li>
+            Element and pseudo-element selectors (<code>h1</code>,
+            <code>::before</code>)
+          </li>
+        </ul>
+        <p>
+          <code>!important</code> overrides all, but should be used sparingly.
+        </p>
+      </section>
+
+      <section class="slide" aria-live="polite" aria-atomic="true" id="slide-3">
+        <h1>CSS Selectors and Specificity</h1>
+        <p>
+          Selectors target elements in HTML. Specificity determines which rule
+          wins if multiple apply.
+        </p>
+        <p><strong>Specificity values:</strong></p>
+        <ul>
+          <li>Inline styles: 1000 points</li>
+          <li>ID selectors: 100 points</li>
+          <li>Classes, attributes, pseudo-classes: 10 points</li>
+          <li>Elements, pseudo-elements: 1 point</li>
+        </ul>
+        <p>
+          The rule with higher specificity wins; if equal, the later declared
+          rule wins.
+        </p>
+      </section>
+
+      <section class="slide" aria-live="polite" aria-atomic="true" id="slide-4">
+        <h1>Cascade Layers (<code>@layer</code>)</h1>
+        <p>
+          <code>@layer</code> groups CSS rules into layers with explicit
+          priority.
+        </p>
+        <p>Example layers:</p>
+        <div class="highlight">
+          @layer base { /* base styles */ }<br />
+          @layer components { /* UI components */ }<br />
+          @layer utilities { /* utility classes */ }
+        </div>
+        <p>
+          Layers override lower layers regardless of selector specificity,
+          helping manage complex style conflicts.
+        </p>
+        <p>
+          If you can't edit external CSS, include it with
+          <code>@import</code> inside a <code>&lt;style&gt;</code> block with
+          <code>@layer</code> to assign layers.
+        </p>
+      </section>
+
+      <section class="slide" aria-live="polite" aria-atomic="true" id="slide-5">
+        <h1>CSS Architecture Patterns</h1>
+        <p>
+          Popular patterns to organize CSS for scalability and maintainability:
+        </p>
+        <ul>
+          <li>
+            <strong>BEM</strong> (Block Element Modifier) - naming convention to
+            reduce conflicts.
+          </li>
+          <li>
+            <strong>OOCSS</strong> (Object-Oriented CSS) - separates structure
+            and skin.
+          </li>
+          <li>
+            <strong>SMACSS</strong> - categorizes styles: Base, Layout, Module,
+            State, Theme.
+          </li>
+          <li>
+            <strong>Utility-First CSS</strong> (e.g., Tailwind) - small reusable
+            utility classes.
+          </li>
+        </ul>
+        <p>
+          Using cascade layers complements these by clearly separating style
+          groups.
+        </p>
+      </section>
+
+      <section class="slide" aria-live="polite" aria-atomic="true" id="slide-6">
+        <h1>CSS Rendering Pipeline and Render-Blocking</h1>
+        <p>Steps browsers perform to render a page:</p>
+        <ol>
+          <li>Parse HTML → Build <code>DOM</code> tree.</li>
+          <li>Parse CSS → Build <code>CSSOM</code> tree.</li>
+          <li>Execute JavaScript (may modify DOM/CSSOM).</li>
+          <li>Construct Render Tree (visible elements + styles).</li>
+          <li>Layout - calculate geometry.</li>
+          <li>Paint - draw pixels on screen.</li>
+        </ol>
+        <p>
+          <strong>CSS is render-blocking:</strong> browser waits for CSS to load
+          and parse before painting.
+        </p>
+        <p>
+          Optimizations: inline critical CSS, defer non-critical CSS, minimize
+          CSS size.
+        </p>
+      </section>
+
+      <section class="slide" aria-live="polite" aria-atomic="true" id="slide-7">
+        <h1>How CSS Influences Content Rendering</h1>
+        <p>Different selectors and specificity affect which styles apply.</p>
+        <p>
+          Layers allow explicit control of style priority beyond specificity.
+        </p>
+        <p>
+          Local styles can override framework styles (e.g., Bootstrap) through
+          specificity or layers.
+        </p>
+        <p>
+          Animations and transitions affect rendering timing and user
+          experience.
+        </p>
+      </section>
+
+      <section class="slide" aria-live="polite" aria-atomic="true" id="slide-8">
+        <h1>Advanced Topics for Large Scale & Browser/OS Development</h1>
+        <ul>
+          <li>
+            <strong>Shadow DOM:</strong> style encapsulation within components.
+          </li>
+          <li><strong>CSS Variables:</strong> reusable and dynamic values.</li>
+          <li><strong>Media Queries:</strong> responsive design.</li>
+          <li><strong>CSS Houdini:</strong> APIs for custom rendering.</li>
+          <li>
+            <strong>Browser Engines:</strong> Blink, Gecko, WebKit parse and
+            render CSS differently.
+          </li>
+          <li>
+            <strong>OS-Level Styling:</strong> system themes, accessibility
+            modes.
+          </li>
+          <li>
+            <strong>Performance:</strong> style recalculation and layout
+            thrashing.
+          </li>
+        </ul>
+      </section>
+
+      <section class="slide" aria-live="polite" aria-atomic="true" id="slide-9">
+        <h1>Summary and Best Practices</h1>
+        <ul>
+          <li>Use <code>@layer</code> to manage style priority cleanly.</li>
+          <li>Understand specificity to avoid conflicts.</li>
+          <li>Adopt architecture patterns for maintainability.</li>
+          <li>Optimize CSS delivery to reduce render-blocking.</li>
+          <li>Leverage modern CSS features for flexibility.</li>
+          <li>
+            Test overrides carefully when mixing frameworks and local styles.
+          </li>
+          <li>
+            Deep knowledge of rendering pipeline improves performance
+            optimization.
+          </li>
+        </ul>
+      </section>
+
+      <!-- Navigation -->
+      <div class="nav-buttons" role="navigation" aria-label="Slide navigation">
+        <button id="prevBtn" aria-label="Previous Slide" disabled>
+          Previous
+        </button>
+        <button id="playPauseBtn" aria-label="Play Presentation">Play</button>
+        <button id="nextBtn" aria-label="Next Slide">Next</button>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-bar" aria-hidden="true">
+        <div class="progress-bar-inner"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const slides = document.querySelectorAll(".slide");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const playPauseBtn = document.getElementById("playPauseBtn");
+        const progressBar = document.querySelector(".progress-bar-inner");
+        let current = 0;
+        let playing = false;
+        let timer = null;
+        const slideCount = slides.length;
+        const slideDuration = 8000; // 8 seconds per slide
+
+        function showSlide(index) {
+          slides.forEach((slide, i) => {
+            slide.classList.toggle("active", i === index);
+          });
+          current = index;
+          prevBtn.disabled = current === 0;
+          nextBtn.disabled = current === slideCount - 1;
+          updateProgress();
+        }
+
+        function nextSlide() {
+          if (current < slideCount - 1) {
+            showSlide(current + 1);
+          } else {
+            pausePresentation();
+          }
+        }
+
+        function prevSlide() {
+          if (current > 0) {
+            showSlide(current - 1);
+          }
+        }
+
+        function playPresentation() {
+          playing = true;
+          playPauseBtn.textContent = "Pause";
+          timer = setInterval(() => {
+            if (current < slideCount - 1) {
+              nextSlide();
+            } else {
+              pausePresentation();
+            }
+          }, slideDuration);
+        }
+
+        function pausePresentation() {
+          playing = false;
+          playPauseBtn.textContent = "Play";
+          clearInterval(timer);
+        }
+
+        function togglePlayPause() {
+          if (playing) {
+            pausePresentation();
+          } else {
+            playPresentation();
+          }
+        }
+
+        function updateProgress() {
+          const percent = ((current + 1) / slideCount) * 100;
+          progressBar.style.width = percent + "%";
+        }
+
+        // Event listeners
+        prevBtn.addEventListener("click", () => {
+          pausePresentation();
+          prevSlide();
+        });
+        nextBtn.addEventListener("click", () => {
+          pausePresentation();
+          nextSlide();
+        });
+        playPauseBtn.addEventListener("click", togglePlayPause);
+
+        // Keyboard navigation support
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowRight") {
+            pausePresentation();
+            nextSlide();
+          } else if (e.key === "ArrowLeft") {
+            pausePresentation();
+            prevSlide();
+          } else if (e.key === " ") {
+            e.preventDefault();
+            togglePlayPause();
+          }
+        });
+
+        // Initialize
+        showSlide(0);
+      })();
+    </script>
+  </body>
+</html>

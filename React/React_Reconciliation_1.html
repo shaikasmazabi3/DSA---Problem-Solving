@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>React Reconciliation Extended Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f9f9f9;
+        margin: 0;
+        padding: 20px;
+        color: #222;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .container {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        max-width: 1300px;
+        margin: 0 auto 40px;
+      }
+      .section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+        padding: 20px;
+        width: 30%;
+        display: flex;
+        flex-direction: column;
+      }
+      .section h2 {
+        text-align: center;
+        margin-bottom: 15px;
+      }
+      .tree {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        min-height: 250px;
+        background: #fafafa;
+        flex-grow: 1;
+        overflow-y: auto;
+      }
+      ul {
+        list-style: none;
+        padding-left: 20px;
+      }
+      li {
+        padding: 8px 12px;
+        margin: 6px 0;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        background: white;
+        position: relative;
+        transition: background-color 0.6s ease, color 0.6s ease;
+      }
+      /* Highlight animations */
+      .highlight-diff {
+        animation: highlightDiff 1.2s ease forwards;
+      }
+      .highlight-update {
+        animation: highlightUpdate 1.2s ease forwards;
+      }
+      .highlight-add {
+        animation: highlightAdd 1.5s ease forwards;
+      }
+      .highlight-remove {
+        animation: highlightRemove 1.5s ease forwards;
+      }
+      @keyframes highlightDiff {
+        0% {
+          box-shadow: 0 0 12px 3px #2196f3;
+        }
+        100% {
+          box-shadow: none;
+        }
+      }
+      @keyframes highlightUpdate {
+        0% {
+          background-color: #ffeb3b;
+        }
+        50% {
+          background-color: #fff176;
+        }
+        100% {
+          background-color: white;
+        }
+      }
+      @keyframes highlightAdd {
+        0% {
+          background-color: #c8e6c9;
+        }
+        100% {
+          background-color: white;
+        }
+      }
+      @keyframes highlightRemove {
+        0% {
+          background-color: #ffcdd2;
+          opacity: 1;
+        }
+        100% {
+          background-color: white;
+          opacity: 0;
+          height: 0;
+          margin: 0;
+          padding: 0;
+        }
+      }
+      #controls {
+        text-align: center;
+        margin-top: 20px;
+      }
+      button,
+      select {
+        background: #0078d4;
+        border: none;
+        color: white;
+        padding: 12px 20px;
+        margin: 0 10px 10px 10px;
+        font-size: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 3px 6px rgb(0 120 212 / 0.5);
+        transition: background-color 0.3s ease;
+      }
+      button:hover:not(:disabled),
+      select:hover:not(:disabled) {
+        background: #005ea2;
+      }
+      button:disabled,
+      select:disabled {
+        background: #a0c4ff;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      select {
+        color: black;
+        width: 250px;
+      }
+      .status {
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #0078d4;
+        min-height: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>React Reconciliation Extended Visualization</h1>
+
+    <div id="controls">
+      <select id="exampleSelect" aria-label="Select example to visualize">
+        <option value="textChange">Change 1st Item Text (Coffee → Tea)</option>
+        <option value="bgChange">Change 3rd Item Background (Orange)</option>
+        <option value="addItem">Add New Item ("Honey")</option>
+        <option value="removeItem">Remove 2nd Item ("Milk")</option>
+        <option value="reorder">Reorder Items (Sugar before Milk)</option>
+      </select>
+      <button id="btnNextStep">Next Step</button>
+      <button id="btnReset" disabled>Reset</button>
+    </div>
+
+    <div class="status" id="statusMessage">
+      Select an example and click "Next Step" to start.
+    </div>
+
+    <div class="container">
+      <section class="section">
+        <h2>Old Virtual DOM</h2>
+        <div class="tree" id="oldVirtualDomTree"></div>
+      </section>
+      <section class="section">
+        <h2>New Virtual DOM</h2>
+        <div class="tree" id="newVirtualDomTree"></div>
+      </section>
+      <section class="section">
+        <h2>Real DOM</h2>
+        <div class="tree" id="realDomTree"></div>
+      </section>
+    </div>
+
+    <script>
+      // Initial data setup
+      const initialVDOM = [
+        { key: "item1", text: "Coffee", style: {} },
+        { key: "item2", text: "Milk", style: {} },
+        { key: "item3", text: "Sugar", style: {} },
+      ];
+
+      // States
+      let oldVirtualDOM = JSON.parse(JSON.stringify(initialVDOM));
+      let newVirtualDOM = JSON.parse(JSON.stringify(initialVDOM));
+      let realDOM = JSON.parse(JSON.stringify(initialVDOM));
+
+      // Steps and states for each example
+      const examples = {
+        textChange: {
+          description: [
+            "Change first item text in New Virtual DOM (Coffee → Tea)",
+            "Diff Old and New Virtual DOM (highlight changed nodes)",
+            "Update Real DOM nodes based on diff",
+            "Commit New Virtual DOM as Old Virtual DOM (update complete)",
+          ],
+          steps: [
+            () => {
+              newVirtualDOM[0].text = "Tea";
+            },
+            () => {}, // diff step handled in main logic
+            () => updateRealDOM(diffVDOM(oldVirtualDOM, newVirtualDOM)),
+            () => commitNewVDOM(),
+          ],
+        },
+        bgChange: {
+          description: [
+            "Change background color of third item in New Virtual DOM (to orange)",
+            "Diff Old and New Virtual DOM (highlight changed nodes)",
+            "Update Real DOM nodes based on diff",
+            "Commit New Virtual DOM as Old Virtual DOM (update complete)",
+          ],
+          steps: [
+            () => {
+              newVirtualDOM[2].style.backgroundColor = "orange";
+            },
+            () => {},
+            () => updateRealDOM(diffVDOM(oldVirtualDOM, newVirtualDOM)),
+            () => commitNewVDOM(),
+          ],
+        },
+        addItem: {
+          description: [
+            'Add new item "Honey" to New Virtual DOM',
+            "Diff Old and New Virtual DOM (highlight added node)",
+            "Update Real DOM nodes based on diff (add new node)",
+            "Commit New Virtual DOM as Old Virtual DOM (update complete)",
+          ],
+          steps: [
+            () => {
+              newVirtualDOM.push({ key: "item4", text: "Honey", style: {} });
+            },
+            () => {},
+            () => updateRealDOM(diffVDOM(oldVirtualDOM, newVirtualDOM)),
+            () => commitNewVDOM(),
+          ],
+        },
+        removeItem: {
+          description: [
+            'Remove second item "Milk" from New Virtual DOM',
+            "Diff Old and New Virtual DOM (highlight removed node)",
+            "Update Real DOM nodes based on diff (remove node)",
+            "Commit New Virtual DOM as Old Virtual DOM (update complete)",
+          ],
+          steps: [
+            () => {
+              newVirtualDOM = newVirtualDOM.filter(
+                (item) => item.key !== "item2"
+              );
+            },
+            () => {},
+            () => updateRealDOM(diffVDOM(oldVirtualDOM, newVirtualDOM)),
+            () => commitNewVDOM(),
+          ],
+        },
+        reorder: {
+          description: [
+            "Reorder items in New Virtual DOM (Sugar before Milk)",
+            "Diff Old and New Virtual DOM (highlight reordered nodes)",
+            "Update Real DOM nodes based on diff (reorder nodes)",
+            "Commit New Virtual DOM as Old Virtual DOM (update complete)",
+          ],
+          steps: [
+            () => {
+              newVirtualDOM = [
+                newVirtualDOM.find((i) => i.key === "item1"),
+                newVirtualDOM.find((i) => i.key === "item3"),
+                newVirtualDOM.find((i) => i.key === "item2"),
+              ];
+            },
+            () => {},
+            () => updateRealDOM(diffVDOM(oldVirtualDOM, newVirtualDOM)),
+            () => commitNewVDOM(),
+          ],
+        },
+      };
+
+      // DOM containers
+      const oldVDOMContainer = document.getElementById("oldVirtualDomTree");
+      const newVDOMContainer = document.getElementById("newVirtualDomTree");
+      const realDOMContainer = document.getElementById("realDomTree");
+      const statusMessage = document.getElementById("statusMessage");
+      const btnNextStep = document.getElementById("btnNextStep");
+      const btnReset = document.getElementById("btnReset");
+      const exampleSelect = document.getElementById("exampleSelect");
+
+      // Utility render function
+      function renderTree(
+        container,
+        nodes,
+        highlights = {},
+        highlightType = ""
+      ) {
+        container.innerHTML = "";
+        const ul = document.createElement("ul");
+        nodes.forEach((node) => {
+          const li = document.createElement("li");
+          li.textContent = node.text;
+          if (node.style && node.style.backgroundColor) {
+            li.style.backgroundColor = node.style.backgroundColor;
+          }
+          if (highlights[node.key]) {
+            if (highlightType === "diff") {
+              li.classList.add("highlight-diff");
+              li.addEventListener(
+                "animationend",
+                () => li.classList.remove("highlight-diff"),
+                { once: true }
+              );
+            } else if (highlightType === "update") {
+              li.classList.add("highlight-update");
+              li.addEventListener(
+                "animationend",
+                () => li.classList.remove("highlight-update"),
+                { once: true }
+              );
+            } else if (highlightType === "add") {
+              li.classList.add("highlight-add");
+              li.addEventListener(
+                "animationend",
+                () => li.classList.remove("highlight-add"),
+                { once: true }
+              );
+            } else if (highlightType === "remove") {
+              li.classList.add("highlight-remove");
+              li.addEventListener(
+                "animationend",
+                () => li.classList.remove("highlight-remove"),
+                { once: true }
+              );
+            }
+          }
+          ul.appendChild(li);
+        });
+        container.appendChild(ul);
+      }
+
+      // Diff function returns keys with changes and change type
+      function diffVDOM(oldVDOM, newVDOM) {
+        const changes = {};
+        const oldKeys = oldVDOM.map((n) => n.key);
+        const newKeys = newVDOM.map((n) => n.key);
+
+        // Detect removals
+        oldKeys.forEach((k) => {
+          if (!newKeys.includes(k)) {
+            changes[k] = "remove";
+          }
+        });
+        // Detect additions and changes
+        newVDOM.forEach((newNode) => {
+          const oldNode = oldVDOM.find((n) => n.key === newNode.key);
+          if (!oldNode) {
+            changes[newNode.key] = "add";
+          } else {
+            if (oldNode.text !== newNode.text) {
+              changes[newNode.key] = "text";
+            } else if (
+              (oldNode.style.backgroundColor || "") !==
+              (newNode.style.backgroundColor || "")
+            ) {
+              changes[newNode.key] = "style";
+            } else if (oldVDOM.indexOf(oldNode) !== newVDOM.indexOf(newNode)) {
+              // Reordered node
+              if (!changes[newNode.key]) changes[newNode.key] = "reorder";
+            }
+          }
+        });
+        return changes;
+      }
+
+      // Update real DOM nodes based on diff keys
+      function updateRealDOM(changes) {
+        // Handle removals first
+        Object.entries(changes).forEach(([key, changeType]) => {
+          if (changeType === "remove") {
+            const idx = realDOM.findIndex((n) => n.key === key);
+            if (idx !== -1) {
+              realDOM.splice(idx, 1);
+            }
+          }
+        });
+        // Handle additions and updates
+        Object.entries(changes).forEach(([key, changeType]) => {
+          if (changeType === "add") {
+            const newNode = newVirtualDOM.find((n) => n.key === key);
+            if (newNode) {
+              realDOM.push(JSON.parse(JSON.stringify(newNode)));
+            }
+          } else if (changeType === "text" || changeType === "style") {
+            const idx = realDOM.findIndex((n) => n.key === key);
+            const newNode = newVirtualDOM.find((n) => n.key === key);
+            if (idx !== -1 && newNode) {
+              if (changeType === "text") {
+                realDOM[idx].text = newNode.text;
+              } else {
+                realDOM[idx].style = JSON.parse(JSON.stringify(newNode.style));
+              }
+            }
+          } else if (changeType === "reorder") {
+            // Reorder realDOM to match newVirtualDOM order
+            const reordered = [];
+            newVirtualDOM.forEach((n) => {
+              const node = realDOM.find((r) => r.key === n.key);
+              if (node) reordered.push(node);
+            });
+            realDOM = reordered;
+          }
+        });
+      }
+
+      // Commit newVirtualDOM as oldVirtualDOM
+      function commitNewVDOM() {
+        oldVirtualDOM = JSON.parse(JSON.stringify(newVirtualDOM));
+      }
+
+      // Clear highlights on all trees
+      function clearHighlights() {
+        renderTree(oldVDOMContainer, oldVirtualDOM);
+        renderTree(newVDOMContainer, newVirtualDOM);
+        renderTree(realDOMContainer, realDOM);
+      }
+
+      // Step control variables
+      let step = 0;
+      let currentExample = exampleSelect.value;
+
+      function nextStep() {
+        const example = examples[currentExample];
+        if (!example) return;
+
+        if (step < example.steps.length) {
+          statusMessage.textContent = `Step ${step + 1}: ${
+            example.description[step]
+          }`;
+          example.steps[step]();
+          // After step function, handle diff and render accordingly
+          if (step === 1 || step === 5) {
+            // Diff and highlight
+            const changes = diffVDOM(oldVirtualDOM, newVirtualDOM);
+            renderTree(oldVDOMContainer, oldVirtualDOM, changes, "diff");
+            renderTree(newVDOMContainer, newVirtualDOM, changes, "diff");
+            renderTree(realDOMContainer, realDOM);
+          } else if (step === 2 || step === 6) {
+            // Update Real DOM and highlight updates
+            const changes = diffVDOM(oldVirtualDOM, newVirtualDOM);
+            updateRealDOM(changes);
+            renderTree(oldVDOMContainer, oldVirtualDOM);
+            renderTree(newVDOMContainer, newVirtualDOM);
+            // Highlight updates, additions, removals
+            renderTree(realDOMContainer, realDOM, changes, "update");
+          } else if (step === 3 || step === 7) {
+            // Commit new VDOM as old and clear highlights
+            commitNewVDOM();
+            clearHighlights();
+          } else {
+            // Just render all without highlights
+            renderTree(oldVDOMContainer, oldVirtualDOM);
+            renderTree(newVDOMContainer, newVirtualDOM);
+            renderTree(realDOMContainer, realDOM);
+          }
+          step++;
+          if (step >= example.steps.length) {
+            btnNextStep.disabled = true;
+            btnReset.disabled = false;
+          }
+        }
+      }
+
+      function reset() {
+        step = 0;
+        oldVirtualDOM = JSON.parse(JSON.stringify(initialVDOM));
+        newVirtualDOM = JSON.parse(JSON.stringify(initialVDOM));
+        realDOM = JSON.parse(JSON.stringify(initialVDOM));
+        btnNextStep.disabled = false;
+        btnReset.disabled = true;
+        clearHighlights();
+        statusMessage.textContent =
+          'Select an example and click "Next Step" to start.';
+      }
+
+      exampleSelect.addEventListener("change", () => {
+        reset();
+        currentExample = exampleSelect.value;
+      });
+
+      btnNextStep.addEventListener("click", nextStep);
+      btnReset.addEventListener("click", reset);
+
+      // Initial render
+      clearHighlights();
+    </script>
+  </body>
+</html>

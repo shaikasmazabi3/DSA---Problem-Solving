@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How Webpage Loading & JavaScript Execution Works - Interactive Visual Guide</title>
+<style>
+  /* Basic styling */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    user-select: none;
+  }
+  header {
+    background: #005a9c;
+    color: white;
+    padding: 1rem 2rem;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.5rem;
+  }
+  main {
+    max-width: 900px;
+    margin: 2rem auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    padding: 2rem;
+    position: relative;
+  }
+  .slide {
+    display: none;
+    animation: fadeIn 1s ease forwards;
+  }
+  .slide.active {
+    display: block;
+  }
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+  .nav-buttons {
+    text-align: center;
+    margin-top: 2rem;
+  }
+  button {
+    background: #005a9c;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    margin: 0 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  button:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+  }
+  .visual {
+    margin: 1rem 0;
+    text-align: center;
+  }
+  .icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  pre {
+    background: #272822;
+    color: #f8f8f2;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    max-height: 200px;
+  }
+  .code-inline {
+    background: #eee;
+    font-family: monospace;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+  }
+  .highlight {
+    color: #d14;
+    font-weight: bold;
+  }
+  .step-box {
+    background: #d0e7ff;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 6px;
+    border-left: 6px solid #005a9c;
+  }
+  .flow-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .flow-item {
+    background: #e6f0ff;
+    border-radius: 8px;
+    padding: 1rem;
+    width: 150px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: relative;
+  }
+  .flow-item .icon {
+    font-size: 4rem;
+  }
+  .arrow {
+    position: absolute;
+    width: 50px;
+    height: 2px;
+    background: #005a9c;
+    top: 50%;
+    right: -60px;
+    transform: translateY(-50%);
+  }
+  .flow-item:last-child .arrow {
+    display: none;
+  }
+  /* Animation for arrows */
+  .arrow::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    margin-top: -5px;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 10px solid #005a9c;
+  }
+  /* Interactive highlight */
+  .highlight-box {
+    background: #ffffcc;
+    border: 2px solid #ffcc00;
+    border-radius: 6px;
+    padding: 0.5rem;
+    margin-top: 1rem;
+    font-weight: bold;
+  }
+  /* Tooltip */
+  .tooltip {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dotted #005a9c;
+  }
+  .tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #005a9c;
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  How Webpage Loading & JavaScript Execution Works
+</header>
+
+<main>
+
+  <!-- Slide 1 -->
+  <section class="slide active" id="slide-1">
+    <h2>Step 1: User Requests a Webpage</h2>
+    <p>Imagine you type a website URL or click a link. Your browser sends a request to the server.</p>
+    <div class="flow-container" style="justify-content:center;">
+      <div class="flow-item" style="position:relative;">
+        <div class="icon">👤</div>
+        <div>User (Browser)</div>
+        <div class="arrow"></div>
+      </div>
+      <div class="flow-item">
+        <div class="icon">🌐</div>
+        <div>Server</div>
+      </div>
+    </div>
+    <p>The server responds by sending the <span class="code-inline">&lt;html&gt;</span> file (the webpage).</p>
+  </section>
+
+  <!-- Slide 2 -->
+  <section class="slide" id="slide-2">
+    <h2>Step 2: Server Sends HTML File</h2>
+    <p>The browser starts downloading the HTML file and begins parsing it <em>line by line</em>.</p>
+    <div class="visual">
+      <div class="icon">📄</div>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;link rel="stylesheet" href="style.css"&gt;
+    &lt;script src="script.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello World&lt;/h1&gt;
+    &lt;img src="image.jpg" alt="Sample Image"&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+      </pre>
+    </div>
+    <p>The browser builds the DOM (Document Object Model) as it parses HTML.</p>
+  </section>
+
+  <!-- Slide 3 -->
+  <section class="slide" id="slide-3">
+    <h2>Step 3: Loading CSS & JavaScript</h2>
+    <p>When the browser encounters:</p>
+    <ul>
+      <li><span class="code-inline">&lt;link rel="stylesheet" href="style.css"&gt;</span> — it requests and downloads the CSS file.</li>
+      <li><span class="code-inline">&lt;script src="script.js"&gt;&lt;/script&gt;</span> — it requests and downloads the JavaScript file.</li>
+    </ul>
+    <p><strong>Important:</strong> By default, JavaScript blocks HTML parsing until it is downloaded and executed.</p>
+    <div class="flow-container" style="justify-content:center;">
+      <div class="flow-item">
+        <div class="icon">📄</div>
+        <div>HTML Parsing</div>
+        <div class="arrow"></div>
+      </div>
+      <div class="flow-item">
+        <div class="icon">🎨</div>
+        <div>CSS Loading</div>
+        <div class="arrow"></div>
+      </div>
+      <div class="flow-item">
+        <div class="icon">📜</div>
+        <div>JS Loading & Execution</div>
+      </div>
+    </div>
+    <p>This blocking can delay page rendering.</p>
+  </section>
+
+  <!-- Slide 4 -->
+  <section class="slide" id="slide-4">
+    <h2>Step 4: What about Assets like Images, Audio, Video?</h2>
+    <p>Assets like images, audio, video, and iframes are requested after their tags are parsed by HTML.</p>
+    <p>The browser downloads them asynchronously without blocking HTML parsing.</p>
+    <div class="flow-container" style="justify-content:center;">
+      <div class="flow-item">
+        <div class="icon">📄</div>
+        <div>HTML Parsing</div>
+        <div class="arrow"></div>
+      </div>
+      <div class="flow-item">
+        <div class="icon">🖼️</div>
+        <div>Image / Audio / Video Request</div>
+      </div>
+    </div>
+    <p>Rendering may wait for these assets to fully load depending on CSS or JS.</p>
+  </section>
+
+  <!-- Slide 5 -->
+  <section class="slide" id="slide-5">
+    <h2>Step 5: Internal vs External JavaScript</h2>
+    <p><strong>Internal JavaScript:</strong> Code inside <span class="code-inline">&lt;script&gt; ... &lt;/script&gt;</span> tags in HTML.</p>
+    <p><strong>External JavaScript:</strong> Code inside separate files loaded with <span class="code-inline">&lt;script src="file.js"&gt;&lt;/script&gt;</span>.</p>
+    <p>Internal scripts run immediately where they appear in the HTML, blocking parsing.</p>
+    <p>External scripts block parsing until downloaded and executed (unless using <code>defer</code> or <code>async</code>).</p>
+  </section>
+
+  <!-- Slide 6 -->
+  <section class="slide" id="slide-6">
+    <h2>Step 6: The <code>defer</code> Attribute</h2>
+    <p>Adding <code>defer</code> to an external script:</p>
+    <pre>&lt;script src="script.js" defer&gt;&lt;/script&gt;</pre>
+    <p>Means:</p>
+    <ul>
+      <li>Script is downloaded in parallel with HTML parsing.</li>
+      <li>Script execution is deferred until after the HTML is fully parsed.</li>
+      <li>Scripts with <code>defer</code> execute in the order they appear.</li>
+    </ul>
+    <p>This prevents blocking and ensures the DOM is ready when script runs.</p>
+  </section>
+
+  <!-- Slide 7 -->
+  <section class="slide" id="slide-7">
+    <h2>Step 7: The <code>async</code> Attribute</h2>
+    <p>Adding <code>async</code> to an external script:</p>
+    <pre>&lt;script src="script.js" async&gt;&lt;/script&gt;</pre>
+    <p>Means:</p>
+    <ul>
+      <li>Script is downloaded in parallel with HTML parsing.</li>
+      <li>Script executes as soon as it is downloaded — <strong>not</strong> waiting for HTML parsing.</li>
+      <li>Scripts with <code>async</code> may execute in any order.</li>
+    </ul>
+    <p>This can cause issues if the script depends on DOM elements or other scripts.</p>
+  </section>
+
+  <!-- Slide 8 -->
+  <section class="slide" id="slide-8">
+    <h2>Step 8: <code>type="module"</code> Scripts</h2>
+    <p>Scripts with <code>type="module"</code> behave like <code>defer</code> by default:</p>
+    <pre>&lt;script type="module" src="module.js"&gt;&lt;/script&gt;</pre>
+    <ul>
+      <li>Modules are downloaded asynchronously.</li>
+      <li>Execution is deferred until HTML parsing is complete.</li>
+      <li>Modules support <code>import</code> and <code>export</code>.</li>
+    </ul>
+    <p>This is the modern preferred way to write modular JavaScript.</p>
+  </section>
+
+  <!-- Slide 9 -->
+  <section class="slide" id="slide-9">
+    <h2>Step 9: What Happens If You Don't Use <code>defer</code> or <code>async</code>?</h2>
+    <p>Without <code>defer</code> or <code>async</code>, scripts block the HTML parser:</p>
+    <ul>
+      <li>Browser stops parsing HTML to download and execute the script.</li>
+      <li>This delays page rendering and can cause a blank page for longer.</li>
+      <li>If the script tries to manipulate DOM elements that haven’t loaded yet, it may cause errors.</li>
+    </ul>
+    <p>Example:</p>
+    <pre>
+&lt;script src="script.js"&gt;&lt;/script&gt;
+&lt;div id="content"&gt;...&lt;/div&gt;
+    </pre>
+    <p>If <code>script.js</code> runs before the div is parsed, it won't find the element.</p>
+  </section>
+
+  <!-- Slide 10 -->
+  <section class="slide" id="slide-10">
+    <h2>Step 10: The <code>DOMContentLoaded</code> Event</h2>
+    <p>This event fires when:</p>
+    <ul>
+      <li>The HTML document has been fully parsed.</li>
+      <li>All <code>defer</code> scripts and <code>type="module"</code> scripts have downloaded and executed.</li>
+    </ul>
+    <p><strong>Note:</strong> <code>DOMContentLoaded</code> does NOT wait for images, videos, or async scripts.</p>
+    <p>Example usage:</p>
+    <pre>
+document.addEventListener('DOMContentLoaded', () =&gt; {
+  console.log('DOM fully parsed and deferred scripts executed');
+});
+    </pre>
+  </section>
+
+  <!-- Slide 11 -->
+  <section class="slide" id="slide-11">
+    <h2>Step 11: Scripts Running After <code>DOMContentLoaded</code></h2>
+    <p>Sometimes scripts run after <code>DOMContentLoaded</code> has fired, such as:</p>
+    <ul>
+      <li>Dynamically imported modules</li>
+      <li><code>async</code> scripts</li>
+      <li>Dynamically injected scripts</li>
+      <li>After asynchronous operations (e.g., <code>await fetch()</code>)</li>
+    </ul>
+    <p>In these cases, check <code>document.readyState</code> before adding a listener:</p>
+    <pre>
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+    </pre>
+    <p>This ensures your setup runs even if DOMContentLoaded already fired.</p>
+  </section>
+
+  <!-- Slide 12 -->
+  <section class="slide" id="slide-12">
+    <h2>Summary: How It All Works Together</h2>
+    <div class="flow-container" style="justify-content:center;">
+      <div class="flow-item" style="width: 120px;">
+        <div class="icon">👤</div>
+        <div>User Requests URL</div>
+        <div class="arrow"></div>
+      </div>
+      <div class="flow-item" style="width: 120px;">
+        <div class="icon">🌐</div>
+        <div>Server Sends HTML</div>
+        <div class="arrow"></div>
+      </div>
+      <div class="flow-item" style="width: 120px;">
+        <div class="icon">📄</div>
+        <div>Browser Parses HTML</div>
+        <div class="arrow"></div>
+      </div>
+      <div class="flow-item" style="width: 120px;">
+        <div class="icon">🎨</div>
+        <div>CSS Loads</div>
+        <div class="arrow"></div>
+      </div>
+      <div class="flow-item" style="width: 120px;">
+        <div class="icon">📜</div>
+        <div>JS Loads & Executes</div>
+        <div class="arrow"></div>
+      </div>
+      <div class="flow-item" style="width: 120px;">
+        <div class="icon">🖼️</div>
+        <div>Assets Load Async</div>
+      </div>
+    </div>
+    <p><strong>Scripts with <code>defer</code> or <code>type="module"</code> run after HTML parsing, improving performance and avoiding errors.</strong></p>
+  </section>
+
+  <div class="nav-buttons">
+    <button id="prevBtn" disabled>⬅ Previous</button>
+    <button id="nextBtn">Next ➡</button>
+  </div>
+
+</main>
+
+<script>
+  // Slideshow logic
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function showSlide(n) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[n].classList.add('active');
+    prevBtn.disabled = n === 0;
+    nextBtn.disabled = n === slides.length - 1;
+  }
+
+  prevBtn.addEventListener('click', () => {
+    if (current > 0) {
+      current--;
+      showSlide(current);
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (current < slides.length - 1) {
+      current++;
+      showSlide(current);
+    }
+  });
+</script>
+
+</body>
+</html>

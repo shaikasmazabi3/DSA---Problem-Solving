@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CSS and Frontend Fun! 🎨 - Interactive Beginner Lesson</title>
+    <style>
+      /* Reset & basics */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f8ff;
+        margin: 0;
+        padding: 0;
+        color: #222;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #004080;
+        margin-bottom: 0.25em;
+      }
+      main {
+        flex-grow: 1;
+        max-width: 700px;
+        margin: 1em auto 3em;
+        padding: 1em 1.5em;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+      .slide {
+        display: none;
+        animation: fadeInSlide 0.8s ease forwards;
+      }
+      .slide.active {
+        display: block;
+      }
+      @keyframes fadeInSlide {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Navigation */
+      nav {
+        text-align: center;
+        margin: 1em 0 2em;
+      }
+      button {
+        background: #007acc;
+        border: none;
+        color: white;
+        padding: 0.6em 1.2em;
+        margin: 0 0.3em;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s ease;
+      }
+      button:focus {
+        outline: 3px solid #ffbf47;
+        outline-offset: 2px;
+      }
+      button:hover:not(:disabled) {
+        background: #005fa3;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      /* Code block styling */
+      pre {
+        background: #e0f7fa;
+        border-radius: 8px;
+        padding: 1em;
+        overflow-x: auto;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1rem;
+        margin: 0.5em 0 1em;
+        color: #006064;
+      }
+      code {
+        font-weight: bold;
+      }
+
+      /* Visual icons styling */
+      .icon {
+        font-size: 3rem;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 0.4em;
+      }
+
+      /* Interactive Quiz Styles */
+      .quiz {
+        background: #fff9c4;
+        border: 2px solid #fbc02d;
+        padding: 1em;
+        border-radius: 10px;
+        margin-top: 1.5em;
+      }
+      .quiz button {
+        background: #fbc02d;
+        color: #333;
+        margin-top: 0.8em;
+        width: 100%;
+        padding: 0.5em;
+        border-radius: 6px;
+      }
+      .quiz button:hover {
+        background: #f9a825;
+      }
+      .quiz-feedback {
+        margin-top: 1em;
+        font-weight: bold;
+      }
+      .correct {
+        color: green;
+      }
+      .wrong {
+        color: red;
+      }
+
+      /* Animated diagram styles */
+      .diagram {
+        margin: 1em 0;
+        border: 2px solid #007acc;
+        border-radius: 12px;
+        padding: 1em;
+        position: relative;
+        background: #e3f2fd;
+      }
+      .diagram-box {
+        background: #bbdefb;
+        border-radius: 10px;
+        padding: 1em;
+        margin: 0.5em auto;
+        max-width: 280px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        position: relative;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      .diagram-box:hover,
+      .diagram-box:focus {
+        background: #90caf9;
+        outline: none;
+      }
+      .arrow {
+        width: 40px;
+        height: 40px;
+        margin: 0 auto;
+        position: relative;
+        animation: arrowBounce 2s infinite ease-in-out;
+      }
+      .arrow svg {
+        fill: #007acc;
+      }
+      @keyframes arrowBounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(8px);
+        }
+      }
+
+      /* Highlight for interactive parts */
+      .highlight {
+        background: #ffd54f;
+        border-radius: 6px;
+        padding: 0.2em 0.5em;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      .highlight:hover,
+      .highlight:focus {
+        background: #ffca28;
+        outline: none;
+      }
+
+      /* Toggle content */
+      .toggle-content {
+        display: none;
+        margin-top: 0.8em;
+        background: #fffde7;
+        border: 1px solid #fbc02d;
+        border-radius: 8px;
+        padding: 0.8em;
+        font-size: 0.95rem;
+      }
+      .toggle-content.active {
+        display: block;
+      }
+      .toggle-button {
+        background: transparent;
+        border: none;
+        color: #fbc02d;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 0;
+        margin-top: 0.5em;
+        font-size: 0.9rem;
+        text-decoration: underline;
+      }
+      .toggle-button:focus {
+        outline: 2px solid #fbc02d;
+        outline-offset: 2px;
+      }
+
+      /* Progress bar for performance */
+      .progress-bar {
+        background: #c8e6c9;
+        border-radius: 10px;
+        overflow: hidden;
+        height: 20px;
+        margin: 0.5em 0 1em;
+        width: 100%;
+        max-width: 300px;
+      }
+      .progress-fill {
+        height: 100%;
+        background: #388e3c;
+        width: 0%;
+        transition: width 1.5s ease;
+        border-radius: 10px;
+      }
+      .progress-label {
+        font-weight: bold;
+        margin-bottom: 0.3em;
+        color: #2e7d32;
+      }
+
+      /* Accessibility: keyboard focus */
+      .diagram-box:focus-visible,
+      button:focus-visible,
+      .highlight:focus-visible {
+        outline: 3px solid #ffbf47;
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <main role="main" aria-label="Interactive CSS and Frontend Lesson">
+      <h1>🎨 CSS & Frontend Fun! - Learn Step-by-Step</h1>
+
+      <!-- Slide 1: Introduction to CSS -->
+      <section
+        class="slide active"
+        id="slide-1"
+        aria-labelledby="slide1-title"
+        tabindex="0"
+      >
+        <h2 id="slide1-title">What is CSS? 🎨</h2>
+        <p>
+          Imagine your webpage is a plain coloring book page.
+          <span role="img" aria-label="coloring book">📖</span>
+          CSS is like your box of crayons that adds colors, shapes, and styles
+          to make it beautiful!
+        </p>
+        <p>
+          CSS stands for <strong>Cascading Style Sheets</strong>. It tells your
+          webpage how to look.
+        </p>
+        <p>
+          <span class="icon" aria-hidden="true">📄</span> = HTML (the page's
+          structure)<br />
+          <span class="icon" aria-hidden="true">🎨</span> = CSS (the colors and
+          styles)<br />
+          <span class="icon" aria-hidden="true">⚙️</span> = JavaScript (the
+          actions and magic)
+        </p>
+        <button
+          aria-controls="quiz-1"
+          aria-expanded="false"
+          class="toggle-button"
+          id="toggle-quiz-1"
+        >
+          Take a quick quiz! 📝
+        </button>
+        <div
+          class="quiz"
+          id="quiz-1"
+          role="region"
+          aria-live="polite"
+          aria-hidden="true"
+        >
+          <p><strong>What does CSS do?</strong></p>
+          <button data-correct="true">Adds colors and styles</button>
+          <button>Adds structure (like paragraphs)</button>
+          <button>Makes the page interactive</button>
+          <p class="quiz-feedback" aria-live="assertive"></p>
+        </div>
+      </section>
+
+      <!-- Slide 2: The Cascade & Layers -->
+      <section
+        class="slide"
+        id="slide-2"
+        aria-labelledby="slide2-title"
+        tabindex="0"
+      >
+        <h2 id="slide2-title">The CSS Cascade & <code>@layer</code> 🏗️</h2>
+        <p>
+          CSS rules can sometimes "fight" to decide who wins. This is called the
+          <strong>cascade</strong>.
+        </p>
+        <p>
+          Think of it like layers of paint 🖌️ on a wall. The top layer covers
+          the ones below.
+        </p>
+        <div
+          class="diagram"
+          aria-label="Diagram showing CSS layers with boxes stacked"
+        >
+          <div
+            tabindex="0"
+            class="diagram-box"
+            aria-describedby="desc-layer3"
+            role="button"
+          >
+            <strong>Layer 3 (Top layer)</strong><br />Overrides others
+            <div id="desc-layer3" class="sr-only">
+              Topmost CSS layer that overrides layers below
+            </div>
+          </div>
+          <div class="arrow" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="40"
+              height="40"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M12 2v20m0 0l-6-6m6 6l6-6"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div
+            tabindex="0"
+            class="diagram-box"
+            aria-describedby="desc-layer2"
+            role="button"
+          >
+            <strong>Layer 2</strong><br />Middle priority
+            <div id="desc-layer2" class="sr-only">
+              Middle CSS layer with medium priority
+            </div>
+          </div>
+          <div class="arrow" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="40"
+              height="40"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M12 2v20m0 0l-6-6m6 6l6-6"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div
+            tabindex="0"
+            class="diagram-box"
+            aria-describedby="desc-layer1"
+            role="button"
+          >
+            <strong>Layer 1 (Bottom layer)</strong><br />Base styles
+            <div id="desc-layer1" class="sr-only">
+              Bottom CSS layer with base styles
+            </div>
+          </div>
+        </div>
+        <p>
+          The <code>@layer</code> rule helps you organize these layers to keep
+          styles neat and clear.
+        </p>
+        <pre><code>@layer base {
+  body { background: white; }
+}
+@layer theme {
+  body { background: lightblue; }
+}</code></pre>
+        <button
+          aria-controls="quiz-2"
+          aria-expanded="false"
+          class="toggle-button"
+          id="toggle-quiz-2"
+        >
+          Try a quiz! 📝
+        </button>
+        <div
+          class="quiz"
+          id="quiz-2"
+          role="region"
+          aria-live="polite"
+          aria-hidden="true"
+        >
+          <p>
+            <strong
+              >If two CSS layers style the same thing, which one wins?</strong
+            >
+          </p>
+          <button>Bottom layer</button>
+          <button data-correct="true">Top layer</button>
+          <button>They merge equally</button>
+          <p class="quiz-feedback" aria-live="assertive"></p>
+        </div>
+      </section>
+
+      <!-- Slide 3: @import and CSS Files -->
+      <section
+        class="slide"
+        id="slide-3"
+        aria-labelledby="slide3-title"
+        tabindex="0"
+      >
+        <h2 id="slide3-title">Importing CSS & CSS Files 📄</h2>
+        <p>
+          Your webpage can have many CSS files. To use one inside another, you
+          use <code>@import</code>.
+        </p>
+        <p>
+          It's like inviting a friend to your party — you bring their styles
+          into your page.
+        </p>
+        <pre><code>@import url("colors.css");
+@import url("fonts.css");</code></pre>
+        <p>But be careful! Importing too many files can slow down your page.</p>
+        <button
+          aria-controls="quiz-3"
+          aria-expanded="false"
+          class="toggle-button"
+          id="toggle-quiz-3"
+        >
+          Quick quiz! 📝
+        </button>
+        <div
+          class="quiz"
+          id="quiz-3"
+          role="region"
+          aria-live="polite"
+          aria-hidden="true"
+        >
+          <p>
+            <strong>What does <code>@import</code> do in CSS?</strong>
+          </p>
+          <button>Imports JavaScript files</button>
+          <button data-correct="true">Imports other CSS files</button>
+          <button>Deletes styles</button>
+          <p class="quiz-feedback" aria-live="assertive"></p>
+        </div>
+      </section>
+
+      <!-- Slide 4: CSS Frameworks -->
+      <section
+        class="slide"
+        id="slide-4"
+        aria-labelledby="slide4-title"
+        tabindex="0"
+      >
+        <h2 id="slide4-title">CSS Frameworks 🏗️</h2>
+        <p>
+          Frameworks are like LEGO kits for building webpages. They give you
+          ready-made blocks of styles.
+        </p>
+        <p>
+          Popular frameworks: <strong>Bootstrap</strong>,
+          <strong>Tailwind CSS</strong>, and <strong>Bulma</strong>.
+        </p>
+        <p>
+          They help you make beautiful pages faster without starting from
+          scratch.
+        </p>
+        <pre><code>&lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"&gt;</code></pre>
+        <button
+          aria-controls="quiz-4"
+          aria-expanded="false"
+          class="toggle-button"
+          id="toggle-quiz-4"
+        >
+          Quiz time! 📝
+        </button>
+        <div
+          class="quiz"
+          id="quiz-4"
+          role="region"
+          aria-live="polite"
+          aria-hidden="true"
+        >
+          <p><strong>What is a CSS framework?</strong></p>
+          <button>A tool for coding JavaScript</button>
+          <button data-correct="true">
+            Ready-made styles to build websites
+          </button>
+          <button>A type of web browser</button>
+          <p class="quiz-feedback" aria-live="assertive"></p>
+        </div>
+      </section>
+
+      <!-- Slide 5: Module.css and Inline CSS -->
+      <section
+        class="slide"
+        id="slide-5"
+        aria-labelledby="slide5-title"
+        tabindex="0"
+      >
+        <h2 id="slide5-title">module.css & Inline CSS 💡</h2>
+        <p>
+          <strong>module.css</strong> lets you write styles that only apply to
+          one part of your page — like a private diary for styles.
+        </p>
+        <p>
+          Inline CSS is when you write styles directly inside your HTML tag,
+          like putting color right on a single word.
+        </p>
+        <pre><code>&lt;div class="button" style="background: orange;"&gt;Click me!&lt;/div&gt;</code></pre>
+        <p>But too much inline CSS can make your page messy!</p>
+        <button
+          aria-controls="quiz-5"
+          aria-expanded="false"
+          class="toggle-button"
+          id="toggle-quiz-5"
+        >
+          Quiz! 📝
+        </button>
+        <div
+          class="quiz"
+          id="quiz-5"
+          role="region"
+          aria-live="polite"
+          aria-hidden="true"
+        >
+          <p><strong>What is inline CSS?</strong></p>
+          <button>CSS written inside HTML tags</button>
+          <button>CSS in separate files</button>
+          <button data-correct="true">CSS written inside HTML tags</button>
+          <p class="quiz-feedback" aria-live="assertive"></p>
+        </div>
+      </section>
+
+      <!-- New Slide 6: CSS as Render-Blocking -->
+      <section
+        class="slide"
+        id="slide-6"
+        aria-labelledby="slide6-title"
+        tabindex="0"
+      >
+        <h2 id="slide6-title">How CSS Blocks Rendering ⏳</h2>
+        <p>
+          When your browser loads a webpage, it wants to show you something
+          quickly.
+        </p>
+        <p>
+          But it <strong>waits for CSS</strong> before painting the page — like
+          waiting for the coloring book crayons before coloring!
+        </p>
+        <div
+          class="diagram"
+          aria-label="Diagram showing browser waiting for CSS before rendering"
+        >
+          <div
+            tabindex="0"
+            class="diagram-box"
+            role="img"
+            aria-label="Browser receiving HTML"
+          >
+            📄 HTML arrives
+          </div>
+          <div class="arrow" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="40"
+              height="40"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M12 2v20m0 0l-6-6m6 6l6-6"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div
+            tabindex="0"
+            class="diagram-box"
+            role="img"
+            aria-label="Browser waiting for CSS"
+          >
+            🎨 Waiting for CSS...
+            <div style="font-size: 0.8rem; color: #555; margin-top: 0.3em">
+              (No colors yet!)
+            </div>
+          </div>
+          <div class="arrow" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="40"
+              height="40"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M12 2v20m0 0l-6-6m6 6l6-6"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div
+            tabindex="0"
+            class="diagram-box"
+            role="img"
+            aria-label="Browser rendering page with CSS"
+          >
+            🎉 CSS arrives — page gets colored & painted!
+          </div>
+        </div>
+        <p>
+          This waiting is called <strong>render-blocking</strong>. It helps the
+          page look right, but can make it slower if CSS files are big or slow.
+        </p>
+        <button
+          aria-controls="quiz-6"
+          aria-expanded="false"
+          class="toggle-button"
+          id="toggle-quiz-6"
+        >
+          Quiz time! 📝
+        </button>
+        <div
+          class="quiz"
+          id="quiz-6"
+          role="region"
+          aria-live="polite"
+          aria-hidden="true"
+        >
+          <p>
+            <strong
+              >Why does the browser wait for CSS before showing the
+              page?</strong
+            >
+          </p>
+          <button>To make sure the page looks correct</button>
+          <button data-correct="true">
+            Because CSS controls the page’s colors and styles
+          </button>
+          <button>To load JavaScript first</button>
+          <p class="quiz-feedback" aria-live="assertive"></p>
+        </div>
+      </section>
+
+      <!-- Slide 7: Summary & Performance Metrics -->
+      <section
+        class="slide"
+        id="slide-7"
+        aria-labelledby="slide7-title"
+        tabindex="0"
+      >
+        <h2 id="slide7-title">Performance & Wrap-Up 🚀</h2>
+        <p>
+          Fast webpages make users happy! Let's meet some important speed
+          friends:
+        </p>
+        <ul>
+          <li>
+            <strong>TTFB</strong> - Time To First Byte: How fast your browser
+            gets the first data from the server.
+          </li>
+          <li>
+            <strong>FCP</strong> - First Contentful Paint: When the first text
+            or image appears.
+          </li>
+          <li>
+            <strong>LCP</strong> - Largest Contentful Paint: When the biggest
+            part of the page loads.
+          </li>
+          <li>
+            <strong>TTI</strong> - Time To Interactive: When your page is ready
+            to use.
+          </li>
+          <li>
+            <strong>CLS</strong> - Cumulative Layout Shift: How much things jump
+            around on your page.
+          </li>
+        </ul>
+        <p>Visualizing <strong>FCP</strong> with a progress bar:</p>
+        <div class="progress-label" id="fcp-label">First Contentful Paint</div>
+        <div
+          class="progress-bar"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+          aria-labelledby="fcp-label"
+        >
+          <div class="progress-fill" id="fcp-bar"></div>
+        </div>
+        <button id="start-fcp-animation">See it in action! ▶️</button>
+        <p>
+          Thanks for learning with me! Keep practicing and your webpages will
+          shine bright! ✨
+        </p>
+      </section>
+
+      <nav aria-label="Slide navigation">
+        <button
+          id="prevBtn"
+          disabled
+          aria-disabled="true"
+          aria-label="Previous Slide"
+        >
+          ⬅️ Previous
+        </button>
+        <button id="nextBtn" aria-label="Next Slide">Next ➡️</button>
+      </nav>
+    </main>
+
+    <script>
+      // Slide navigation logic
+      const slides = document.querySelectorAll(".slide");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      let currentSlide = 0;
+
+      function showSlide(index) {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle("active", i === index);
+          if (i === index) slide.focus();
+        });
+        prevBtn.disabled = index === 0;
+        nextBtn.disabled = index === slides.length - 1;
+        prevBtn.setAttribute("aria-disabled", prevBtn.disabled);
+        nextBtn.setAttribute("aria-disabled", nextBtn.disabled);
+        currentSlide = index;
+        // Close all quizzes on slide change
+        document.querySelectorAll(".quiz").forEach((q) => {
+          q.setAttribute("aria-hidden", "true");
+          q.classList.remove("active");
+        });
+        document.querySelectorAll(".toggle-button").forEach((btn) => {
+          btn.setAttribute("aria-expanded", "false");
+        });
+      }
+
+      prevBtn.addEventListener("click", () => {
+        if (currentSlide > 0) showSlide(currentSlide - 1);
+      });
+      nextBtn.addEventListener("click", () => {
+        if (currentSlide < slides.length - 1) showSlide(currentSlide + 1);
+      });
+
+      // Quiz toggle buttons
+      document.querySelectorAll(".toggle-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const quizId = button.getAttribute("aria-controls");
+          const quiz = document.getElementById(quizId);
+          const expanded = button.getAttribute("aria-expanded") === "true";
+          if (expanded) {
+            quiz.setAttribute("aria-hidden", "true");
+            quiz.classList.remove("active");
+            button.setAttribute("aria-expanded", "false");
+          } else {
+            quiz.setAttribute("aria-hidden", "false");
+            quiz.classList.add("active");
+            button.setAttribute("aria-expanded", "true");
+            // Reset quiz feedback and buttons
+            quiz.querySelectorAll("button").forEach((btn) => {
+              btn.disabled = false;
+              btn.classList.remove("correct", "wrong");
+            });
+            quiz.querySelector(".quiz-feedback").textContent = "";
+          }
+        });
+      });
+
+      // Quiz answers logic
+      document.querySelectorAll(".quiz").forEach((quiz) => {
+        quiz.querySelectorAll("button").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const feedback = quiz.querySelector(".quiz-feedback");
+            if (btn.dataset.correct === "true") {
+              feedback.textContent = "🎉 Correct! Well done!";
+              feedback.className = "quiz-feedback correct";
+            } else {
+              feedback.textContent = "❌ That's not quite right. Try again!";
+              feedback.className = "quiz-feedback wrong";
+            }
+            // Disable all buttons after one answer
+            quiz.querySelectorAll("button").forEach((b) => (b.disabled = true));
+          });
+        });
+      });
+
+      // Animate FCP progress bar
+      const fcpBar = document.getElementById("fcp-bar");
+      const startFcpAnimBtn = document.getElementById("start-fcp-animation");
+      startFcpAnimBtn.addEventListener("click", () => {
+        fcpBar.style.width = "0%";
+        let progress = 0;
+        startFcpAnimBtn.disabled = true;
+        startFcpAnimBtn.textContent = "Loading...";
+        const interval = setInterval(() => {
+          progress += 5;
+          fcpBar.style.width = progress + "%";
+          fcpBar.parentElement.setAttribute("aria-valuenow", progress);
+          if (progress >= 100) {
+            clearInterval(interval);
+            startFcpAnimBtn.textContent = "Done! ✅";
+            startFcpAnimBtn.disabled = false;
+          }
+        }, 100);
+      });
+
+      // Accessibility: allow keyboard navigation for diagram boxes
+      document.querySelectorAll(".diagram-box").forEach((box) => {
+        box.addEventListener("click", () => {
+          alert(
+            "This box represents a CSS layer. Layers stack on top of each other, with the top layer overriding the bottom ones.",
+          );
+        });
+        box.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            box.click();
+          }
+        });
+      });
+
+      // Initialize first slide
+      showSlide(0);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JavaScript Execution Visualization</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4ff;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  header {
+    background: #2563eb;
+    color: white;
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  #leftPanel, #rightPanel {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  #leftPanel {
+    background: white;
+    border-right: 2px solid #e0e7ff;
+  }
+  h2 {
+    color: #2563eb;
+    margin-bottom: 10px;
+  }
+  pre {
+    background: #e0e7ff;
+    border-radius: 8px;
+    padding: 15px;
+    font-family: monospace;
+    font-size: 1.1rem;
+    user-select: none;
+  }
+  pre .highlight-line {
+    background-color: #bfdbfe;
+    display: block;
+  }
+  ul.tree {
+    list-style: none;
+    padding-left: 20px;
+  }
+  ul.tree li {
+    margin: 5px 0;
+    cursor: default;
+    user-select: none;
+  }
+  ul.tree li.highlight {
+    background-color: #bfdbfe;
+    border-radius: 6px;
+  }
+  #descriptions {
+    font-size: 1rem;
+    line-height: 1.4;
+    background: #dbeafe;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+  }
+  #controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+  }
+  button {
+    background: #2563eb;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+  }
+  /* Scrollbar */
+  #rightPanel::-webkit-scrollbar {
+    width: 8px;
+  }
+  #rightPanel::-webkit-scrollbar-thumb {
+    background-color: #93c5fd;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header>JavaScript Execution and DOM/CSSOM Mutation Visualization</header>
+
+<div id="main">
+  <div id="leftPanel">
+    <h2>JavaScript Code</h2>
+    <pre id="jsCode">
+const p = document.createElement('p');
+p.textContent = 'Hello from JavaScript!';
+document.body.appendChild(p);
+    </pre>
+    <div id="descriptions">
+      Click Next to step through JS parsing and execution.
+    </div>
+    <div id="controls">
+      <button id="prevBtn" disabled>Previous</button>
+      <button id="nextBtn">Next</button>
+    </div>
+  </div>
+  <div id="rightPanel">
+    <h2>DOM Tree</h2>
+    <ul id="domTree" class="tree"></ul>
+  </div>
+</div>
+
+<script>
+  const jsCodeEl = document.getElementById("jsCode");
+  const domTreeEl = document.getElementById("domTree");
+  const descriptionsEl = document.getElementById("descriptions");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
+  // JS code lines for highlighting
+  const codeLines = [
+    "const p = document.createElement('p');",
+    "p.textContent = 'Hello from JavaScript!';",
+    "document.body.appendChild(p);"
+  ];
+
+  // DOM tree states at each step
+  const domStates = [
+    [ // Initial DOM
+      { name: "html", children: [
+        { name: "body", children: [] }
+      ]}
+    ],
+    [ // After createElement, no DOM change yet
+      { name: "html", children: [
+        { name: "body", children: [] }
+      ]}
+    ],
+    [ // After setting textContent (still no DOM change)
+      { name: "html", children: [
+        { name: "body", children: [] }
+      ]}
+    ],
+    [ // After appendChild, new <p> added
+      { name: "html", children: [
+        { name: "body", children: [
+          { name: "p", children: [
+            { name: "#text", content: "Hello from JavaScript!" }
+          ]}
+        ]}
+      ]}
+    ]
+  ];
+
+  let currentStep = 0;
+
+  // Render JS code with highlighted line
+  function renderCode(lineIndex) {
+    const html = codeLines.map((line, i) => {
+      if (i === lineIndex) {
+        return `<span class="highlight-line">${line}</span>`;
+      }
+      return line;
+    }).join("\n");
+    jsCodeEl.innerHTML = html;
+  }
+
+  // Render DOM tree recursively
+  function renderDOM(nodes, container) {
+    container.innerHTML = "";
+    function createNodeEl(node) {
+      const li = document.createElement("li");
+      if (node.name === "#text") {
+        li.textContent = `"${node.content}" (text node)`;
+        li.style.fontStyle = "italic";
+        li.style.color = "#374151";
+      } else {
+        li.textContent = `<${node.name}>`;
+      }
+      if (node.children && node.children.length) {
+        const ul = document.createElement("ul");
+        ul.className = "tree";
+        node.children.forEach(child => ul.appendChild(createNodeEl(child)));
+        li.appendChild(ul);
+      }
+      return li;
+    }
+    nodes.forEach(node => container.appendChild(createNodeEl(node)));
+  }
+
+  // Descriptions for each step
+  const descriptions = [
+    "Step 1: JavaScript code is parsed into an Abstract Syntax Tree (AST).",
+    "Step 2: Execution starts. The <code>createElement('p')</code> creates a new &lt;p&gt; element but does not add it to the DOM yet.",
+    "Step 3: The <code>textContent</code> property sets the text inside the new &lt;p&gt; element.",
+    "Step 4: The <code>appendChild</code> method inserts the new &lt;p&gt; element into the DOM under &lt;body&gt;."
+  ];
+
+  function updateUI() {
+    renderCode(currentStep === 0 ? -1 : currentStep - 1);
+    renderDOM(domStates[currentStep], domTreeEl);
+    descriptionsEl.innerHTML = descriptions[currentStep];
+    prevBtn.disabled = currentStep === 0;
+    nextBtn.disabled = currentStep === domStates.length - 1;
+  }
+
+  prevBtn.addEventListener("click", () => {
+    if (currentStep > 0) {
+      currentStep--;
+      updateUI();
+    }
+  });
+
+  nextBtn.addEventListener("click", () => {
+    if (currentStep < domStates.length - 1) {
+      currentStep++;
+      updateUI();
+    }
+  });
+
+  updateUI();
+</script>
+
+</body>
+</html>

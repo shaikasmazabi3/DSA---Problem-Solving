@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fun Frontend: Prototypal Inheritance & More!</title>
+    <style>
+      /* Reset & base */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #fefefe;
+        margin: 0;
+        padding: 0;
+        color: #222;
+      }
+      main {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 1rem;
+      }
+      h1,
+      h2 {
+        color: #2a9d8f;
+      }
+      h1 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 0.3rem;
+      }
+      h2 {
+        margin-top: 2rem;
+      }
+      p {
+        font-size: 1.1rem;
+        line-height: 1.4;
+      }
+      code {
+        background: #e0f7f5;
+        color: #056b66;
+        padding: 0.15em 0.4em;
+        border-radius: 4px;
+        font-family: monospace;
+      }
+      button {
+        background-color: #2a9d8f;
+        color: white;
+        border: none;
+        padding: 0.6em 1.2em;
+        margin: 1em 0;
+        font-size: 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      button:hover,
+      button:focus {
+        background-color: #21867a;
+        outline: none;
+      }
+      /* Slide container */
+      .slide {
+        display: none;
+        animation: fadeIn 0.7s ease forwards;
+      }
+      .slide.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      /* Navigation */
+      nav {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+      }
+      nav button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+      /* Visual Boxes & Icons */
+      .box {
+        background-color: #e0f7f5;
+        border: 2px solid #2a9d8f;
+        border-radius: 10px;
+        padding: 1rem;
+        margin: 1rem 0;
+        text-align: center;
+        position: relative;
+        user-select: none;
+      }
+      .icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+      }
+      /* Prototypal inheritance tree */
+      #protoTree {
+        display: flex;
+        justify-content: center;
+        margin: 1rem 0;
+      }
+      .protoNode {
+        border: 2px solid #2a9d8f;
+        border-radius: 10px;
+        background: #a7c7c5;
+        padding: 1rem 1.5rem;
+        margin: 0 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        user-select: none;
+      }
+      .protoNode:hover,
+      .protoNode:focus {
+        background-color: #21867a;
+        color: white;
+        outline: none;
+      }
+      .arrow {
+        font-size: 2.5rem;
+        align-self: center;
+        user-select: none;
+      }
+      /* Code snippet container */
+      pre {
+        background: #eef9f8;
+        border-left: 4px solid #2a9d8f;
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 1rem;
+      }
+      /* Quiz styles */
+      .quiz {
+        margin-top: 1rem;
+        border: 2px solid #2a9d8f;
+        border-radius: 10px;
+        padding: 1rem;
+        background: #d0f0ec;
+      }
+      .quiz button {
+        background-color: #056b66;
+        margin-top: 0.5rem;
+      }
+      .feedback {
+        margin-top: 0.5rem;
+        font-weight: bold;
+      }
+      /* Interactive diagram */
+      .memory-box {
+        width: 150px;
+        height: 100px;
+        border: 3px solid #2a9d8f;
+        border-radius: 10px;
+        margin: 1rem auto;
+        position: relative;
+        background: #b2dedc;
+        user-select: none;
+      }
+      .memory-box h3 {
+        margin: 0.3rem;
+        font-size: 1.2rem;
+        text-align: center;
+      }
+      .memory-slot {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #056b66;
+        border-radius: 6px;
+        background: #e0f7f5;
+        margin: 0.2rem auto;
+        line-height: 40px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      .memory-slot:hover,
+      .memory-slot:focus {
+        background-color: #21867a;
+        color: white;
+        outline: none;
+      }
+      /* Animation for lazy loading */
+      .lazy-load {
+        width: 100%;
+        height: 100px;
+        background: linear-gradient(
+          90deg,
+          #2a9d8f 25%,
+          #a7c7c5 50%,
+          #2a9d8f 75%
+        );
+        background-size: 200% 100%;
+        animation: loading 1.5s linear infinite;
+        border-radius: 10px;
+        margin: 1rem 0;
+      }
+      @keyframes loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+      /* Accessibility focus */
+      [tabindex]:focus {
+        outline: 3px solid #2a9d8f;
+        outline-offset: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <main
+      role="main"
+      aria-label="Interactive lesson on JavaScript frontend basics"
+    >
+      <h1>🎉 Fun Frontend: Prototypal Inheritance & More!</h1>
+      <section id="slide1" class="slide active" tabindex="0" aria-live="polite">
+        <h2>👋 Welcome!</h2>
+        <p>
+          Let's learn some cool JavaScript magic:
+          <strong>Objects, Arrays, Functions, and Prototypal Inheritance</strong
+          >! We'll also peek at <em>polyfills</em>.
+        </p>
+        <p>
+          Imagine JavaScript like a fun toy box 🧸 where things can share toys
+          and learn tricks from one another.
+        </p>
+        <button
+          aria-controls="slide2"
+          aria-label="Go to next slide: What is an Object?"
+        >
+          Next ➡️
+        </button>
+      </section>
+
+      <section id="slide2" class="slide" tabindex="0" aria-live="polite">
+        <h2>📦 What is an Object?</h2>
+        <p>
+          Think of an <strong>object</strong> as a toy box filled with toys
+          (properties) and tricks (methods).
+        </p>
+        <div class="box" aria-label="Object toy box example">
+          <div class="icon" aria-hidden="true">🧸</div>
+          <strong>Teddy Bear</strong><br />
+          Color: Brown<br />
+          Size: Medium<br />
+          <button
+            aria-expanded="false"
+            aria-controls="objCode"
+            class="toggleCodeBtn"
+          >
+            Show Code Example
+          </button>
+          <pre id="objCode" hidden><code>
+const teddy = {
+  color: "brown",
+  size: "medium",
+  hug() {
+    console.log("🤗 Hugging teddy!");
+  }
+};
+      </code></pre>
+        </div>
+        <button
+          aria-controls="slide3"
+          aria-label="Go to next slide: What is an Array?"
+        >
+          Next ➡️
+        </button>
+        <button
+          aria-controls="slide1"
+          aria-label="Go to previous slide: Welcome"
+        >
+          ⬅️ Back
+        </button>
+      </section>
+
+      <section id="slide3" class="slide" tabindex="0" aria-live="polite">
+        <h2>🧩 What is an Array?</h2>
+        <p>
+          An <strong>array</strong> is a special box that keeps things in order
+          — like your toy train 🚂 with cars one after another.
+        </p>
+        <div class="box" aria-label="Array toy train example">
+          <div class="icon" aria-hidden="true">🚂</div>
+          <strong>Toy Train</strong><br />
+          Cars: ["Engine", "Cargo", "Caboose"]
+          <button
+            aria-expanded="false"
+            aria-controls="arrCode"
+            class="toggleCodeBtn"
+          >
+            Show Code Example
+          </button>
+          <pre id="arrCode" hidden><code>
+const train = ["Engine", "Cargo", "Caboose"];
+console.log(train[0]); // "Engine"
+      </code></pre>
+        </div>
+        <button
+          aria-controls="slide4"
+          aria-label="Go to next slide: What is a Function?"
+        >
+          Next ➡️
+        </button>
+        <button
+          aria-controls="slide2"
+          aria-label="Go to previous slide: What is an Object?"
+        >
+          ⬅️ Back
+        </button>
+      </section>
+
+      <section id="slide4" class="slide" tabindex="0" aria-live="polite">
+        <h2>⚙️ What is a Function?</h2>
+        <p>
+          A <strong>function</strong> is like a magic spell 🪄 you can say to
+          make your toys do things.
+        </p>
+        <div class="box" aria-label="Function magic spell example">
+          <div class="icon" aria-hidden="true">🪄</div>
+          <strong>Magic Spell</strong><br />
+          <button
+            aria-expanded="false"
+            aria-controls="funcCode"
+            class="toggleCodeBtn"
+          >
+            Show Code Example
+          </button>
+          <pre id="funcCode" hidden><code>
+function sayHello(name) {
+  console.log("Hello, " + name + "!");
+}
+sayHello("Friend"); // Hello, Friend!
+      </code></pre>
+        </div>
+        <button
+          aria-controls="slide5"
+          aria-label="Go to next slide: Prototypal Inheritance"
+        >
+          Next ➡️
+        </button>
+        <button
+          aria-controls="slide3"
+          aria-label="Go to previous slide: What is an Array?"
+        >
+          ⬅️ Back
+        </button>
+      </section>
+
+      <section id="slide5" class="slide" tabindex="0" aria-live="polite">
+        <h2>🌳 Prototypal Inheritance</h2>
+        <p>
+          Imagine toys can borrow tricks from other toys! This is
+          <strong>prototypal inheritance</strong>.
+        </p>
+        <p>Look at this simple family tree of toys:</p>
+        <div
+          id="protoTree"
+          role="list"
+          aria-label="Prototypal inheritance tree"
+        >
+          <div
+            class="protoNode"
+            tabindex="0"
+            role="listitem"
+            aria-describedby="protoDesc1"
+            aria-label="Object prototype node"
+          >
+            Object.prototype
+          </div>
+          <div class="arrow" aria-hidden="true">➡️</div>
+          <div
+            class="protoNode"
+            tabindex="0"
+            role="listitem"
+            aria-describedby="protoDesc2"
+            aria-label="Animal prototype node"
+          >
+            Animal.prototype
+          </div>
+          <div class="arrow" aria-hidden="true">➡️</div>
+          <div
+            class="protoNode"
+            tabindex="0"
+            role="listitem"
+            aria-describedby="protoDesc3"
+            aria-label="Dog prototype node"
+          >
+            Dog.prototype
+          </div>
+        </div>
+        <p id="protoDesc1" hidden>Root prototype with basic shared tricks.</p>
+        <p id="protoDesc2" hidden>Animal prototype with animal tricks.</p>
+        <p id="protoDesc3" hidden>Dog prototype with dog tricks.</p>
+        <button
+          aria-expanded="false"
+          aria-controls="protoExplanation"
+          class="toggleCodeBtn"
+        >
+          Show Explanation
+        </button>
+        <pre id="protoExplanation" hidden><code>
+// Dog inherits tricks from Animal, which inherits from Object
+const dog = {
+  bark() {
+    console.log("Woof!");
+  }
+};
+const animal = {
+  eat() {
+    console.log("Eating food!");
+  }
+};
+Object.setPrototypeOf(dog, animal);
+dog.bark(); // Woof!
+dog.eat();  // Eating food! (inherited)
+    </code></pre>
+        <button aria-controls="slide6" aria-label="Go to next slide: Polyfills">
+          Next ➡️
+        </button>
+        <button
+          aria-controls="slide4"
+          aria-label="Go to previous slide: What is a Function?"
+        >
+          ⬅️ Back
+        </button>
+      </section>
+
+      <section id="slide6" class="slide" tabindex="0" aria-live="polite">
+        <h2>🛠️ What are Polyfills?</h2>
+        <p>
+          Sometimes, old browsers don’t know new tricks.
+          <strong>Polyfills</strong> teach them those tricks!
+        </p>
+        <p>It’s like giving an old toy a new gadget so it can do new magic.</p>
+        <button
+          aria-expanded="false"
+          aria-controls="polyfillCode"
+          class="toggleCodeBtn"
+        >
+          Show Polyfill Example
+        </button>
+        <pre id="polyfillCode" hidden><code>
+// Polyfill for Array.includes (old browsers)
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function(item) {
+    return this.indexOf(item) !== -1;
+  };
+}
+    </code></pre>
+        <button
+          aria-controls="slide7"
+          aria-label="Go to next slide: Quick Quiz"
+        >
+          Next ➡️
+        </button>
+        <button
+          aria-controls="slide5"
+          aria-label="Go to previous slide: Prototypal Inheritance"
+        >
+          ⬅️ Back
+        </button>
+      </section>
+
+      <section id="slide7" class="slide" tabindex="0" aria-live="polite">
+        <h2>❓ Quick Quiz Time!</h2>
+        <p>Which of these is <strong>not</strong> an object in JavaScript?</p>
+        <form id="quizForm" aria-labelledby="quizQuestion">
+          <fieldset>
+            <legend id="quizQuestion" class="sr-only">Quiz question</legend>
+            <label><input type="radio" name="answer" value="a" /> Array</label
+            ><br />
+            <label
+              ><input type="radio" name="answer" value="b" /> Function</label
+            ><br />
+            <label><input type="radio" name="answer" value="c" /> Number</label
+            ><br />
+            <label><input type="radio" name="answer" value="d" /> Object</label>
+          </fieldset>
+          <button type="submit">Check Answer</button>
+        </form>
+        <div
+          id="quizFeedback"
+          class="feedback"
+          role="alert"
+          aria-live="assertive"
+        ></div>
+        <button aria-controls="slide8" aria-label="Go to next slide: Summary">
+          Next ➡️
+        </button>
+        <button
+          aria-controls="slide6"
+          aria-label="Go to previous slide: Polyfills"
+        >
+          ⬅️ Back
+        </button>
+      </section>
+
+      <section id="slide8" class="slide" tabindex="0" aria-live="polite">
+        <h2>🎉 Summary</h2>
+        <ul>
+          <li>Objects are boxes with properties and tricks.</li>
+          <li>Arrays keep things in order, like a toy train.</li>
+          <li>Functions are magic spells you can cast.</li>
+          <li>
+            Prototypal inheritance means toys can borrow tricks from others!
+          </li>
+          <li>Polyfills teach old browsers new tricks.</li>
+        </ul>
+        <p>Keep exploring and have fun coding! 🚀</p>
+        <button aria-controls="slide1" aria-label="Restart the lesson">
+          Restart 🔄
+        </button>
+      </section>
+    </main>
+
+    <script>
+      // Slide navigation
+      const slides = document.querySelectorAll(".slide");
+      let current = 0;
+
+      function showSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        slides[current].classList.remove("active");
+        slides[index].classList.add("active");
+        slides[index].focus();
+        current = index;
+      }
+
+      // Buttons for next/back
+      document.querySelectorAll("button[aria-controls]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const targetId = btn.getAttribute("aria-controls");
+          const targetSlide = document.getElementById(targetId);
+          if (targetSlide) {
+            const idx = Array.from(slides).indexOf(targetSlide);
+            if (idx !== -1) showSlide(idx);
+          }
+        });
+      });
+
+      // Toggle code blocks and explanations
+      document.querySelectorAll(".toggleCodeBtn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const targetId = btn.getAttribute("aria-controls");
+          const target = document.getElementById(targetId);
+          if (target) {
+            const isHidden = target.hasAttribute("hidden");
+            if (isHidden) {
+              target.removeAttribute("hidden");
+              btn.setAttribute("aria-expanded", "true");
+              btn.textContent = btn.textContent.replace("Show", "Hide");
+            } else {
+              target.setAttribute("hidden", "");
+              btn.setAttribute("aria-expanded", "false");
+              btn.textContent = btn.textContent.replace("Hide", "Show");
+            }
+          }
+        });
+      });
+
+      // Quiz logic
+      const quizForm = document.getElementById("quizForm");
+      const feedback = document.getElementById("quizFeedback");
+
+      quizForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const answer = quizForm.answer.value;
+        if (!answer) {
+          feedback.textContent = "Please select an answer!";
+          feedback.style.color = "red";
+          return;
+        }
+        if (answer === "c") {
+          feedback.textContent =
+            "✅ Correct! Number is a primitive, not an object.";
+          feedback.style.color = "green";
+        } else {
+          feedback.textContent = "❌ Not quite. Try again!";
+          feedback.style.color = "red";
+        }
+      });
+
+      // Keyboard navigation for proto nodes with descriptions
+      const protoNodes = document.querySelectorAll(".protoNode");
+      protoNodes.forEach((node) => {
+        node.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            alert(
+              node.getAttribute("aria-describedby")
+                ? document.getElementById(node.getAttribute("aria-describedby"))
+                    .textContent
+                : "No description.",
+            );
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

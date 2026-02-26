@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fun with JavaScript Functions! 🎉</title>
+    <style>
+      /* Reset and base */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f8ff;
+        margin: 0;
+        padding: 0;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      h1,
+      h2 {
+        color: #004080;
+      }
+      main {
+        flex-grow: 1;
+        max-width: 720px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem 2rem;
+      }
+      .slide {
+        display: none;
+        animation: fadeIn 0.8s ease forwards;
+      }
+      .slide.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      nav {
+        text-align: center;
+        margin: 1rem 0 2rem;
+      }
+      button {
+        background: #004080;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.6rem 1.2rem;
+        margin: 0 0.3rem;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+      }
+      button:focus {
+        outline: 3px solid #ffa500;
+      }
+      button:hover:not(:disabled) {
+        background: #0066cc;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      pre {
+        background: #e6f0ff;
+        border-radius: 8px;
+        padding: 1rem;
+        font-size: 1rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+        user-select: all;
+      }
+      code {
+        font-family: "Courier New", Courier, monospace;
+        font-weight: bold;
+        color: #004080;
+      }
+      .emoji {
+        font-size: 2rem;
+        vertical-align: middle;
+        margin-right: 0.3rem;
+      }
+      .highlight {
+        background: #fff3bf;
+        border-left: 5px solid #ffb703;
+        padding: 0.5rem 1rem;
+        margin: 1rem 0;
+        border-radius: 6px;
+      }
+      .diagram {
+        margin: 1rem 0;
+        text-align: center;
+      }
+      .box {
+        display: inline-block;
+        border: 3px solid #0077cc;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        margin: 0 1rem;
+        font-size: 1.2rem;
+        background: #d0e7ff;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        user-select: none;
+      }
+      .box:hover,
+      .box:focus {
+        background: #a6d1ff;
+        outline: none;
+      }
+      .arrow {
+        display: inline-block;
+        font-size: 2rem;
+        vertical-align: middle;
+        color: #0077cc;
+        user-select: none;
+      }
+      .quiz {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f9f9f9;
+        border-radius: 12px;
+        border: 2px solid #004080;
+      }
+      .quiz button {
+        background: #0077cc;
+        margin: 0.4rem 0.8rem 0.4rem 0;
+      }
+      .quiz button.correct {
+        background: #28a745;
+      }
+      .quiz button.incorrect {
+        background: #dc3545;
+      }
+      .feedback {
+        margin-top: 0.6rem;
+        font-weight: bold;
+      }
+      .hidden {
+        display: none;
+      }
+      .toggle-btn {
+        margin-top: 1rem;
+        background: #ffa500;
+        color: #1a1a1a;
+      }
+      .code-container {
+        position: relative;
+      }
+      .code-copy {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #0077cc;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      .code-copy:focus {
+        outline: 3px solid #ffa500;
+      }
+      /* Accessibility */
+      [tabindex="0"]:focus {
+        outline: 3px solid #ffa500;
+      }
+    </style>
+  </head>
+  <body>
+    <header role="banner" aria-label="Page header">
+      <h1>Fun with JavaScript Functions! 🎉</h1>
+      <p>
+        Learn important JavaScript function concepts step-by-step with fun
+        visuals and quizzes!
+      </p>
+    </header>
+
+    <main role="main" aria-live="polite" aria-atomic="true">
+      <!-- Slides container -->
+      <section id="slides">
+        <!-- Slide 1: Functions -->
+        <article
+          class="slide active"
+          id="slide-1"
+          tabindex="0"
+          aria-label="Slide 1: What is a Function?"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">⚙️</span> What is a Function?
+          </h2>
+          <p>
+            A function is like a <strong>magic machine</strong> that takes some
+            input, does something, and gives back an output!
+          </p>
+          <div class="diagram" aria-label="Function magic machine diagram">
+            <div class="box" tabindex="0" aria-describedby="desc-input">
+              Input<br />🔢
+            </div>
+            <span class="arrow" aria-hidden="true">➡️</span>
+            <div class="box" aria-label="Function machine">
+              Function<br />⚙️
+            </div>
+            <span class="arrow" aria-hidden="true">➡️</span>
+            <div class="box" tabindex="0" aria-describedby="desc-output">
+              Output<br />🎁
+            </div>
+          </div>
+          <p>Example: A function that adds two numbers.</p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of add function"
+          ><code>function add(a, b) {
+  return a + b;
+}</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-1"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-1" aria-live="polite">
+            <p>What does a function do?</p>
+            <button data-correct="true">
+              Takes input, does something, and gives output
+            </button>
+            <button>No idea</button>
+            <button>Just stores numbers</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 2: Parameters & Arguments -->
+        <article
+          class="slide"
+          id="slide-2"
+          tabindex="0"
+          aria-label="Slide 2: Parameters and Arguments"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">📝</span> Parameters &
+            Arguments
+          </h2>
+          <p>
+            <strong>Parameters</strong> are like empty boxes in a function
+            waiting for values.
+          </p>
+          <p>
+            <strong>Arguments</strong> are the actual values you put into those
+            boxes when calling the function.
+          </p>
+          <div class="diagram" aria-label="Parameters and arguments diagram">
+            <div class="box" aria-label="Function with parameter box">
+              Function(a) 📦
+            </div>
+            <span class="arrow" aria-hidden="true">⬇️</span>
+            <div class="box" tabindex="0" aria-describedby="desc-arg">
+              Calling with argument: <code>5</code>
+            </div>
+          </div>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of parameter and argument"
+          ><code>function greet(name) {
+  return "Hello, " + name + "!";
+}
+greet("Alice");  // Argument "Alice"</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-2"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-2" aria-live="polite">
+            <p>What do we call the actual values passed to a function?</p>
+            <button>Parameters</button>
+            <button data-correct="true">Arguments</button>
+            <button>Functions</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 3: Callback Functions -->
+        <article
+          class="slide"
+          id="slide-3"
+          tabindex="0"
+          aria-label="Slide 3: Callback Functions"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">🔄</span> Callback Functions
+          </h2>
+          <p>
+            A <strong>callback function</strong> is a function you give to
+            another function to be called later.
+          </p>
+          <p>
+            It’s like giving your friend a note to remind them to do something
+            for you.
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of callback function"
+          ><code>function greet(name, callback) {
+  console.log("Hello, " + name + "!");
+  callback();
+}
+greet("Bob", function() {
+  console.log("Have a nice day!");
+});</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-3"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-3" aria-live="polite">
+            <p>What is a callback function?</p>
+            <button>A function called by another function later</button>
+            <button data-correct="true">
+              A function passed to another function to be called later
+            </button>
+            <button>A function that never runs</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 4: Higher Order Functions -->
+        <article
+          class="slide"
+          id="slide-4"
+          tabindex="0"
+          aria-label="Slide 4: Higher Order Functions"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">🚀</span> Higher Order
+            Functions
+          </h2>
+          <p>
+            A <strong>higher order function</strong> is a function that can take
+            other functions as input or return a function.
+          </p>
+          <p>
+            Think of it as a boss who can give orders (functions) or even create
+            new helpers (functions)!
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of higher order function"
+          ><code>function repeat(action, times) {
+  for(let i=0; i &lt; times; i++) {
+    action();
+  }
+}
+repeat(() =&gt; console.log("Hi!"), 3);</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-4"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-4" aria-live="polite">
+            <p>What can a higher order function do?</p>
+            <button>Only take numbers</button>
+            <button data-correct="true">
+              Take functions as input or return functions
+            </button>
+            <button>Only return strings</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 5: IIFE (Immediately Invoked Function Expression) -->
+        <article
+          class="slide"
+          id="slide-5"
+          tabindex="0"
+          aria-label="Slide 5: IIFE"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">⏩</span> IIFE (Immediately
+            Invoked Function Expression)
+          </h2>
+          <p>
+            An <strong>IIFE</strong> is a function that runs right after it’s
+            created — no need to call it later!
+          </p>
+          <p>
+            It's like opening a gift immediately instead of saving it for later.
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of IIFE"
+          ><code>(function() {
+  console.log("I run right away!");
+})();</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-5"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-5" aria-live="polite">
+            <p>When does an IIFE run?</p>
+            <button>When you call it later</button>
+            <button data-correct="true">Immediately after it’s created</button>
+            <button>Never</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 6: Anonymous Functions -->
+        <article
+          class="slide"
+          id="slide-6"
+          tabindex="0"
+          aria-label="Slide 6: Anonymous Functions"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">👻</span> Anonymous Functions
+          </h2>
+          <p>
+            An <strong>anonymous function</strong> is a function without a name.
+          </p>
+          <p>
+            It’s like a secret helper that does a job but doesn’t need a name
+            tag.
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of anonymous function"
+          ><code>setTimeout(function() {
+  console.log("Hello after 1 second!");
+}, 1000);</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-6"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-6" aria-live="polite">
+            <p>What is special about anonymous functions?</p>
+            <button data-correct="true">They have no name</button>
+            <button>They always return numbers</button>
+            <button>They are only used in HTML</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 7: Pure Functions -->
+        <article
+          class="slide"
+          id="slide-7"
+          tabindex="0"
+          aria-label="Slide 7: Pure Functions"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">💧</span> Pure Functions
+          </h2>
+          <p>
+            A <strong>pure function</strong> always gives the same output for
+            the same input and doesn’t change anything outside itself.
+          </p>
+          <p>
+            It’s like a vending machine: put in a coin, get the same snack every
+            time!
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of pure function"
+          ><code>function square(x) {
+  return x * x;
+}</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-7"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-7" aria-live="polite">
+            <p>Which is true about pure functions?</p>
+            <button>They change things outside the function</button>
+            <button data-correct="true">
+              They always return the same output for the same input
+            </button>
+            <button>They never return anything</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 8: Currying -->
+        <article
+          class="slide"
+          id="slide-8"
+          tabindex="0"
+          aria-label="Slide 8: Currying"
+        >
+          <h2><span class="emoji" aria-hidden="true">🍛</span> Currying</h2>
+          <p>
+            <strong>Currying</strong> means turning a function that takes many
+            arguments into a chain of functions each taking one argument.
+          </p>
+          <p>
+            Think of it as building a sandwich step by step, one ingredient at a
+            time.
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of currying"
+          ><code>function add(a) {
+  return function(b) {
+    return a + b;
+  };
+}
+const add5 = add(5);
+console.log(add5(3)); // 8</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-8"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-8" aria-live="polite">
+            <p>What does currying do?</p>
+            <button>Takes all arguments at once</button>
+            <button data-correct="true">
+              Turns a multi-argument function into a chain of single-argument
+              functions
+            </button>
+            <button>Removes all arguments</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 9: Arrow Functions -->
+        <article
+          class="slide"
+          id="slide-9"
+          tabindex="0"
+          aria-label="Slide 9: Arrow Functions"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">➡️</span> Arrow Functions
+          </h2>
+          <p>
+            Arrow functions are a short way to write functions with
+            <code>=&gt;</code>.
+          </p>
+          <p>
+            They are like a shortcut or a quick note instead of a long letter.
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of arrow function"
+          ><code>const greet = name =&gt; "Hi, " + name + "!";
+console.log(greet("Sam"));</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-9"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-9" aria-live="polite">
+            <p>What symbol is used in arrow functions?</p>
+            <button>=&gt;</button>
+            <button data-correct="true">=&gt;</button>
+            <button>==></button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 10: Function Hoisting -->
+        <article
+          class="slide"
+          id="slide-10"
+          tabindex="0"
+          aria-label="Slide 10: Function Hoisting"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">🎩</span> Function Hoisting
+          </h2>
+          <p>
+            <strong>Hoisting</strong> means JavaScript moves function
+            declarations to the top before running code.
+          </p>
+          <p>
+            It’s like your teacher reading the whole lesson plan before starting
+            class.
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of function hoisting"
+          ><code>sayHi();
+function sayHi() {
+  console.log("Hi!");
+}</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-10"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-10" aria-live="polite">
+            <p>What does hoisting allow?</p>
+            <button>Using functions before they are declared</button>
+            <button data-correct="true">
+              Using function declarations before they appear in code
+            </button>
+            <button>Nothing special</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 11: Function Declaration vs Expression -->
+        <article
+          class="slide"
+          id="slide-11"
+          tabindex="0"
+          aria-label="Slide 11: Function Declaration and Expression"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">📜</span> Function
+            Declaration & Expression
+          </h2>
+          <p>
+            <strong>Function Declaration</strong> is a named function you write
+            directly.
+          </p>
+          <p>
+            <strong>Function Expression</strong> is a function stored in a
+            variable.
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of function declaration and expression"
+          ><code>// Declaration
+function sayHello() {
+  return "Hello!";
+}
+// Expression
+const sayBye = function() {
+  return "Bye!";
+};</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-11"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-11" aria-live="polite">
+            <p>Which is true about function expressions?</p>
+            <button>They are always hoisted</button>
+            <button data-correct="true">They are stored in variables</button>
+            <button>They can't be stored in variables</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 12: Returning Functions from Functions -->
+        <article
+          class="slide"
+          id="slide-12"
+          tabindex="0"
+          aria-label="Slide 12: Returning Functions from Functions"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">🎁</span> Returning Functions
+            from Functions
+          </h2>
+          <p>
+            Functions can give back other functions like handing you a new tool!
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of returning functions"
+          ><code>function makeGreeter(name) {
+  return function() {
+    console.log("Hello, " + name + "!");
+  };
+}
+const greetJohn = makeGreeter("John");
+greetJohn();</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-12"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-12" aria-live="polite">
+            <p>What can functions return?</p>
+            <button>Only numbers</button>
+            <button>Only strings</button>
+            <button data-correct="true">Other functions</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 13: Return Part of the Function -->
+        <article
+          class="slide"
+          id="slide-13"
+          tabindex="0"
+          aria-label="Slide 13: Return Part of the Function"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">↩️</span> Return Part of the
+            Function
+          </h2>
+          <p>
+            The <code>return</code> keyword sends a value back and stops the
+            function right there.
+          </p>
+          <p>
+            It’s like finishing your homework and telling your teacher “I’m
+            done!”
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of return"
+          ><code>function checkAge(age) {
+  if(age &lt; 18) {
+    return "Too young";
+  }
+  return "Welcome!";
+}
+console.log(checkAge(20));</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-13"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-13" aria-live="polite">
+            <p>What does <code>return</code> do inside a function?</p>
+            <button>Starts the function</button>
+            <button>Stops the function and sends back a value</button>
+            <button data-correct="true">
+              Stops the function and sends back a value
+            </button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 14: Garbage Collection -->
+        <article
+          class="slide"
+          id="slide-14"
+          tabindex="0"
+          aria-label="Slide 14: Garbage Collection"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">🗑️</span> Garbage Collection
+          </h2>
+          <p>
+            Garbage collection is JavaScript cleaning up memory by removing
+            things it no longer needs.
+          </p>
+          <p>
+            Think of it as your room’s cleaning fairy who picks up toys you
+            stopped playing with.
+          </p>
+          <div
+            class="diagram"
+            aria-label="Garbage collection cleaning up memory"
+          >
+            <div class="box" tabindex="0" aria-describedby="desc-memory">
+              Memory Box: <br />Used & Free Space
+            </div>
+          </div>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-14"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-14" aria-live="polite">
+            <p>What does garbage collection do?</p>
+            <button data-correct="true">
+              Frees memory by removing unused stuff
+            </button>
+            <button>Creates new functions</button>
+            <button>Runs your code faster</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+
+        <!-- Slide 15: Closures -->
+        <article
+          class="slide"
+          id="slide-15"
+          tabindex="0"
+          aria-label="Slide 15: Closures"
+        >
+          <h2><span class="emoji" aria-hidden="true">🔒</span> Closures</h2>
+          <p>
+            A <strong>closure</strong> is when a function remembers the place
+            where it was created — even if it runs somewhere else later.
+          </p>
+          <p>
+            Imagine a backpack that keeps your favorite toys safe wherever you
+            go!
+          </p>
+          <pre
+            class="code-container"
+            aria-label="JavaScript code example of closure"
+          ><code>function makeCounter() {
+  let count = 0;
+  return function() {
+    count++;
+    return count;
+  };
+}
+const counter = makeCounter();
+console.log(counter()); // 1
+console.log(counter()); // 2</code><button class="code-copy" aria-label="Copy code to clipboard">Copy</button></pre>
+          <div
+            class="highlight"
+            aria-label="Real world closure example in React, memoization and caching"
+          >
+            <strong>Real World Example:</strong> In React, closures help keep
+            track of state inside components. Memoization and caching use
+            closures to remember previous results and speed up your app! 🏎️💨
+          </div>
+          <button
+            class="toggle-btn"
+            aria-expanded="false"
+            aria-controls="quiz-15"
+          >
+            Show Quiz
+          </button>
+          <div class="quiz hidden" id="quiz-15" aria-live="polite">
+            <p>What special thing does a closure do?</p>
+            <button>
+              Keeps track of variables where the function was created
+            </button>
+            <button data-correct="true">
+              Remembers variables even if run somewhere else
+            </button>
+            <button>Deletes variables after function runs</button>
+            <div class="feedback" aria-live="assertive"></div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <nav role="navigation" aria-label="Slideshow navigation">
+      <button id="prevBtn" aria-label="Previous slide" disabled>
+        ⬅️ Previous
+      </button>
+      <button id="nextBtn" aria-label="Next slide">Next ➡️</button>
+    </nav>
+
+    <footer
+      role="contentinfo"
+      aria-label="Page footer"
+      style="text-align: center; padding: 1rem; font-size: 0.9rem; color: #666"
+    >
+      Made with ❤️ for curious learners!
+    </footer>
+
+    <script>
+      // Slide navigation
+      const slides = document.querySelectorAll(".slide");
+      let currentSlide = 0;
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      function showSlide(n) {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle("active", i === n);
+          if (i === n) slide.focus();
+        });
+        prevBtn.disabled = n === 0;
+        nextBtn.disabled = n === slides.length - 1;
+      }
+
+      prevBtn.addEventListener("click", () => {
+        if (currentSlide > 0) {
+          currentSlide--;
+          showSlide(currentSlide);
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (currentSlide < slides.length - 1) {
+          currentSlide++;
+          showSlide(currentSlide);
+        }
+      });
+
+      // Keyboard navigation: left/right arrows
+      document.addEventListener("keydown", (e) => {
+        if (
+          e.target.tagName === "BUTTON" ||
+          e.target.tagName === "TEXTAREA" ||
+          e.target.tagName === "INPUT"
+        )
+          return;
+        if (e.key === "ArrowRight") {
+          if (currentSlide < slides.length - 1) {
+            currentSlide++;
+            showSlide(currentSlide);
+          }
+        } else if (e.key === "ArrowLeft") {
+          if (currentSlide > 0) {
+            currentSlide--;
+            showSlide(currentSlide);
+          }
+        }
+      });
+
+      // Toggle quiz visibility
+      document.querySelectorAll(".toggle-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const quizId = btn.getAttribute("aria-controls");
+          const quiz = document.getElementById(quizId);
+          const isHidden = quiz.classList.contains("hidden");
+          quiz.classList.toggle("hidden");
+          btn.setAttribute("aria-expanded", isHidden);
+          if (isHidden) quiz.querySelector("button").focus();
+        });
+      });
+
+      // Quiz answer checking
+      document.querySelectorAll(".quiz").forEach((quiz) => {
+        quiz.querySelectorAll("button").forEach((answerBtn) => {
+          answerBtn.addEventListener("click", () => {
+            const feedback = quiz.querySelector(".feedback");
+            if (answerBtn.dataset.correct === "true") {
+              feedback.textContent = "🎉 Correct!";
+              answerBtn.classList.add("correct");
+              quiz.querySelectorAll("button").forEach((b) => {
+                if (b !== answerBtn) b.disabled = true;
+              });
+              answerBtn.disabled = true;
+            } else {
+              feedback.textContent = "❌ Try again!";
+              answerBtn.classList.add("incorrect");
+              setTimeout(() => answerBtn.classList.remove("incorrect"), 1000);
+            }
+          });
+        });
+      });
+
+      // Copy code to clipboard
+      document.querySelectorAll(".code-copy").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const code = btn.previousElementSibling.textContent;
+          navigator.clipboard.writeText(code).then(() => {
+            btn.textContent = "Copied!";
+            setTimeout(() => (btn.textContent = "Copy"), 1500);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

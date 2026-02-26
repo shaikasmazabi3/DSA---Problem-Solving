@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>React Fiber Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f9f9f9;
+        margin: 0;
+        padding: 20px;
+        color: #222;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      #fiberContainer {
+        max-width: 800px;
+        margin: 0 auto 30px;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        background: white;
+        padding: 20px;
+      }
+      .fiber-node {
+        border: 1px solid #0078d4;
+        background: #e3f2fd;
+        padding: 12px 20px;
+        border-radius: 10px;
+        margin: 10px 0;
+        position: relative;
+        transition: background-color 0.6s ease;
+      }
+      .fiber-node.current {
+        background-color: #bbdefb;
+      }
+      .fiber-node.completed {
+        background-color: #a5d6a7;
+      }
+      .fiber-children {
+        margin-left: 40px;
+        border-left: 2px solid #90caf9;
+        padding-left: 20px;
+      }
+      #controls {
+        text-align: center;
+      }
+      button {
+        background: #0078d4;
+        border: none;
+        color: white;
+        padding: 10px 22px;
+        margin: 0 15px;
+        font-size: 1.1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 3px 6px rgb(0 120 212 / 0.5);
+        transition: background-color 0.3s ease;
+      }
+      button:hover:not(:disabled) {
+        background: #005ea2;
+      }
+      button:disabled {
+        background: #a0c4ff;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      #status {
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #0078d4;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>React Fiber: Incremental Work & Commit Visualization</h1>
+
+    <div id="status">
+      Click "Next Unit of Work" to process fibers one by one.
+    </div>
+
+    <div id="fiberContainer"></div>
+
+    <div id="controls">
+      <button id="btnNextWork">Next Unit of Work</button>
+      <button id="btnCommit" disabled>Commit Changes</button>
+      <button id="btnReset" disabled>Reset</button>
+    </div>
+
+    <script>
+      // Fiber node structure example
+      // Each fiber has: id, name, child fibers, sibling fiber, parent link
+      const fiberTree = {
+        id: "root",
+        name: "App",
+        child: {
+          id: "header",
+          name: "Header",
+          child: null,
+          sibling: {
+            id: "main",
+            name: "Main",
+            child: {
+              id: "article",
+              name: "Article",
+              child: null,
+              sibling: {
+                id: "sidebar",
+                name: "Sidebar",
+                child: null,
+                sibling: null,
+                parent: null, // will be set later
+              },
+            },
+            sibling: null,
+            parent: null, // will be set later
+          },
+          parent: null, // will be set later
+        },
+        sibling: null,
+        parent: null,
+      };
+
+      // Set parent links recursively
+      function setParents(node, parent = null) {
+        if (!node) return;
+        node.parent = parent;
+        setParents(node.child, node);
+        setParents(node.sibling, parent);
+      }
+      setParents(fiberTree);
+
+      // Flatten fiber nodes for work queue (depth-first traversal)
+      function flattenFibers(node) {
+        if (!node) return [];
+        let result = [node];
+        result = result.concat(flattenFibers(node.child));
+        result = result.concat(flattenFibers(node.sibling));
+        return result;
+      }
+
+      // Work queue
+      let workQueue = flattenFibers(fiberTree);
+      let currentWorkIndex = 0;
+      const fiberContainer = document.getElementById("fiberContainer");
+      const status = document.getElementById("status");
+      const btnNextWork = document.getElementById("btnNextWork");
+      const btnCommit = document.getElementById("btnCommit");
+      const btnReset = document.getElementById("btnReset");
+
+      // Render fiber tree with highlights
+      function renderFiberTree(currentIndex, completedIndices) {
+        fiberContainer.innerHTML = "";
+        function createNode(node) {
+          if (!node) return null;
+          const div = document.createElement("div");
+          div.className = "fiber-node";
+          if (workQueue.indexOf(node) === currentIndex) {
+            div.classList.add("current");
+          } else if (completedIndices.has(workQueue.indexOf(node))) {
+            div.classList.add("completed");
+          }
+          div.textContent = node.name;
+          if (node.child) {
+            const childrenDiv = document.createElement("div");
+            childrenDiv.className = "fiber-children";
+            let childNode = node.child;
+            while (childNode) {
+              const childDiv = createNode(childNode);
+              if (childDiv) childrenDiv.appendChild(childDiv);
+              childNode = childNode.sibling;
+            }
+            div.appendChild(childrenDiv);
+          }
+          return div;
+        }
+        fiberContainer.appendChild(createNode(fiberTree));
+      }
+
+      let completedWork = new Set();
+
+      function nextUnitOfWork() {
+        if (currentWorkIndex >= workQueue.length) {
+          status.textContent =
+            "All units of work processed. Ready to commit changes.";
+          btnNextWork.disabled = true;
+          btnCommit.disabled = false;
+          return;
+        }
+        const currentFiber = workQueue[currentWorkIndex];
+        status.textContent = `Processing fiber: ${currentFiber.name}`;
+        completedWork.add(currentWorkIndex);
+        renderFiberTree(currentWorkIndex, completedWork);
+        currentWorkIndex++;
+      }
+
+      function commitChanges() {
+        status.textContent = "Committing changes to the DOM...";
+        btnCommit.disabled = true;
+        btnReset.disabled = false;
+
+        // Simulate commit phase animation
+        let i = 0;
+        function commitStep() {
+          if (i >= workQueue.length) {
+            status.textContent = "Commit phase complete! DOM updated.";
+            return;
+          }
+          const fiberNode = workQueue[i];
+          // Highlight committed fiber node
+          const fiberDivs = fiberContainer.querySelectorAll(".fiber-node");
+          fiberDivs.forEach((div) => {
+            if (div.textContent === fiberNode.name) {
+              div.style.backgroundColor = "#a5d6a7"; // green highlight
+              setTimeout(() => {
+                div.style.backgroundColor = "";
+              }, 800);
+            }
+          });
+          i++;
+          setTimeout(commitStep, 500);
+        }
+        commitStep();
+      }
+
+      function reset() {
+        currentWorkIndex = 0;
+        completedWork.clear();
+        btnNextWork.disabled = false;
+        btnCommit.disabled = true;
+        btnReset.disabled = true;
+        status.textContent =
+          'Click "Next Unit of Work" to process fibers one by one.';
+        renderFiberTree(currentWorkIndex, completedWork);
+      }
+
+      btnNextWork.addEventListener("click", nextUnitOfWork);
+      btnCommit.addEventListener("click", commitChanges);
+      btnReset.addEventListener("click", reset);
+
+      // Initial render
+      reset();
+    </script>
+  </body>
+</html>

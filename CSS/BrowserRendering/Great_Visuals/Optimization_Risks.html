@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>05 - Optimization Risks & Big Companies</title>
+    <style>
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: #f0f8ff;
+        margin: 0;
+        color: #333;
+      }
+      .container {
+        max-width: 900px;
+        margin: 2em auto;
+        background: white;
+        padding: 2em;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      }
+      h1,
+      h2 {
+        margin-bottom: 0.5em;
+      }
+      ul {
+        list-style: none;
+        padding-left: 0;
+      }
+      ul li {
+        margin-bottom: 0.7em;
+      }
+      .warning {
+        background: #ffcccc;
+        color: #a00;
+        border-left: 6px solid #a00;
+        padding: 0.8em 1em;
+        margin: 1em 0;
+        border-radius: 8px;
+        font-weight: bold;
+      }
+      .animation-box {
+        width: 80px;
+        height: 80px;
+        background: #0078d7;
+        border-radius: 15px;
+        margin: 1em auto;
+        animation: spin 4s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      nav {
+        margin-top: 2em;
+        text-align: center;
+      }
+      nav a {
+        background: #0078d7;
+        color: white;
+        padding: 0.7em 1.5em;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        margin: 0 0.5em;
+        display: inline-block;
+      }
+      nav a:hover {
+        background: #005ea2;
+      }
+      .quiz-toggle {
+        background: #e0f0ff;
+        border: 2px solid #0078d7;
+        color: #0078d7;
+        font-weight: bold;
+        border-radius: 12px;
+        padding: 0.5em 1em;
+        cursor: pointer;
+        margin-top: 1em;
+        user-select: none;
+        transition: background 0.3s;
+      }
+      .quiz-toggle:hover {
+        background: #c0e0ff;
+      }
+      .quiz {
+        background: #f0f8ff;
+        border: 2px solid #0078d7;
+        border-radius: 12px;
+        margin-top: 1em;
+        padding: 1em;
+      }
+      .quiz button {
+        background: #0078d7;
+        border: none;
+        color: white;
+        padding: 0.5em 1em;
+        margin: 0.4em 0.4em 0.4em 0;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.3s;
+      }
+      .quiz button:hover {
+        background: #005ea2;
+      }
+      .quiz-feedback {
+        margin-top: 1em;
+        font-weight: bold;
+        font-size: 1.1em;
+        min-height: 1.5em;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="container"
+      role="main"
+      aria-label="Optimization Risks and Big Companies Performance"
+    >
+      <h1>What Happens If We Don’t Optimize?</h1>
+      <ul>
+        <li>No lazy loading → slow page and big data usage.</li>
+        <li>No responsive images → blurry or too big images.</li>
+        <li>
+          <code>!important</code> everywhere → messy and confusing styles.
+        </li>
+        <li>Too many animations → browser works too hard, slows down.</li>
+        <li>Frequent layout recalculations → page jumps and lags.</li>
+        <li>Bad cascade layers → style conflicts and broken looks.</li>
+      </ul>
+      <div class="warning" role="alert">
+        Using <code>!important</code> everywhere is bad practice! It breaks CSS
+        cascading and makes fixing bugs hard.
+      </div>
+      <div class="animation-box" aria-label="Example spinning animation"></div>
+      <p style="text-align: center">
+        (Too many animations like this can slow down your page!)
+      </p>
+
+      <h2>How Big Companies Optimize Web Performance</h2>
+      <ul>
+        <li>
+          <strong>Uber</strong>: Uses code splitting to load only needed
+          JavaScript.
+        </li>
+        <li>
+          <strong>Rakuten</strong>: Uses caching aggressively and lazy loads
+          images.
+        </li>
+        <li>Both constantly monitor performance and fix slow parts.</li>
+      </ul>
+
+      <button class="quiz-toggle" aria-expanded="false" aria-controls="quiz5">
+        Take Quiz on Optimization
+      </button>
+      <div id="quiz5" class="quiz" hidden>
+        <p>Why is using <code>!important</code> everywhere bad?</p>
+        <button onclick="checkAnswer(this, true)">
+          It breaks CSS cascading and makes fixing bugs hard
+        </button>
+        <button onclick="checkAnswer(this, false)">
+          It makes the page faster
+        </button>
+        <button onclick="checkAnswer(this, false)">It adds more images</button>
+
+        <p>What do Uber and Rakuten do to improve performance?</p>
+        <button onclick="checkAnswer(this, true)">
+          Use code splitting, caching, and lazy loading
+        </button>
+        <button onclick="checkAnswer(this, false)">
+          Load everything at once
+        </button>
+        <button onclick="checkAnswer(this, false)">Ignore performance</button>
+
+        <div class="quiz-feedback" aria-live="polite"></div>
+      </div>
+
+      <nav>
+        <a
+          href="04-critical-rendering-path.html"
+          aria-label="Previous lesson: Critical Rendering Path and Performance Metrics"
+          >⬅️ Previous</a
+        >
+      </nav>
+
+      <script>
+        document
+          .querySelector(".quiz-toggle")
+          .addEventListener("click", function () {
+            const quiz = document.getElementById("quiz5");
+            const expanded = this.getAttribute("aria-expanded") === "true";
+            this.setAttribute("aria-expanded", !expanded);
+            quiz.hidden = expanded;
+            if (!expanded) {
+              quiz
+                .querySelectorAll("button")
+                .forEach((b) => (b.disabled = false));
+              quiz.querySelector(".quiz-feedback").textContent = "";
+            }
+          });
+
+        function checkAnswer(button, isCorrect) {
+          const quiz = button.closest(".quiz");
+          const feedback = quiz.querySelector(".quiz-feedback");
+          if (isCorrect) {
+            feedback.textContent = "🎉 Correct! Great job!";
+            feedback.style.color = "green";
+          } else {
+            feedback.textContent = "❌ Oops, try again!";
+            feedback.style.color = "red";
+          }
+          quiz.querySelectorAll("button").forEach((b) => (b.disabled = true));
+        }
+      </script>
+    </div>
+  </body>
+</html>

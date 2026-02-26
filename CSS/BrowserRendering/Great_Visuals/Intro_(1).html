@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>01 - Intro: How Browser Loads Website & Basics</title>
+    <style>
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: #f0f8ff;
+        margin: 0;
+        color: #333;
+      }
+      .container {
+        max-width: 900px;
+        margin: 2em auto;
+        background: white;
+        padding: 2em;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      }
+      h1,
+      h2 {
+        margin-bottom: 0.5em;
+      }
+      pre {
+        background: #282c34;
+        color: #abb2bf;
+        padding: 1em;
+        border-radius: 10px;
+        overflow-x: auto;
+        font-family: Consolas, monospace;
+      }
+      nav {
+        margin-top: 2em;
+        text-align: center;
+      }
+      nav a {
+        background: #0078d7;
+        color: white;
+        padding: 0.7em 1.5em;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        margin: 0 0.5em;
+        display: inline-block;
+      }
+      nav a:hover {
+        background: #005ea2;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="container"
+      role="main"
+      aria-label="Intro to Browser Loading and Basics"
+    >
+      <h1>How Does a Browser Load a Website?</h1>
+      <p>
+        Imagine the browser is a mailman who fetches a book (website) from a big
+        library called the internet.
+      </p>
+      <ol>
+        <li>You type <code>amazon.com</code>.</li>
+        <li>
+          The browser asks the internet phone book (DNS) where Amazon lives.
+        </li>
+        <li>Browser sends a letter (HTTP request) to Amazon’s server.</li>
+        <li>Amazon sends back the main book (HTML file).</li>
+        <li>
+          Browser reads the book and sees notes to get styles (CSS), brain (JS),
+          and pictures (assets).
+        </li>
+        <li>Browser fetches those and builds the website you see!</li>
+      </ol>
+
+      <h2>HTML, CSS, JavaScript, and Assets</h2>
+      <p><strong>HTML</strong> is the skeleton (structure):</p>
+      <pre>
+&lt;h1&gt;Welcome to Amazon&lt;/h1&gt;
+&lt;img src="logo.png" alt="Amazon Logo"&gt;
+</pre
+      >
+      <p><strong>CSS</strong> is the clothes (styles):</p>
+      <pre>
+h1 {
+  color: orange;
+  font-size: 24px;
+}
+</pre
+      >
+      <p><strong>JavaScript</strong> is the brain (interactivity):</p>
+      <pre>
+document.querySelector('button').onclick = () =&gt; alert('Added to cart!');</pre
+      >
+      <p><strong>Assets</strong> are decorations like images and videos.</p>
+
+      <nav>
+        <a
+          href="02-dom-cssom-render-tree.html"
+          aria-label="Next lesson: DOM, CSSOM, Render Tree"
+          >Next ➡️</a
+        >
+      </nav>
+    </div>
+  </body>
+</html>

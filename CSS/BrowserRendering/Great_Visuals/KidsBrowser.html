@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Frontend Concepts Interactive Slideshow with Quizzes</title>
+    <style>
+      /* Basic Reset and Styling */
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: #f0f8ff;
+        margin: 0;
+        overflow-x: hidden;
+        color: #333;
+      }
+      h1,
+      h2,
+      h3 {
+        margin: 0.3em 0;
+      }
+      .container {
+        width: 90vw;
+        max-width: 900px;
+        margin: 2em auto;
+        background: white;
+        padding: 1.5em 2em;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        position: relative;
+        min-height: 600px;
+      }
+      /* Slide Navigation */
+      .nav-buttons {
+        text-align: center;
+        margin-top: 1em;
+      }
+      button {
+        background: #0078d7;
+        border: none;
+        color: white;
+        font-size: 1.1em;
+        padding: 0.6em 1.2em;
+        border-radius: 10px;
+        margin: 0 0.5em;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      button:hover:not(:disabled) {
+        background: #005ea2;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      /* Slide Styles */
+      .slide {
+        display: none;
+        animation: fadeIn 1s ease forwards;
+      }
+      .slide.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Icons */
+      .icon {
+        font-size: 2.5em;
+        margin-right: 0.4em;
+        vertical-align: middle;
+      }
+
+      /* Code block */
+      pre {
+        background: #282c34;
+        color: #abb2bf;
+        padding: 1em;
+        border-radius: 10px;
+        font-size: 1em;
+        overflow-x: auto;
+        margin: 1em 0;
+        font-family: Consolas, monospace;
+      }
+
+      /* Tree Visualization */
+      .tree {
+        font-family: monospace;
+        white-space: pre;
+        background: #e6f7ff;
+        padding: 1em 1.5em;
+        border-radius: 10px;
+        box-shadow: inset 0 0 10px #a0d8ff;
+        margin: 1em 0;
+        color: #005a9e;
+      }
+
+      /* Visual Boxes */
+      .box {
+        display: inline-block;
+        padding: 0.6em 1em;
+        margin: 0.3em 0.5em 0.5em 0;
+        border-radius: 12px;
+        background: #0078d7;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 4px 8px rgba(0, 120, 215, 0.4);
+        cursor: default;
+        user-select: none;
+      }
+
+      /* Animations for assets loading */
+      .loading-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin: 0 4px;
+        background: #0078d7;
+        border-radius: 50%;
+        animation: bounce 1.2s infinite ease-in-out;
+      }
+      .loading-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .loading-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes bounce {
+        0%,
+        80%,
+        100% {
+          transform: translateY(0);
+        }
+        40% {
+          transform: translateY(-15px);
+        }
+      }
+
+      /* Lazy Loading Image Box */
+      .lazy-img {
+        width: 200px;
+        height: 120px;
+        background: #ddd;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #777;
+        font-weight: bold;
+        font-size: 1.2em;
+        border: 3px dashed #bbb;
+        margin: 1em auto;
+        user-select: none;
+        background-size: cover;
+        background-position: center;
+      }
+
+      /* Responsive Images Demo */
+      .responsive-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Highlight important CSS warning */
+      .warning {
+        background: #ffcccc;
+        color: #a00;
+        border-left: 6px solid #a00;
+        padding: 0.8em 1em;
+        margin: 1em 0;
+        border-radius: 8px;
+        font-weight: bold;
+      }
+
+      /* Animations example */
+      .animation-box {
+        width: 80px;
+        height: 80px;
+        background: #0078d7;
+        border-radius: 15px;
+        margin: 1em auto;
+        animation: spin 4s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Layout shift simulation */
+      .layout-shift {
+        width: 100px;
+        height: 50px;
+        background: #0078d7;
+        margin: 1em auto;
+        border-radius: 10px;
+        transition: margin 0.5s ease;
+      }
+      .layout-shift.shifted {
+        margin-left: 150px;
+      }
+
+      /* Scroll container for lazy loading demo */
+      .scroll-container {
+        height: 150px;
+        overflow-y: auto;
+        border: 2px solid #0078d7;
+        border-radius: 12px;
+        padding: 1em;
+        margin: 1em 0;
+      }
+      .scroll-item {
+        height: 100px;
+        background: #e6f7ff;
+        margin-bottom: 1em;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #005a9e;
+        user-select: none;
+      }
+
+      /* Progress bar for performance */
+      .progress-bar {
+        width: 100%;
+        background: #ddd;
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 1em 0;
+        height: 20px;
+      }
+      .progress-fill {
+        height: 100%;
+        background: #0078d7;
+        width: 0;
+        transition: width 1.5s ease;
+      }
+
+      /* Quiz Styles */
+      .quiz-toggle {
+        background: #e0f0ff;
+        border: 2px solid #0078d7;
+        color: #0078d7;
+        font-weight: bold;
+        border-radius: 12px;
+        padding: 0.5em 1em;
+        cursor: pointer;
+        margin-top: 1em;
+        user-select: none;
+        transition: background 0.3s;
+      }
+      .quiz-toggle:hover {
+        background: #c0e0ff;
+      }
+      .quiz {
+        background: #f0f8ff;
+        border: 2px solid #0078d7;
+        border-radius: 12px;
+        margin-top: 1em;
+        padding: 1em;
+      }
+      .quiz button {
+        background: #0078d7;
+        border: none;
+        color: white;
+        padding: 0.5em 1em;
+        margin: 0.4em 0.4em 0.4em 0;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.3s;
+      }
+      .quiz button:hover {
+        background: #005ea2;
+      }
+      .quiz-feedback {
+        margin-top: 1em;
+        font-weight: bold;
+        font-size: 1.1em;
+        min-height: 1.5em;
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        margin-top: 2em;
+        font-size: 0.9em;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="container"
+      role="main"
+      aria-label="Frontend Concepts Interactive Slideshow with Quizzes"
+    >
+      <!-- Slide 1 -->
+      <section class="slide active" id="slide1" aria-live="polite">
+        <h2><span class="icon">📡</span>How Does a Browser Load a Website?</h2>
+        <p>
+          Imagine the browser is a mailman who fetches a book (website) from a
+          big library called the internet.
+        </p>
+        <ol>
+          <li>You type <code>amazon.com</code>.</li>
+          <li>
+            The browser asks the internet phone book (DNS) where Amazon lives.
+          </li>
+          <li>Browser sends a letter (HTTP request) to Amazon’s server.</li>
+          <li>Amazon sends back the main book (HTML file).</li>
+          <li>
+            Browser reads the book and sees notes to get styles (CSS), brain
+            (JS), and pictures (assets).
+          </li>
+          <li>Browser fetches those and builds the website you see!</li>
+        </ol>
+        <div style="text-align: center; margin-top: 2em">
+          <div class="loading-dot" aria-label="Loading animation dot"></div>
+          <div class="loading-dot" aria-label="Loading animation dot"></div>
+          <div class="loading-dot" aria-label="Loading animation dot"></div>
+        </div>
+      </section>
+
+      <!-- Slide 2 -->
+      <section class="slide" id="slide2" aria-live="polite">
+        <h2>
+          <span class="icon">📄🎨⚙️</span>HTML, CSS, JavaScript, and Assets
+        </h2>
+        <p><strong>HTML</strong> is the skeleton (structure):</p>
+        <pre>
+&lt;h1&gt;Welcome to Amazon&lt;/h1&gt;
+&lt;img src="logo.png" alt="Amazon Logo"&gt;
+</pre
+        >
+        <p><strong>CSS</strong> is the clothes (styles):</p>
+        <pre>
+h1 {
+  color: orange;
+  font-size: 24px;
+}
+</pre
+        >
+        <p><strong>JavaScript</strong> is the brain (interactivity):</p>
+        <pre>
+document.querySelector('button').onclick = () =&gt; alert('Added to cart!');</pre
+        >
+        <p><strong>Assets</strong> are decorations like images and videos.</p>
+      </section>
+
+      <!-- Slide 3 -->
+      <section class="slide" id="slide3" aria-live="polite">
+        <h2><span class="icon">🌳</span>DOM, CSSOM, and Render Tree</h2>
+        <p>
+          The browser turns HTML into the <strong>DOM</strong> — a family tree
+          of page elements:
+        </p>
+        <div class="tree" aria-label="DOM Tree" role="tree">
+          <pre>
+html
+├── head
+└── body
+    ├── h1
+    ├── img
+    └── button
+</pre
+          >
+        </div>
+        <p>It reads CSS and makes the <strong>CSSOM</strong> (style tree).</p>
+        <p>
+          Then it combines DOM + CSSOM into the <strong>Render Tree</strong> to
+          know what to show.
+        </p>
+
+        <button class="quiz-toggle" aria-expanded="false" aria-controls="quiz3">
+          Take Quiz on DOM
+        </button>
+        <div id="quiz3" class="quiz" hidden>
+          <p>What does DOM stand for?</p>
+          <button onclick="checkAnswer(this, true)">
+            Document Object Model
+          </button>
+          <button onclick="checkAnswer(this, false)">Data Object Model</button>
+          <button onclick="checkAnswer(this, false)">
+            Document Outline Manager
+          </button>
+          <div class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Slide 4 -->
+      <section class="slide" id="slide4" aria-live="polite">
+        <h2>
+          <span class="icon">🎨🖌️</span>Layout (Reflow) and Paint (Repaint)
+        </h2>
+        <p>
+          <strong>Layout</strong> is like placing furniture in a room — the
+          browser figures out where each element goes.
+        </p>
+        <p>
+          <strong>Paint</strong> is coloring and drawing pixels on the screen.
+        </p>
+        <p>
+          If the page changes, the browser might have to do layout and paint
+          again, which can slow things down.
+        </p>
+
+        <button class="quiz-toggle" aria-expanded="false" aria-controls="quiz4">
+          Take Quiz on Layout & Paint
+        </button>
+        <div id="quiz4" class="quiz" hidden>
+          <p>What does "layout" mean in a browser?</p>
+          <button onclick="checkAnswer(this, true)">
+            Figuring out where elements go on the screen
+          </button>
+          <button onclick="checkAnswer(this, false)">
+            Coloring pixels on the screen
+          </button>
+          <button onclick="checkAnswer(this, false)">Downloading images</button>
+          <div class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Slide 5 -->
+      <section class="slide" id="slide5" aria-live="polite">
+        <h2>
+          <span class="icon">🐢</span>Lazy Loading: Load Only What You See
+        </h2>
+        <p>
+          Imagine a big coloring book with 100 pages but you only color the
+          first 5 pages now.
+        </p>
+        <p>
+          Lazy loading means the browser only loads images or content when you
+          scroll to see them.
+        </p>
+        <div class="lazy-img" aria-label="Image placeholder for lazy loading">
+          Image not loaded yet
+        </div>
+        <p>
+          Without lazy loading, the browser loads all images at once, making the
+          page slow.
+        </p>
+
+        <button class="quiz-toggle" aria-expanded="false" aria-controls="quiz5">
+          Take Quiz on Lazy Loading
+        </button>
+        <div id="quiz5" class="quiz" hidden>
+          <p>What is lazy loading good for?</p>
+          <button onclick="checkAnswer(this, true)">
+            Loading images only when you see them
+          </button>
+          <button onclick="checkAnswer(this, false)">
+            Loading all images at once
+          </button>
+          <button onclick="checkAnswer(this, false)">
+            Making images blurry
+          </button>
+          <div class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Slide 6 -->
+      <section class="slide" id="slide6" aria-live="polite">
+        <h2><span class="icon">💾</span>Caching: Remembering to Save Time</h2>
+        <p>
+          When you visit a website, your browser saves some files in a secret
+          box called <strong>cache</strong>.
+        </p>
+        <p>
+          Next time, the browser uses those saved files instead of asking the
+          server again, making loading faster.
+        </p>
+        <div class="box">Cache</div>
+        <p>
+          Think of it as your browser remembering your favorite book so you
+          don’t have to borrow it again.
+        </p>
+
+        <button class="quiz-toggle" aria-expanded="false" aria-controls="quiz6">
+          Take Quiz on Caching
+        </button>
+        <div id="quiz6" class="quiz" hidden>
+          <p>What does caching help with?</p>
+          <button onclick="checkAnswer(this, true)">
+            Loading pages faster on repeat visits
+          </button>
+          <button onclick="checkAnswer(this, false)">
+            Making images bigger
+          </button>
+          <button onclick="checkAnswer(this, false)">Deleting all files</button>
+          <div class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Slide 7 -->
+      <section class="slide" id="slide7" aria-live="polite">
+        <h2><span class="icon">⚡</span>Critical Rendering Path</h2>
+        <p>The browser wants to show you the page as fast as possible.</p>
+        <ol>
+          <li>
+            Loads the <strong>critical resources</strong> (HTML, CSS, JS needed
+            for first screen).
+          </li>
+          <li>Builds DOM and CSSOM.</li>
+          <li>Creates Render Tree.</li>
+          <li>
+            Paints the page quickly so you see something (First Contentful
+            Paint).
+          </li>
+          <li>Loads other stuff in the background.</li>
+        </ol>
+
+        <button class="quiz-toggle" aria-expanded="false" aria-controls="quiz7">
+          Take Quiz on Critical Rendering Path
+        </button>
+        <div id="quiz7" class="quiz" hidden>
+          <p>What is the Critical Rendering Path?</p>
+          <button onclick="checkAnswer(this, true)">
+            The fastest way browser shows the page
+          </button>
+          <button onclick="checkAnswer(this, false)">
+            A type of CSS style
+          </button>
+          <button onclick="checkAnswer(this, false)">
+            A JavaScript function
+          </button>
+          <div class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Slide 8 -->
+      <section class="slide" id="slide8" aria-live="polite">
+        <h2><span class="icon">⏱️</span>Performance Metrics</h2>
+        <ul>
+          <li>
+            <strong>TTFB</strong>: Time to First Byte – how fast the server
+            responds.
+          </li>
+          <li>
+            <strong>FCP</strong>: First Contentful Paint – when first content
+            appears.
+          </li>
+          <li>
+            <strong>LCP</strong>: Largest Contentful Paint – when biggest part
+            is loaded.
+          </li>
+          <li>
+            <strong>TTI</strong>: Time to Interactive – when page is usable.
+          </li>
+          <li>
+            <strong>CLS</strong>: Cumulative Layout Shift – how much things jump
+            around.
+          </li>
+        </ul>
+        <div class="progress-bar" aria-label="Performance progress bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <button class="quiz-toggle" aria-expanded="false" aria-controls="quiz8">
+          Take Quiz on Performance Metrics
+        </button>
+        <div id="quiz8" class="quiz" hidden>
+          <p>Which metric measures how much things jump around on the page?</p>
+          <button onclick="checkAnswer(this, true)">
+            CLS (Cumulative Layout Shift)
+          </button>
+          <button onclick="checkAnswer(this, false)">TTFB</button>
+          <button onclick="checkAnswer(this, false)">LCP</button>
+          <div class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Slide 9 -->
+      <section class="slide" id="slide9" aria-live="polite">
+        <h2><span class="icon">⚠️</span>What Happens If We Don’t Optimize?</h2>
+        <ul>
+          <li>No lazy loading → slow page and big data usage.</li>
+          <li>No responsive images → blurry or too big images.</li>
+          <li>
+            <code>!important</code> everywhere → messy and confusing styles.
+          </li>
+          <li>Too many animations → browser works too hard, slows down.</li>
+          <li>Frequent layout recalculations → page jumps and lags.</li>
+          <li>Bad cascade layers → style conflicts and broken looks.</li>
+        </ul>
+        <div class="warning" role="alert">
+          Using <code>!important</code> everywhere is bad practice! It breaks
+          CSS cascading and makes fixing bugs hard.
+        </div>
+        <div
+          class="animation-box"
+          aria-label="Example spinning animation"
+        ></div>
+        <p style="text-align: center">
+          (Too many animations like this can slow down your page!)
+        </p>
+      </section>
+
+      <!-- Slide 10 -->
+      <section class="slide" id="slide10" aria-live="polite">
+        <h2>
+          <span class="icon">🚀</span>How Big Companies Optimize Web Performance
+        </h2>
+        <ul>
+          <li>
+            <strong>Uber</strong>: Uses code splitting to load only needed
+            JavaScript.
+          </li>
+          <li>
+            <strong>Rakuten</strong>: Uses caching aggressively and lazy loads
+            images.
+          </li>
+          <li>Both constantly monitor performance and fix slow parts.</li>
+        </ul>
+      </section>
+
+      <!-- Navigation Buttons -->
+      <div class="nav-buttons" role="navigation" aria-label="Slide navigation">
+        <button id="prevBtn" aria-disabled="true" aria-label="Previous slide">
+          ⬅️ Previous
+        </button>
+        <button id="nextBtn" aria-label="Next slide">Next ➡️</button>
+      </div>
+    </div>
+
+    <script>
+      // Slide navigation
+      const slides = document.querySelectorAll(".slide");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const progressFill = document.getElementById("progressFill");
+
+      let currentSlide = 0;
+
+      function showSlide(n) {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle("active", i === n);
+        });
+        prevBtn.disabled = n === 0;
+        nextBtn.disabled = n === slides.length - 1;
+        prevBtn.setAttribute("aria-disabled", prevBtn.disabled);
+        nextBtn.setAttribute("aria-disabled", nextBtn.disabled);
+
+        // Animate progress bar on performance metrics slide
+        if (slides[n].id === "slide8") {
+          progressFill.style.width = "0%";
+          setTimeout(() => {
+            progressFill.style.width = "80%";
+          }, 100);
+        } else {
+          progressFill.style.width = "0%";
+        }
+
+        // Simulate lazy loading image on slide 5
+        if (slides[n].id === "slide5") {
+          const lazyImg = slides[n].querySelector(".lazy-img");
+          lazyImg.textContent = "Image not loaded yet";
+          lazyImg.style.backgroundImage = "none";
+          setTimeout(() => {
+            lazyImg.textContent = "";
+            lazyImg.style.backgroundImage =
+              "url('https://via.placeholder.com/200x120?text=Lazy+Loaded+Image')";
+          }, 2000);
+        }
+      }
+
+      prevBtn.addEventListener("click", () => {
+        if (currentSlide > 0) {
+          currentSlide--;
+          showSlide(currentSlide);
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (currentSlide < slides.length - 1) {
+          currentSlide++;
+          showSlide(currentSlide);
+        }
+      });
+
+      // Quiz toggle buttons
+      document.querySelectorAll(".quiz-toggle").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const quizId = btn.getAttribute("aria-controls");
+          const quiz = document.getElementById(quizId);
+          const expanded = btn.getAttribute("aria-expanded") === "true";
+          btn.setAttribute("aria-expanded", !expanded);
+          if (quiz) {
+            quiz.hidden = expanded;
+            if (!expanded) {
+              // Reset feedback and buttons
+              quiz
+                .querySelectorAll("button")
+                .forEach((b) => (b.disabled = false));
+              quiz.querySelector(".quiz-feedback").textContent = "";
+            }
+          }
+        });
+      });
+
+      // Quiz answer checking
+      function checkAnswer(button, isCorrect) {
+        const quiz = button.closest(".quiz");
+        const feedback = quiz.querySelector(".quiz-feedback");
+        if (isCorrect) {
+          feedback.textContent = "🎉 Correct! Great job!";
+          feedback.style.color = "green";
+        } else {
+          feedback.textContent = "❌ Oops, try again!";
+          feedback.style.color = "red";
+        }
+        // Disable all buttons after answer
+        quiz.querySelectorAll("button").forEach((b) => (b.disabled = true));
+      }
+
+      // Initial show
+      showSlide(currentSlide);
+    </script>
+
+    <footer>&copy; 2026 Frontend Fun for Kids</footer>
+  </body>
+</html>

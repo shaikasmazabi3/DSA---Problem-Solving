@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      Critical Rendering Path Visualizer with Reflow & Repaint - Enhanced UX
+    </title>
+    <style>
+      /* General */
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: #e0f7fa;
+        margin: 0;
+        padding: 20px;
+        color: #004d40;
+      }
+      h1,
+      h2 {
+        text-align: center;
+        color: #00796b;
+        margin-bottom: 5px;
+      }
+      p.description {
+        text-align: center;
+        max-width: 750px;
+        margin: 0 auto 30px;
+        font-size: 1.15em;
+        color: #004d40dd;
+      }
+
+      /* Container for the entire visualization */
+      .container {
+        max-width: 960px;
+        margin: 0 auto 80px;
+        background: #b2dfdb;
+        border-radius: 15px;
+        padding: 25px 30px 40px;
+        box-shadow: 0 0 20px #004d4080;
+      }
+
+      /* Step navigation */
+      .step-nav {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .step-nav button {
+        background: #00796b;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        margin: 0 12px;
+        border-radius: 8px;
+        font-size: 1.1em;
+        cursor: pointer;
+        box-shadow: 0 0 15px #004d40;
+        transition: background 0.3s ease;
+      }
+      .step-nav button:disabled {
+        background: #004d4011;
+        color: #004d4044;
+        cursor: default;
+        box-shadow: none;
+      }
+      .step-nav button:hover:not(:disabled) {
+        background: #004d40;
+      }
+
+      /* Side-by-side Step Content */
+      .step-content {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+        min-height: 280px;
+      }
+
+      /* Tree containers */
+      .tree {
+        background: white;
+        border: 3px solid #00796b;
+        border-radius: 12px;
+        width: 320px;
+        min-height: 250px;
+        padding: 15px 20px;
+        box-shadow: 0 0 15px #004d4080;
+        position: relative;
+        overflow-y: auto;
+      }
+
+      /* Node styles */
+      .node {
+        background: #004d40;
+        color: white;
+        border-radius: 8px;
+        padding: 10px 15px;
+        margin: 10px auto;
+        width: fit-content;
+        font-weight: bold;
+        font-size: 1.1em;
+        box-shadow: 0 0 8px #00796b;
+        cursor: default;
+      }
+      .subtree {
+        margin-left: 25px;
+        border-left: 2px dashed #00796b;
+        padding-left: 15px;
+      }
+      .highlight {
+        animation: glow 1.5s ease-in-out forwards;
+        box-shadow: 0 0 15px 6px #ffcc00 !important;
+      }
+      @keyframes glow {
+        0% {
+          box-shadow: 0 0 0px 0px #ffcc00;
+        }
+        50% {
+          box-shadow: 0 0 15px 6px #ffcc00;
+        }
+        100% {
+          box-shadow: 0 0 0px 0px #ffcc00;
+        }
+      }
+
+      /* Arrows */
+      .arrow {
+        font-size: 3em;
+        text-align: center;
+        color: #00796b;
+        margin: 0 10px;
+        user-select: none;
+        align-self: center;
+      }
+
+      /* Description text below trees */
+      #descriptionBox {
+        max-width: 960px;
+        margin: 25px auto 0;
+        font-size: 1.25em;
+        background: #b2dfdb;
+        border-radius: 10px;
+        padding: 18px 25px;
+        box-shadow: inset 0 0 12px #004d4080;
+        color: #004d40;
+        text-align: center;
+        min-height: 90px;
+      }
+
+      /* Layout & Paint visual container */
+      #layoutPaintContainer {
+        width: 320px;
+        height: 250px;
+        background: white;
+        border: 3px solid #00796b;
+        border-radius: 12px;
+        box-shadow: 0 0 15px #004d4080;
+        position: relative;
+        overflow: hidden;
+      }
+      /* Boxes representing layout */
+      .box {
+        position: absolute;
+        border: 2px solid #004d40;
+        background: #b2dfdb;
+        color: #004d40;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 8px;
+        box-shadow: 0 0 8px #00796b;
+        user-select: none;
+        transition: all 1s ease;
+      }
+      #box1 {
+        top: 20px;
+        left: 20px;
+        width: 360px;
+        height: 60px;
+      }
+      #box2 {
+        top: 100px;
+        left: 40px;
+        width: 320px;
+        height: 50px;
+      }
+      #box3 {
+        top: 170px;
+        left: 60px;
+        width: 280px;
+        height: 50px;
+      }
+      /* Painted boxes fill animation */
+      .painted {
+        background: #00796b !important;
+        color: white !important;
+        transition: background-color 1.5s ease, color 1.5s ease;
+      }
+
+      /* Reflow & Repaint section */
+      #reflowRepaintSection {
+        display: flex;
+        flex-direction: column;
+        /*max-width: 960px;*/
+        height: 100%;
+        margin: 40px auto 60px;
+        background: #fff3e0;
+        border-radius: 15px;
+        padding: 25px 30px 35px;
+        box-shadow: 0 0 20px #ffb74d;
+        color: #bf360c;
+      }
+      #reflowRepaintTitle {
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.5em;
+        margin-bottom: 15px;
+        color: #bf360c;
+      }
+      #reflowRepaintVisual {
+        margin: 20px auto 15px;
+        width: 900px;
+        height: 230px;
+        position: relative;
+        border: 3px solid #bf360c;
+        border-radius: 12px;
+        background: #fff8e1;
+        display: flex;
+        gap: 40px;
+        padding: 10px;
+        box-sizing: border-box;
+        overflow-x: auto;
+      }
+
+      /* Boxes inside reflow/repaint demo */
+      .reflow-box,
+      .repaint-box {
+        flex: none;
+        border-radius: 12px;
+        font-weight: bold;
+        color: white;
+        user-select: none;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 0 10px;
+        transition: all 0.6s ease;
+        font-size: 1em;
+      }
+
+      /* Reflow boxes - orange */
+      .reflow-box {
+        background: #f57c00;
+        width: 140px;
+        height: 80px;
+        box-shadow: 0 0 15px #ef6c00;
+        border: 3px solid #bf360c;
+      }
+      .reflow-box.expanded {
+        width: 200px;
+        height: 120px;
+      }
+
+      /* Repaint boxes - yellow */
+      .repaint-box {
+        background: #fbc02d;
+        color: black;
+        width: 140px;
+        height: 80px;
+        box-shadow: 0 0 15px #f9a825;
+        border: 3px solid #bf360c;
+      }
+      .repaint-box.changed {
+        background: #f57c00;
+        color: white;
+      }
+
+      /* Reflow/Repaint labels */
+      #reflowRepaintText {
+        display: flex;
+        flex-direction: column;
+        font-size: 1.2em;
+        text-align: center;
+        margin-top: 15px;
+        min-height: 70px;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* Scrollbar styling for reflow/repaint container */
+      #reflowRepaintVisual::-webkit-scrollbar {
+        height: 8px;
+      }
+      #reflowRepaintVisual::-webkit-scrollbar-track {
+        background: #fff8e1;
+      }
+      #reflowRepaintVisual::-webkit-scrollbar-thumb {
+        background: #bf360c;
+        border-radius: 10px;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 1000px) {
+        .step-content {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .tree,
+        #layoutPaintContainer {
+          width: 90vw;
+          max-width: 400px;
+          margin-bottom: 30px;
+        }
+        #reflowRepaintVisual {
+          width: 95vw;
+          height: 200px;
+          overflow-x: scroll;
+          padding: 5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Critical Rendering Path Visualizer</h1>
+    <p class="description">
+      Watch how a browser builds your webpage: from trees to layout, paint, and
+      how changes cause reflow and repaint! Use the navigation buttons to
+      explore steps side by side.
+    </p>
+
+    <div class="container" aria-label="Critical Rendering Path Visualization">
+      <div class="step-nav" aria-label="Step navigation">
+        <button id="prevStepBtn" aria-label="Previous step" disabled>
+          ← Previous
+        </button>
+        <button id="nextStepBtn" aria-label="Next step">Next →</button>
+      </div>
+
+      <div
+        class="step-content"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-relevant="additions removals"
+      >
+        <!-- Left panel: Tree or Layout -->
+        <div
+          id="leftPanel"
+          class="tree"
+          role="region"
+          aria-label="Left panel visualization area"
+        >
+          <!-- Content dynamic -->
+        </div>
+
+        <div class="arrow" aria-hidden="true">→</div>
+
+        <!-- Right panel: Tree or Paint -->
+        <div
+          id="rightPanel"
+          class="tree"
+          role="region"
+          aria-label="Right panel visualization area"
+        >
+          <!-- Content dynamic -->
+        </div>
+      </div>
+
+      <div
+        id="descriptionBox"
+        role="region"
+        aria-live="polite"
+        aria-atomic="true"
+        style="margin-top: 25px"
+      ></div>
+    </div>
+
+    <!-- Reflow & Repaint Interactive Demo -->
+    <section
+      id="reflowRepaintSection"
+      aria-label="Reflow and Repaint demonstration"
+    >
+      <h2 id="reflowRepaintTitle">Reflow and Repaint Demonstration</h2>
+      <p
+        style="
+          max-width: 900px;
+          margin: 0 auto 15px;
+          text-align: center;
+          color: #bf360c;
+        "
+      >
+        Click the boxes below to see how changing size (reflow) or color
+        (repaint) affects the page. There are at least 5 items in each container
+        to show large scale effects.
+      </p>
+      <div
+        id="reflowRepaintVisual"
+        role="region"
+        aria-label="Interactive boxes for reflow and repaint demo"
+      >
+        <div
+          id="reflowContainer"
+          style="
+            flex: 1;
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 12px;
+            overflow-x: auto;
+          "
+          aria-label="Reflow boxes container"
+        >
+          <!-- 5+ reflow boxes generated by JS -->
+        </div>
+        <div
+          id="repaintContainer"
+          style="
+            flex: 1;
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 12px;
+            overflow-x: auto;
+          "
+          aria-label="Repaint boxes container"
+        >
+          <!-- 5+ repaint boxes generated by JS -->
+        </div>
+      </div>
+      <div
+        id="reflowRepaintText"
+        role="region"
+        aria-live="polite"
+        aria-atomic="true"
+        style="max-width: 900px; margin: 20px auto 0"
+      ></div>
+    </section>
+
+    <script>
+      // Elements references
+      const leftPanel = document.getElementById("leftPanel");
+      const rightPanel = document.getElementById("rightPanel");
+      const descriptionBox = document.getElementById("descriptionBox");
+      const prevStepBtn = document.getElementById("prevStepBtn");
+      const nextStepBtn = document.getElementById("nextStepBtn");
+
+      // Step data: Each step has left and right content (HTML strings or functions to create DOM),
+      // description text, and optional highlight functions.
+      const steps = [
+        {
+          title: "DOM Tree",
+          description:
+            "The browser reads your HTML code and builds the <strong>DOM tree</strong>, which represents the structure of the page.",
+          leftContent: () => {
+            const container = document.createElement("div");
+            container.innerHTML = `
+          <div class="node" id="htmlNode">&lt;html&gt;
+            <div class="subtree">
+              <div class="node" id="headNode">&lt;head&gt;</div>
+              <div class="node" id="bodyNode">&lt;body&gt;
+                <div class="subtree">
+                  <div class="node" id="h1Node">&lt;h1&gt;Hello World&lt;/h1&gt;</div>
+                  <div class="node" id="pNode">&lt;p&gt;Welcome to the page.&lt;/p&gt;</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+            return container;
+          },
+          rightContent: () => {
+            const container = document.createElement("div");
+            container.style.fontStyle = "italic";
+            container.style.color = "#004d40aa";
+            container.style.textAlign = "center";
+            container.style.marginTop = "40%";
+            container.textContent = "No right panel content for DOM Tree step.";
+            return container;
+          },
+          highlight: (container) => {
+            ["htmlNode", "headNode", "bodyNode", "h1Node", "pNode"].forEach(
+              (id) => {
+                const node = container.querySelector(`#${id}`);
+                if (node) node.classList.add("highlight");
+              }
+            );
+          },
+        },
+        {
+          title: "CSSOM Tree",
+          description:
+            "The browser reads CSS files and builds the <strong>CSSOM tree</strong> to understand styles for each element.",
+          leftContent: () => {
+            const container = document.createElement("div");
+            container.innerHTML = `
+          <div class="node" id="styleSheetNode">Stylesheet
+            <div class="subtree">
+              <div class="node" id="h1StyleNode">h1 { color: blue; }</div>
+              <div class="node" id="pStyleNode">p { font-size: 16px; }</div>
+            </div>
+          </div>
+        `;
+            return container;
+          },
+          rightContent: () => {
+            const container = document.createElement("div");
+            container.style.fontStyle = "italic";
+            container.style.color = "#004d40aa";
+            container.style.textAlign = "center";
+            container.style.marginTop = "40%";
+            container.textContent =
+              "No right panel content for CSSOM Tree step.";
+            return container;
+          },
+          highlight: (container) => {
+            ["styleSheetNode", "h1StyleNode", "pStyleNode"].forEach((id) => {
+              const node = container.querySelector(`#${id}`);
+              if (node) node.classList.add("highlight");
+            });
+          },
+        },
+        {
+          title: "Render Tree",
+          description:
+            "The browser combines DOM and CSSOM to build the <strong>Render tree</strong>, which contains only visible elements with styles applied.",
+          leftContent: () => {
+            const container = document.createElement("div");
+            container.innerHTML = `
+          <div class="node" id="renderHtmlNode">&lt;html&gt;
+            <div class="subtree">
+              <div class="node" id="renderBodyNode">&lt;body&gt;
+                <div class="subtree">
+                  <div class="node" id="renderH1Node" style="color: blue;">&lt;h1&gt;Hello World&lt;/h1&gt;</div>
+                  <div class="node" id="renderPNode" style="font-size: 16px;">&lt;p&gt;Welcome to the page.&lt;/p&gt;</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+            return container;
+          },
+          rightContent: () => {
+            const container = document.createElement("div");
+            container.style.fontStyle = "italic";
+            container.style.color = "#004d40aa";
+            container.style.textAlign = "center";
+            container.style.marginTop = "40%";
+            container.textContent =
+              "No right panel content for Render Tree step.";
+            return container;
+          },
+          highlight: (container) => {
+            [
+              "renderHtmlNode",
+              "renderBodyNode",
+              "renderH1Node",
+              "renderPNode",
+            ].forEach((id) => {
+              const node = container.querySelector(`#${id}`);
+              if (node) node.classList.add("highlight");
+            });
+          },
+        },
+        {
+          title: "Layout (Reflow)",
+          description:
+            "The browser calculates the size and position of each box in the render tree. This is called <strong>Layout (Reflow)</strong>.",
+          leftContent: () => {
+            // Layout visual with boxes sized small initially
+            const container = document.createElement("div");
+            container.id = "layoutPaintContainer";
+            container.style.position = "relative";
+            container.style.overflow = "hidden";
+
+            // Boxes
+            const box1 = document.createElement("div");
+            box1.className = "box";
+            box1.id = "box1";
+            box1.textContent = "html";
+
+            const box2 = document.createElement("div");
+            box2.className = "box";
+            box2.id = "box2";
+            box2.textContent = "body";
+
+            const box3 = document.createElement("div");
+            box3.className = "box";
+            box3.id = "box3";
+            box3.textContent = "content";
+
+            // Start small for animation
+            box1.style.width = "50px";
+            box1.style.height = "30px";
+            box2.style.width = "40px";
+            box2.style.height = "20px";
+            box3.style.width = "30px";
+            box3.style.height = "15px";
+
+            container.appendChild(box1);
+            container.appendChild(box2);
+            container.appendChild(box3);
+
+            // Animate sizes after delay
+            setTimeout(() => {
+              box1.style.transition = "all 1s ease";
+              box2.style.transition = "all 1s ease 0.5s";
+              box3.style.transition = "all 1s ease 1s";
+              box1.style.width = "360px";
+              box1.style.height = "60px";
+              box2.style.width = "320px";
+              box2.style.height = "50px";
+              box3.style.width = "280px";
+              box3.style.height = "50px";
+            }, 100);
+
+            return container;
+          },
+          rightContent: () => {
+            const container = document.createElement("div");
+            container.style.fontStyle = "italic";
+            container.style.color = "#004d40aa";
+            container.style.textAlign = "center";
+            container.style.marginTop = "40%";
+            container.textContent =
+              "Layout calculates box sizes and positions.";
+            return container;
+          },
+          highlight: () => {
+            // Highlight left panel boxes by adding subtle glow
+            const boxes = ["box1", "box2", "box3"];
+            boxes.forEach((id) => {
+              const el = document.getElementById(id);
+              if (el) el.classList.add("highlight");
+            });
+          },
+        },
+        {
+          title: "Paint (Repaint)",
+          description:
+            "Finally, the browser paints pixels on the screen to display the page. This is called <strong>Paint (Repaint)</strong>.",
+          leftContent: () => {
+            // Same layout container with boxes painted progressively
+            const container = document.createElement("div");
+            container.id = "layoutPaintContainer";
+            container.style.position = "relative";
+            container.style.overflow = "hidden";
+
+            // Boxes with painted class added progressively
+            const box1 = document.createElement("div");
+            box1.className = "box painted";
+            box1.id = "box1";
+            box1.textContent = "html";
+
+            const box2 = document.createElement("div");
+            box2.className = "box painted";
+            box2.id = "box2";
+            box2.textContent = "body";
+
+            const box3 = document.createElement("div");
+            box3.className = "box painted";
+            box3.id = "box3";
+            box3.textContent = "content";
+
+            container.appendChild(box1);
+            container.appendChild(box2);
+            container.appendChild(box3);
+
+            return container;
+          },
+          rightContent: () => {
+            const container = document.createElement("div");
+            container.style.fontStyle = "italic";
+            container.style.color = "#004d40aa";
+            container.style.textAlign = "center";
+            container.style.marginTop = "40%";
+            container.textContent =
+              "Paint colors pixels on the screen to show the page.";
+            return container;
+          },
+          highlight: () => {
+            // Highlight painted boxes
+            ["box1", "box2", "box3"].forEach((id) => {
+              const el = document.getElementById(id);
+              if (el) el.classList.add("highlight");
+            });
+          },
+        },
+      ];
+
+      let currentStepIndex = 0;
+
+      function renderStep(index) {
+        currentStepIndex = index;
+        prevStepBtn.disabled = currentStepIndex === 0;
+        nextStepBtn.disabled = false;
+
+        const step = steps[index];
+        if (!step) return;
+
+        // Clear panels
+        leftPanel.innerHTML = "";
+        rightPanel.innerHTML = "";
+        descriptionBox.innerHTML = "";
+
+        // Insert left content
+        const leftContent =
+          typeof step.leftContent === "function"
+            ? step.leftContent()
+            : step.leftContent;
+        if (leftContent instanceof HTMLElement)
+          leftPanel.appendChild(leftContent);
+        else leftPanel.innerHTML = leftContent;
+
+        // Insert right content
+        const rightContent =
+          typeof step.rightContent === "function"
+            ? step.rightContent()
+            : step.rightContent;
+        if (rightContent instanceof HTMLElement)
+          rightPanel.appendChild(rightContent);
+        else rightPanel.innerHTML = rightContent;
+
+        // Insert description
+        descriptionBox.innerHTML = step.description;
+
+        // Highlight if function provided
+        if (typeof step.highlight === "function") {
+          // Wait a bit for DOM insertion before highlighting
+          setTimeout(() => {
+            // Highlight left panel nodes
+            step.highlight(leftPanel);
+            // Highlight right panel nodes (if any)
+            step.highlight(rightPanel);
+          }, 150);
+        }
+
+        // Update buttons text on last step
+        nextStepBtn.textContent =
+          index === steps.length - 1 ? "Restart" : "Next →";
+      }
+
+      prevStepBtn.addEventListener("click", () => {
+        if (currentStepIndex > 0) {
+          renderStep(currentStepIndex - 1);
+        }
+      });
+      nextStepBtn.addEventListener("click", () => {
+        if (currentStepIndex < steps.length - 1) {
+          renderStep(currentStepIndex + 1);
+        } else {
+          renderStep(0);
+        }
+      });
+
+      // Initial render
+      renderStep(0);
+
+      // Reflow & Repaint demo setup
+      const reflowContainer = document.getElementById("reflowContainer");
+      const repaintContainer = document.getElementById("repaintContainer");
+      const reflowRepaintText = document.getElementById("reflowRepaintText");
+
+      // Create 5 reflow boxes
+      for (let i = 1; i <= 5; i++) {
+        const box = document.createElement("div");
+        box.className = "reflow-box";
+        box.textContent = `Box ${i}`;
+        box.setAttribute("tabindex", "0");
+        box.setAttribute("role", "button");
+        box.setAttribute("aria-pressed", "false");
+        box.setAttribute(
+          "aria-label",
+          `Reflow box number ${i}, click to toggle size`
+        );
+        reflowContainer.appendChild(box);
+
+        box.addEventListener("click", () => toggleReflowBox(box));
+        box.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggleReflowBox(box);
+          }
+        });
+      }
+
+      // Create 5 repaint boxes
+      for (let i = 1; i <= 5; i++) {
+        const box = document.createElement("div");
+        box.className = "repaint-box";
+        box.textContent = `Box ${i}`;
+        box.setAttribute("tabindex", "0");
+        box.setAttribute("role", "button");
+        box.setAttribute("aria-pressed", "false");
+        box.setAttribute(
+          "aria-label",
+          `Repaint box number ${i}, click to toggle color`
+        );
+        repaintContainer.appendChild(box);
+
+        box.addEventListener("click", () => toggleRepaintBox(box));
+        box.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggleRepaintBox(box);
+          }
+        });
+      }
+
+      function toggleReflowBox(box) {
+        const expanded = box.classList.toggle("expanded");
+        box.setAttribute("aria-pressed", expanded.toString());
+        reflowRepaintText.innerHTML = expanded
+          ? "<strong>Reflow:</strong> This box changed size, so the browser recalculates layout for affected elements. This operation can be costly."
+          : "Click any orange box to change its size and trigger <strong>Reflow</strong>.";
+      }
+
+      function toggleRepaintBox(box) {
+        const changed = box.classList.toggle("changed");
+        box.setAttribute("aria-pressed", changed.toString());
+        reflowRepaintText.innerHTML = changed
+          ? "<strong>Repaint:</strong> This box changed color, so the browser repaints pixels without recalculating layout. This operation is cheaper."
+          : "Click any yellow box to change its color and trigger <strong>Repaint</strong>.";
+      }
+
+      // Initial reflow/repaint text
+      reflowRepaintText.innerHTML =
+        "Click any orange box to change its size and trigger <strong>Reflow</strong>.<br>Click any yellow box to change its color and trigger <strong>Repaint</strong>.";
+    </script>
+  </body>
+</html>

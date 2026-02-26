@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bucket Sort - Complete Step-by-Step Visualization</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .header h1 {
+        font-size: 36px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 16px;
+        opacity: 0.9;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .control-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+      }
+
+      .control-panel h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 18px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      .input-group label {
+        display: block;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+
+      .input-group input:focus {
+        outline: none;
+        border-color: #ff9a56;
+      }
+
+      .info-section {
+        background: #f0f0f0;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #555;
+      }
+
+      .info-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .info-item {
+        margin-bottom: 8px;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #ff9a56;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 13px;
+      }
+
+      .start-btn {
+        background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%);
+        color: white;
+      }
+
+      .start-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255, 154, 86, 0.4);
+      }
+
+      .reset-btn {
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      .reset-btn:hover {
+        background: #e0e0e0;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .visualization-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      .step-header {
+        margin-bottom: 30px;
+      }
+
+      .step-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .step-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #ff9a56;
+        text-align: center;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #ff9a56;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        font-family: "Courier New", monospace;
+      }
+
+      .visualization {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        min-height: 500px;
+      }
+
+      .vis-title {
+        font-weight: 600;
+        color: #ff9a56;
+        margin-bottom: 20px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .vis-section {
+        margin-bottom: 30px;
+      }
+
+      .vis-section-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 13px;
+      }
+
+      .bars-container {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 8px;
+        height: 200px;
+        margin-bottom: 20px;
+      }
+
+      .buckets-display {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 15px;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+      }
+
+      .bucket {
+        border: 2px solid #ff9a56;
+        border-radius: 8px;
+        padding: 12px;
+        background: #fff9f7;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+
+      .bucket-label {
+        font-weight: 600;
+        color: #ff9a56;
+        font-size: 12px;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+
+      .bucket-items {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .bucket-item {
+        background: #ff9a56;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .bucket.active {
+        background: #ffe0d6;
+        border-color: #ff6a88;
+      }
+
+      .bucket.active .bucket-item {
+        background: #ff6a88;
+      }
+
+      .bar {
+        flex: 1;
+        background: #ff9a56;
+        border-radius: 4px 4px 0 0;
+        transition: all 0.3s ease;
+        position: relative;
+        min-width: 30px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+      }
+
+      .bar-value {
+        background : white;
+        border-radius: 4px;
+        padding : 3px 12px;
+        border: 1px solid #ff9a56;
+        color: #ff9a56;
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 5px;
+      }
+
+      .bar.distributing {
+        background: #ffc107;
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+      }
+
+      .bar.sorting {
+        background: #0d6efd;
+        box-shadow: 0 0 15px rgba(13, 110, 253, 0.6);
+      }
+
+      .bar.sorted {
+        background: #28a745;
+      }
+
+      .step-info {
+        background: #fff3e0;
+        border-left: 4px solid #ff9800;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+      }
+
+      .step-info-title {
+        font-weight: 700;
+        color: #ff9800;
+        margin-bottom: 10px;
+        font-size: 15px;
+      }
+
+      .step-info-content {
+        color: #555;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .nav-buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      .nav-btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 14px;
+      }
+
+      .prev-btn {
+        background: #e0e0e0;
+        color: #333;
+      }
+
+      .prev-btn:hover:not(:disabled) {
+        background: #d0d0d0;
+      }
+
+      .next-btn {
+        background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%);
+        color: white;
+      }
+
+      .next-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255, 154, 86, 0.4);
+      }
+
+      .prev-btn:disabled,
+      .next-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .progress {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 13px;
+        color: #666;
+        font-weight: 600;
+      }
+
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #555;
+      }
+
+      .legend-color {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+      }
+
+      .color-distributing {
+        background: #ffc107;
+      }
+
+      .color-sorting {
+        background: #0d6efd;
+      }
+
+      .color-sorted {
+        background: #28a745;
+      }
+
+      .color-default {
+        background: #ff9a56;
+      }
+
+      .back-link {
+        display: inline-block;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 1024px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .control-panel {
+          position: static;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 24px;
+        }
+
+        .bars-container {
+          height: 150px;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .buckets-display {
+          grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="sorting-index.html" class="back-link">← Back to Index</a>
+
+      <div class="header">
+        <h1>🪣 Bucket Sort Visualization</h1>
+        <p>Distribute & Sort - Step by Step</p>
+      </div>
+
+      <div class="main-grid">
+        <!-- Control Panel -->
+        <div class="control-panel">
+          <h2>⚙️ Controls</h2>
+
+          <div class="input-group">
+            <label>Array Size</label>
+            <input type="number" id="sizeInput" value="12" min="8" max="20" />
+          </div>
+
+          <div class="input-group">
+            <label>Number of Buckets</label>
+            <input type="number" id="bucketsInput" value="5" min="3" max="10" />
+          </div>
+
+          <div class="input-group">
+            <label>Animation Speed</label>
+            <input
+              type="range"
+              id="speedInput"
+              min="100"
+              max="1000"
+              value="300"
+              style="width: 100%"
+            />
+            <small style="color: #999">Faster ← → Slower</small>
+          </div>
+
+          <div class="buttons">
+            <button class="start-btn" onclick="startVisualization()">
+              Start
+            </button>
+            <button class="reset-btn" onclick="resetVisualization()">
+              Reset
+            </button>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">Algorithm Info</div>
+            <div class="info-item">
+              <span class="info-label">Type:</span> Non-Comparative
+            </div>
+            <div class="info-item">
+              <span class="info-label">Time Avg:</span> O(n + k)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Time Worst:</span> O(n²)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Space:</span> O(n + k)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Stable:</span> ✓ Yes
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">How It Works</div>
+            <div style="font-size: 12px; line-height: 1.6; color: #666">
+              1. Create empty buckets<br />
+              2. Distribute elements<br />
+              3. Sort each bucket<br />
+              4. Concatenate buckets<br />
+              5. Best for uniform data
+            </div>
+          </div>
+        </div>
+
+        <!-- Visualization Panel -->
+        <div class="visualization-panel">
+          <div class="step-header">
+            <div class="step-title" id="stepTitle">Initialization</div>
+            <div class="step-description" id="stepDescription">
+              Click "Start" to begin the visualization
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Total Buckets</div>
+              <div class="stat-value" id="bucketCount">-</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Elements Distributed</div>
+              <div class="stat-value" id="distributed">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Phase</div>
+              <div class="stat-value" id="phase">-</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Sorted</div>
+              <div class="stat-value" id="sorted">0</div>
+            </div>
+          </div>
+
+          <div class="visualization">
+            <div class="vis-title">Array Visualization</div>
+
+            <div class="vis-section">
+              <div class="vis-section-title">Current Array</div>
+              <div class="bars-container" id="barsContainer"></div>
+            </div>
+
+            <div class="vis-section">
+              <div class="vis-section-title">Buckets</div>
+              <div class="buckets-display" id="bucketsDisplay"></div>
+            </div>
+          </div>
+
+          <div class="step-info" id="stepInfo" style="display: none">
+            <div class="step-info-title" id="stepInfoTitle">
+              Step Information
+            </div>
+            <div class="step-info-content" id="stepInfoContent"></div>
+          </div>
+
+          <div class="nav-buttons">
+            <button
+              class="nav-btn prev-btn"
+              id="prevBtn"
+              onclick="previousStep()"
+              disabled
+            >
+              ← Previous
+            </button>
+            <button
+              class="nav-btn next-btn"
+              id="nextBtn"
+              onclick="nextStep()"
+              disabled
+            >
+              Next →
+            </button>
+          </div>
+
+          <div class="progress" id="progress">Ready to start</div>
+
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color color-default"></div>
+              <span>Unsorted</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-distributing"></div>
+              <span>Distributing</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-sorting"></div>
+              <span>Sorting</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-sorted"></div>
+              <span>Sorted</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let array = [];
+      let steps = [];
+      let currentStep = 0;
+
+      function generateRandomArray(size) {
+        return Array.from(
+          { length: size },
+          () => Math.floor(Math.random() * 100) + 1,
+        );
+      }
+
+      function createSteps() {
+        steps = [];
+        const arr = [...array];
+        const numBuckets = parseInt(
+          document.getElementById("bucketsInput").value,
+        );
+        const maxVal = Math.max(...arr);
+        const minVal = Math.min(...arr);
+        const range = maxVal - minVal + 1;
+
+        // Initial state
+        steps.push({
+          array: [...arr],
+          buckets: Array(numBuckets)
+            .fill(null)
+            .map(() => []),
+          phase: "Setup",
+          distributed: 0,
+          sorted: 0,
+          title: "Initial Array",
+          description: `Ready for Bucket Sort with ${numBuckets} buckets. Range: ${minVal}-${maxVal}`,
+        });
+
+        // Distribution phase
+        const buckets = Array(numBuckets)
+          .fill(null)
+          .map(() => []);
+
+        for (let i = 0; i < arr.length; i++) {
+          const normalized = (arr[i] - minVal) / range;
+          const bucketIdx = Math.floor(normalized * numBuckets);
+          const finalBucketIdx =
+            bucketIdx === numBuckets ? numBuckets - 1 : bucketIdx;
+
+          buckets[finalBucketIdx].push(arr[i]);
+
+          steps.push({
+            array: [...arr],
+            buckets: buckets.map((b) => [...b]),
+            phase: "Distribution",
+            distributed: i + 1,
+            sorted: 0,
+            activeBucket: finalBucketIdx,
+            title: `Distributing Element ${arr[i]}`,
+            description: `Placed ${arr[i]} in bucket ${finalBucketIdx}`,
+          });
+        }
+
+        // Sorting phase
+        for (let i = 0; i < buckets.length; i++) {
+          if (buckets[i].length > 1) {
+            buckets[i].sort((a, b) => a - b);
+
+            steps.push({
+              array: [...arr],
+              buckets: buckets.map((b) => [...b]),
+              phase: "Sorting",
+              distributed: arr.length,
+              sorted: 0,
+              activeBucket: i,
+              title: `Sorting Bucket ${i}`,
+              description: `Sorted bucket ${i}: [${buckets[i].join(', ')}]`,
+            });
+          }
+        }
+
+        // Concatenation phase
+        const result = [];
+        for (let i = 0; i < buckets.length; i++) {
+          for (let j = 0; j < buckets[i].length; j++) {
+            result.push(buckets[i][j]);
+
+            steps.push({
+              array: [...result],
+              buckets: buckets.map((b) => [...b]),
+              phase: "Concatenation",
+              distributed: arr.length,
+              sorted: result.length,
+              activeBucket: i,
+              title: `Concatenating Buckets`,
+              description: `Added ${buckets[i][j]} from bucket ${i}`,
+            });
+          }
+        }
+
+        // Final step
+        steps.push({
+          array: [...result],
+          buckets: buckets.map((b) => [...b]),
+          phase: "Complete",
+          distributed: arr.length,
+          sorted: result.length,
+          activeBucket: -1,
+          title: "✅ Sorting Complete!",
+          description: `Array sorted using Bucket Sort!`,
+        });
+      }
+
+      function renderBars(array, sorted = 0) {
+        const container = document.getElementById("barsContainer");
+        container.innerHTML = "";
+        const maxValue = Math.max(...array);
+
+        array.forEach((value, index) => {
+          const bar = document.createElement("div");
+          bar.className = "bar";
+
+          if (index < sorted) {
+            bar.classList.add("sorted");
+          }
+
+          const height = (value / maxValue) * 100;
+          bar.style.height = height + "%";
+
+          const valueSpan = document.createElement("div");
+          valueSpan.className = "bar-value";
+          valueSpan.textContent = value;
+          bar.appendChild(valueSpan);
+
+          container.appendChild(bar);
+        });
+      }
+
+      function renderBuckets(buckets, activeBucket = -1) {
+        const container = document.getElementById("bucketsDisplay");
+        container.innerHTML = "";
+
+        buckets.forEach((bucket, index) => {
+          const bucketDiv = document.createElement("div");
+          bucketDiv.className = "bucket";
+
+          if (index === activeBucket) {
+            bucketDiv.classList.add("active");
+          }
+
+          const label = document.createElement("div");
+          label.className = "bucket-label";
+          label.textContent = `B${index}`;
+
+          const items = document.createElement("div");
+          items.className = "bucket-items";
+
+          bucket.forEach((item) => {
+            const itemDiv = document.createElement("div");
+            itemDiv.className = "bucket-item";
+            itemDiv.textContent = item;
+            items.appendChild(itemDiv);
+          });
+
+          bucketDiv.appendChild(label);
+          bucketDiv.appendChild(items);
+          container.appendChild(bucketDiv);
+        });
+      }
+
+      function displayStep(stepIndex) {
+        if (stepIndex < 0 || stepIndex >= steps.length) return;
+
+        const step = steps[stepIndex];
+
+        document.getElementById("stepTitle").textContent = step.title;
+        document.getElementById("stepDescription").textContent =
+          step.description;
+        document.getElementById("bucketCount").textContent =
+          step.buckets.length;
+        document.getElementById("distributed").textContent = step.distributed;
+        document.getElementById("phase").textContent = step.phase;
+        document.getElementById("sorted").textContent = step.sorted;
+
+        renderBars(step.array, step.sorted);
+        renderBuckets(step.buckets, step.activeBucket || -1);
+
+        document.getElementById("stepInfo").style.display = "block";
+        document.getElementById("stepInfoTitle").textContent =
+          "Bucket Sort Concept";
+        document.getElementById("stepInfoContent").innerHTML = `
+                <strong>Phase:</strong> ${step.phase}<br>
+                <strong>Total Buckets:</strong> ${step.buckets.length}<br>
+                <strong>Elements Distributed:</strong> ${step.distributed}<br>
+                <strong>Elements Sorted:</strong> ${step.sorted}
+            `;
+
+        document.getElementById("prevBtn").disabled = stepIndex === 0;
+        document.getElementById("nextBtn").disabled =
+          stepIndex === steps.length - 1;
+        document.getElementById("progress").textContent =
+          `Step ${stepIndex + 1} of ${steps.length}`;
+
+        currentStep = stepIndex;
+      }
+
+      function startVisualization() {
+        const size = parseInt(document.getElementById("sizeInput").value);
+        array = generateRandomArray(size);
+        createSteps();
+        displayStep(0);
+      }
+
+      function nextStep() {
+        if (currentStep < steps.length - 1) {
+          displayStep(currentStep + 1);
+        }
+      }
+
+      function previousStep() {
+        if (currentStep > 0) {
+          displayStep(currentStep - 1);
+        }
+      }
+
+      function resetVisualization() {
+        array = [];
+        steps = [];
+        currentStep = 0;
+        document.getElementById("barsContainer").innerHTML = "";
+        document.getElementById("bucketsDisplay").innerHTML = "";
+        document.getElementById("stepTitle").textContent = "Initialization";
+        document.getElementById("stepDescription").textContent =
+          'Click "Start" to begin the visualization';
+        document.getElementById("bucketCount").textContent = "-";
+        document.getElementById("distributed").textContent = "0";
+        document.getElementById("phase").textContent = "-";
+        document.getElementById("sorted").textContent = "0";
+        document.getElementById("stepInfo").style.display = "none";
+        document.getElementById("prevBtn").disabled = true;
+        document.getElementById("nextBtn").disabled = true;
+        document.getElementById("progress").textContent = "Ready to start";
+      }
+    </script>
+  </body>
+</html>

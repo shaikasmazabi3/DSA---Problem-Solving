@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DSA Prerequisites</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        max-width: 900px;
+        width: 100%;
+        padding: 40px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 20px;
+      }
+
+      .header h1 {
+        color: #667eea;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        color: #666;
+        font-size: 1.1em;
+      }
+
+      .slide {
+        display: none;
+        min-height: 400px;
+      }
+
+      .slide.active {
+        display: block;
+        animation: fadeIn 0.5s;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .slide h2 {
+        color: #667eea;
+        font-size: 1.8em;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+      }
+
+      .slide-content {
+        color: #333;
+        line-height: 1.8;
+        font-size: 1.05em;
+      }
+
+      .slide-content p {
+        margin-bottom: 15px;
+      }
+
+      .slide-content code {
+        background: #f5f5f5;
+        padding: 2px 8px;
+        border-radius: 4px;
+        color: #e83e8c;
+        font-family: monospace;
+      }
+
+      .slide-content pre {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 15px 0;
+        border-left: 4px solid #667eea;
+        font-family: monospace;
+        font-size: 0.9em;
+      }
+
+      .slide-content ul {
+        margin-left: 25px;
+        margin-bottom: 15px;
+      }
+
+      .slide-content li {
+        margin-bottom: 8px;
+      }
+
+      .box {
+        background: #e7f3ff;
+        border-left: 4px solid #667eea;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 4px;
+      }
+
+      .box strong {
+        color: #667eea;
+      }
+
+      .progress-bar {
+        background: #e9ecef;
+        height: 8px;
+        border-radius: 4px;
+        margin-bottom: 30px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        height: 100%;
+        transition: width 0.3s ease;
+      }
+
+      .dots {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #ddd;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .dot.active {
+        background: #667eea;
+        transform: scale(1.3);
+      }
+
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 40px;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 1em;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .counter {
+        color: #667eea;
+        font-size: 1.1em;
+        font-weight: 600;
+      }
+
+      .checklist {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 10px;
+        margin: 20px 0;
+      }
+
+      .checklist-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: #f5f5f5;
+        border-radius: 6px;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .checklist-item input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #667eea;
+      }
+
+      .checklist-item.checked {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .checklist-item.checked span {
+        text-decoration: line-through;
+      }
+
+      .completion {
+        display: none;
+        text-align: center;
+        padding: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        margin-top: 30px;
+      }
+
+      .completion.show {
+        display: block;
+      }
+
+      .completion h2 {
+        color: white;
+        margin-bottom: 15px;
+        font-size: 2em;
+      }
+
+      .stars {
+        font-size: 2em;
+        margin: 15px 0;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 20px;
+        }
+
+        .header h1 {
+          font-size: 1.5em;
+        }
+
+        .slide h2 {
+          font-size: 1.2em;
+        }
+
+        .controls {
+          flex-direction: column;
+        }
+
+        button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎓 DSA Prerequisites</h1>
+        <p>Master the fundamentals before solving DSA problems</p>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+      </div>
+
+      <div class="dots" id="dots"></div>
+
+      <div id="slides"></div>
+
+      <div class="controls">
+        <button id="prevBtn">← Previous</button>
+        <span class="counter"
+          ><span id="current">1</span> / <span id="total">0</span></span
+        >
+        <button id="nextBtn">Next →</button>
+      </div>
+
+      <div class="completion" id="completion">
+        <h2>🎉 Congratulations!</h2>
+        <p>You've completed all prerequisites!</p>
+        <div class="stars">⭐⭐⭐⭐⭐</div>
+        <p>You're ready for the 12-week DSA journey!</p>
+      </div>
+    </div>
+
+    <script>
+      const slides = [
+        {
+          title: "Welcome",
+          html: "<p>This slideshow teaches everything you need before solving DSA problems.</p><div class='box'><strong>Why prerequisites matter:</strong><ul style='margin-top: 10px;'><li>Build solid foundation</li><li>Understand the 'why'</li><li>Learn DSA faster</li><li>Debug code effectively</li></ul></div>",
+        },
+
+        {
+          title: "1. Variables and Scope",
+          html: "<p>Understanding variable declaration:</p><pre><code>var x = 1;      // Function scoped (old)\nlet y = 2;      // Block scoped (use this)\nconst z = 3;    // Cannot reassign (use this)</code></pre><div class='box'><strong>Rules:</strong><ul><li>var: Outdated, avoid</li><li>let: Use for reassignable vars</li><li>const: Use by default</li></ul></div>",
+        },
+
+        {
+          title: "2. Data Types",
+          html: "<p>JavaScript data types:</p><pre><code>const num = 5;        // Number\nconst str = 'hello';  // String\nconst bool = true;    // Boolean\nconst arr = [1,2,3];  // Array\nconst obj = {a: 1};   // Object\nconst map = new Map(); // Map\nconst set = new Set(); // Set</code></pre><div class='box'><strong>For DSA:</strong><ul><li>Arrays: Ordered elements</li><li>Objects: Key-value pairs</li><li>Maps/Sets: Advanced structures</li></ul></div>",
+        },
+
+        {
+          title: "3. Array Methods",
+          html: "<p>Master these array operations:</p><pre><code>const arr = [1, 2, 3, 4, 5];\narr[0];         // Access: 1\narr.length;     // Length: 5\narr.push(6);    // Add end\narr.pop();      // Remove end\narr.shift();    // Remove start\narr.unshift(0); // Add start\narr.slice(1, 3); // Copy [2,3]</code></pre><div class='box'><strong>Time Complexity:</strong><ul><li>Access: O(1)</li><li>Push/Pop: O(1)</li><li>Shift/Unshift: O(n)</li></ul></div>",
+        },
+
+        {
+          title: "4. String Methods",
+          html: "<p>String operations (strings are immutable):</p><pre><code>const str = 'hello';\nstr[0];          // 'h'\nstr.length;      // 5\nstr.indexOf('l'); // 2\nstr.includes('el'); // true\nstr.toUpperCase(); // 'HELLO'\nstr.slice(1, 3); // 'el'\nstr.split('');   // ['h','e','l','l','o']\n['h','e','l','l','o'].join(''); // 'hello'</code></pre><div class='box'><strong>Key:</strong> Convert to array, solve, convert back</div>",
+        },
+
+        {
+          title: "5. For Loop",
+          html: "<p>The for loop is essential for DSA:</p><pre><code>for (let i = 0; i < 5; i++) {\n    console.log(i);  // 0,1,2,3,4\n}\n\nconst arr = [10, 20, 30];\nfor (let i = 0; i < arr.length; i++) {\n    console.log(arr[i]);\n}\n\n// Backward\nfor (let i = arr.length - 1; i >= 0; i--) {\n    console.log(arr[i]); // 30,20,10\n}</code></pre><div class='box'><strong>Why for loop:</strong><ul><li>Index control</li><li>Flexible direction</li><li>Fast performance</li></ul></div>",
+        },
+
+        {
+          title: "6. Conditionals",
+          html: "<p>Conditional logic:</p><pre><code>if (5 > 3) {\n    console.log('yes');\n} else {\n    console.log('no');\n}\n\n// Comparisons\n5 > 3;       // true\n5 === 5;     // true (always use ===)\n5 !== 3;     // true\n\n// Logical\ntrue && true;  // true (AND)\ntrue || false; // true (OR)\n!true;         // false (NOT)\n\n// Ternary\nconst result = 5 > 3 ? 'yes' : 'no';</code></pre><div class='box'><strong>Rules:</strong><ul><li>Always use === (not ==)</li><li>Early return: if (bad) return;</li></ul></div>",
+        },
+
+        {
+          title: "7. Functions",
+          html: "<p>Functions and arrow functions:</p><pre><code>function add(a, b) {\n    return a + b;\n}\n\nconst multiply = (a, b) => {\n    return a * b;\n};\n\nconst square = (x) => x * x;\n\nfunction greet(name = 'World') {\n    return 'Hello, ' + name;\n}</code></pre><div class='box'><strong>For DSA:</strong><ul><li>Use arrow functions</li><li>Always return results</li><li>Handle edge cases</li></ul></div>",
+        },
+
+        {
+          title: "8. Recursion",
+          html: "<p>Function calling itself:</p><pre><code>function factorial(n) {\n    if (n === 1) return 1;  // Base\n    return n * factorial(n - 1); // Recursive\n}\n\nfactorial(5); // 120\n\nfunction sum(arr) {\n    if (arr.length === 0) return 0;\n    return arr[0] + sum(arr.slice(1));\n}</code></pre><div class='box'><strong>Every recursion needs:</strong><ul><li>Base case: When to stop</li><li>Recursive case: How to break down</li><li>Progress: Move towards base</li></ul></div>",
+        },
+
+        {
+          title: "9. Array (Data Structure)",
+          html: "<p>Arrays are fundamental:</p><pre><code>const arr = [1, 2, 3];\n\n// Time Complexity:\n// Access:       O(1)\n// Insert/Delete: O(n)\n// Search:       O(n)</code></pre><div class='box'><strong>When to use:</strong><ul><li>Ordered data</li><li>Need index access</li><li>Most DSA problems</li></ul></div>",
+        },
+
+        {
+          title: "10. Object & Map (Data Structures)",
+          html: "<p>Key-value pair storage:</p><pre><code>// Object\nconst obj = {name: 'John', age: 30};\nobj.name = 'Jane';\ndelete obj.age;\n\n// Map (modern)\nconst map = new Map();\nmap.set('name', 'John');\nmap.get('name');   // 'John'\nmap.has('name');   // true\nmap.delete('name');\n\n// Time: O(1) average</code></pre><div class='box'><strong>When to use:</strong><ul><li>Fast lookup: O(1)</li><li>Count frequencies</li><li>Cache results</li></ul></div>",
+        },
+
+        {
+          title: "11. Set (Data Structure)",
+          html: "<p>Unique values only:</p><pre><code>const set = new Set();\nset.add(1);\nset.add(2);\nset.add(2); // No duplicates\n\nconsole.log(set); // {1, 2}\nset.has(1);       // true\nset.delete(1);\n\n// Remove duplicates\nconst arr = [1, 2, 2, 3, 3, 3];\nconst unique = [...new Set(arr)];\n// [1, 2, 3]\n\n// Time: O(1)</code></pre><div class='box'><strong>When to use:</strong><ul><li>Remove duplicates</li><li>Check membership</li></ul></div>",
+        },
+
+        {
+          title: "12. Stack (Data Structure)",
+          html: "<p>Last In First Out (LIFO):</p><pre><code>class Stack {\n    constructor() { this.items = []; }\n    push(elem) { this.items.push(elem); }\n    pop() { return this.items.pop(); }\n    peek() { return this.items[this.items.length - 1]; }\n}\n\nconst stack = new Stack();\nstack.push(1);\nstack.push(2);\nstack.pop(); // Returns 2</code></pre><div class='box'><strong>When to use:</strong><ul><li>Undo/Redo</li><li>Matching parentheses</li><li>DFS searches</li></ul></div>",
+        },
+
+        {
+          title: "13. Queue (Data Structure)",
+          html: "<p>First In First Out (FIFO):</p><pre><code>class Queue {\n    constructor() { this.items = []; }\n    enqueue(elem) { this.items.push(elem); }\n    dequeue() { return this.items.shift(); }\n    peek() { return this.items[0]; }\n}\n\nconst queue = new Queue();\nqueue.enqueue(1);\nqueue.enqueue(2);\nqueue.dequeue(); // Returns 1</code></pre><div class='box'><strong>When to use:</strong><ul><li>BFS searches</li><li>Task scheduling</li><li>Level-order traversal</li></ul></div>",
+        },
+
+        {
+          title: "14. Linear Search",
+          html: "<p>Find element by checking each:</p><pre><code>function linearSearch(arr, target) {\n    for (let i = 0; i < arr.length; i++) {\n        if (arr[i] === target) return i;\n    }\n    return -1;\n}\n\nlinearSearch([3, 1, 4, 1, 5], 4); // 2</code></pre><div class='box'><strong>Details:</strong><ul><li>Time: O(n)</li><li>Space: O(1)</li><li>Simple but slow for big arrays</li></ul></div>",
+        },
+
+        {
+          title: "15. Binary Search",
+          html: "<p>Find in sorted array by eliminating half:</p><pre><code>function binarySearch(arr, target) {\n    let left = 0, right = arr.length - 1;\n    while (left <= right) {\n        const mid = Math.floor((left + right) / 2);\n        if (arr[mid] === target) return mid;\n        else if (arr[mid] < target) left = mid + 1;\n        else right = mid - 1;\n    }\n    return -1;\n}\n\nbinarySearch([1, 3, 5, 7, 9], 5); // 2</code></pre><div class='box'><strong>Details:</strong><ul><li>Time: O(log n)</li><li>Much faster than linear search</li></ul></div>",
+        },
+
+        {
+          title: "16. Two Pointers Algorithm",
+          html: "<p>Use two pointers for single-pass:</p><pre><code>function twoSum(arr, target) {\n    let left = 0, right = arr.length - 1;\n    while (left < right) {\n        const sum = arr[left] + arr[right];\n        if (sum === target) return [arr[left], arr[right]];\n        else if (sum < target) left++;\n        else right--;\n    }\n    return null;\n}\n\ntwoSum([2, 7, 11, 15], 9); // [2, 7]</code></pre><div class='box'><strong>Key Points:</strong><ul><li>Start at opposite ends</li><li>Move based on condition</li><li>Much faster than nested loops</li></ul></div>",
+        },
+
+        {
+          title: "17. Sliding Window",
+          html: "<p>Dynamic window sliding through data:</p><pre><code>function maxSumSubarray(arr, k) {\n    let windowSum = 0;\n    for (let i = 0; i < k; i++) windowSum += arr[i];\n    let maxSum = windowSum;\n    \n    for (let i = k; i < arr.length; i++) {\n        windowSum = windowSum - arr[i - k] + arr[i];\n        maxSum = Math.max(maxSum, windowSum);\n    }\n    return maxSum;\n}\n\nmaxSumSubarray([2, 1, 5, 1, 3, 2], 3); // 9</code></pre><div class='box'><strong>Key:</strong> Remove left, add right - no recalculation</div>",
+        },
+
+        {
+          title: "18. Big O: Time Complexity",
+          html: "<p>How time grows with input:</p><pre><code>O(1)      Constant - arr[0]\nO(log n)  Binary search\nO(n)      Linear - loop\nO(n logn) Merge sort\nO(n²)     Nested loops (SLOW!)\nO(2^n)    Exponential\nO(n!)     Factorial</code></pre><div class='box'><strong>For n = 1,000,000:</strong><ul><li>O(1): instant</li><li>O(log n): 20 ops</li><li>O(n): 1ms</li><li>O(n²): 1000 seconds!</li></ul></div>",
+        },
+
+        {
+          title: "19. Big O: Space Complexity",
+          html: "<p>How memory grows:</p><pre><code>O(1)    Constant space - few vars\nO(n)    Linear - store all input\nO(n²)   Quadratic - 2D array\nO(log n) Log - recursion depth</code></pre><div class='box'><strong>Rules:</strong><ul><li>Time: Most important</li><li>Space: Secondary</li><li>For n=10^6, need O(n) or better</li></ul></div>",
+        },
+
+        {
+          title: "20. Self-Assessment",
+          html: "<p>Can you do these without looking them up?</p><div class='checklist' id='checklist'></div><p style='margin-top: 20px;'><strong>Scoring:</strong></p><ul><li>0-3: Need more practice</li><li>4-6: Getting there</li><li>7-9: Almost ready</li><li>10/10: Ready for DSA!</li></ul>",
+        },
+
+        {
+          title: "Ready for DSA!",
+          html: "<p>You've mastered all prerequisites!</p><div class='box'><strong>What you know:</strong><ul><li>JavaScript fundamentals</li><li>All basic data structures</li><li>Key algorithms</li><li>Time/Space complexity</li></ul></div><p style='margin-top: 20px;'><strong>Next: 12-Week DSA Journey</strong></p><ul><li>Week 1-2: Arrays + Strings</li><li>Week 3-4: Sorting + Searching</li><li>Week 5-6: Linked Lists + Stacks + Queues</li><li>Week 7-10: Trees + Graphs</li><li>Week 11: Dynamic Programming</li><li>Week 12: Mixed practice</li></ul>",
+        },
+      ];
+
+      let current = 0;
+
+      function init() {
+        const slidesDiv = document.getElementById("slides");
+        const dotsDiv = document.getElementById("dots");
+        document.getElementById("total").textContent = slides.length;
+
+        slides.forEach((slide, i) => {
+          const slideEl = document.createElement("div");
+          slideEl.className = "slide" + (i === 0 ? " active" : "");
+          slideEl.innerHTML =
+            "<h2>" +
+            slide.title +
+            '</h2><div class="slide-content">' +
+            slide.html +
+            "</div>";
+          slidesDiv.appendChild(slideEl);
+
+          const dotEl = document.createElement("div");
+          dotEl.className = "dot" + (i === 0 ? " active" : "");
+          dotEl.onclick = () => goTo(i);
+          dotsDiv.appendChild(dotEl);
+        });
+
+        const checklistDiv = document.getElementById("checklist");
+        if (checklistDiv) {
+          const items = [
+            "Reverse an array",
+            "Count frequencies",
+            "Implement Stack",
+            "Implement Queue",
+            "Do binary search",
+            "Use two pointers",
+            "Sliding window",
+            "Time complexity",
+            "Recursive function",
+            "Know data structure",
+          ];
+          items.forEach((item) => {
+            const label = document.createElement("label");
+            label.className = "checklist-item";
+            label.innerHTML =
+              '<input type="checkbox" onchange="this.parentElement.classList.toggle(\'checked\')"><span>' +
+              item +
+              "</span>";
+            checklistDiv.appendChild(label);
+          });
+        }
+
+        updateUI();
+      }
+
+      function goTo(i) {
+        if (i < 0 || i >= slides.length) return;
+        document
+          .querySelectorAll(".slide")
+          .forEach((s, idx) => s.classList.toggle("active", idx === i));
+        document
+          .querySelectorAll(".dot")
+          .forEach((d, idx) => d.classList.toggle("active", idx === i));
+        current = i;
+        updateUI();
+      }
+
+      function updateUI() {
+        const progress = ((current + 1) / slides.length) * 100;
+        document.getElementById("progress").style.width = progress + "%";
+        document.getElementById("current").textContent = current + 1;
+        document.getElementById("prevBtn").disabled = current === 0;
+        document.getElementById("nextBtn").disabled =
+          current === slides.length - 1;
+        document.getElementById("prevBtn").onclick = () => goTo(current - 1);
+        document.getElementById("nextBtn").onclick = () => goTo(current + 1);
+
+        if (current === slides.length - 1) {
+          document.getElementById("completion").classList.add("show");
+        } else {
+          document.getElementById("completion").classList.remove("show");
+        }
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") goTo(current - 1);
+        if (e.key === "ArrowRight") goTo(current + 1);
+      });
+
+      window.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>

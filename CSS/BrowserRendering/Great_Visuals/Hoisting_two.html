@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JavaScript Hoisting & Scope for Beginners 🌈</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #fff8f0;
+        color: #333;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #app {
+        max-width: 650px;
+        width: 90vw;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        background: linear-gradient(90deg, #ff6f61, #ffb347);
+        color: white;
+        padding: 1rem;
+        font-size: 1.6rem;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      main {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      section {
+        display: none;
+        flex-direction: column;
+        gap: 1rem;
+        animation: fadeIn 0.8s ease forwards;
+      }
+
+      section.active {
+        display: flex;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #d35400;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .emoji {
+        font-size: 1.8rem;
+      }
+
+      p {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      pre {
+        background: #fff3e0;
+        border-radius: 8px;
+        padding: 1rem;
+        font-size: 1rem;
+        overflow-x: auto;
+        font-family: "Courier New", Courier, monospace;
+        user-select: all;
+      }
+
+      code {
+        color: #e67e22;
+        font-weight: 600;
+      }
+
+      button {
+        background: #ff6f61;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover,
+      button:focus {
+        background: #e55b4a;
+        outline: none;
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #fff0e6;
+      }
+
+      .quiz {
+        background: #fff8e1;
+        border: 2px solid #ffb347;
+        border-radius: 8px;
+        padding: 1rem;
+      }
+
+      .quiz h3 {
+        margin-top: 0;
+      }
+
+      .quiz button {
+        margin-top: 0.6rem;
+        background: #ffb347;
+      }
+
+      .quiz button:hover,
+      .quiz button:focus {
+        background: #e6a735;
+      }
+
+      .feedback {
+        margin-top: 0.5rem;
+        font-weight: 700;
+      }
+
+      .correct {
+        color: green;
+      }
+
+      .wrong {
+        color: red;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Interactive Diagram styles */
+      .box {
+        border: 2px solid #ffb347;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        position: relative;
+        cursor: pointer;
+        background: #fff3e0;
+        transition: background-color 0.3s ease;
+      }
+      .box:hover,
+      .box:focus {
+        background: #ffe0b2;
+        outline: none;
+      }
+      .arrow {
+        width: 40px;
+        height: 40px;
+        border-left: 4px solid #ffb347;
+        border-bottom: 4px solid #ffb347;
+        transform: rotate(-45deg);
+        margin: 0 auto;
+      }
+      .hidden-text {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+      }
+      .hidden-text.show {
+        max-height: 300px;
+      }
+
+      /* Accessibility focus */
+      button:focus-visible,
+      .box:focus-visible {
+        outline: 3px solid #ffb347;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" role="main" aria-label="JavaScript Hoisting and Scope Lesson">
+      <header>🌈 JavaScript Hoisting & Scope for Beginners</header>
+
+      <main>
+        <!-- Slide 1 -->
+        <section
+          class="active"
+          aria-live="polite"
+          aria-label="What is Hoisting?"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">🎈</span> What is Hoisting?
+          </h2>
+          <p>
+            Hoisting is like magic in JavaScript! 🧙‍♂️ It moves variable and
+            function <strong>declarations</strong> to the top of their container
+            before running the code.
+          </p>
+          <p>
+            Imagine you packed your toys in boxes, but the boxes magically
+            appear at the top shelf before you start playing.
+          </p>
+          <pre><code>console.log(name); // undefined
+var name = "Sam";</code></pre>
+          <p>
+            Even though the code writes <code>var name = "Sam";</code> last,
+            JavaScript acts like <code>var name;</code> is at the top first.
+          </p>
+          <button aria-label="Go to next slide" onclick="nextSlide()">
+            Next ➡️
+          </button>
+        </section>
+
+        <!-- Slide 2 -->
+        <section aria-live="polite" aria-label="Fully and Partially Hoisted">
+          <h2>
+            <span class="emoji" aria-hidden="true">✨</span> Fully & Partially
+            Hoisted
+          </h2>
+          <p>
+            <strong>Fully hoisted:</strong> Functions are moved completely to
+            the top, so you can call them before you write them!
+          </p>
+          <pre><code>sayHi(); // Hello!
+
+function sayHi() {
+  console.log("Hello!");
+}</code></pre>
+          <p>
+            <strong>Partially hoisted:</strong> Variables declared with
+            <code>var</code> are hoisted, but only their
+            <strong>declaration</strong>, not their <strong>value</strong>.
+          </p>
+          <pre><code>console.log(age); // undefined
+var age = 7;</code></pre>
+          <p>
+            So, the variable box exists at the top, but it’s empty until
+            assigned.
+          </p>
+          <button
+            aria-label="Show quiz for this slide"
+            onclick="toggleQuiz('quiz3')"
+          >
+            Take Quiz 📝
+          </button>
+          <div id="quiz3" class="quiz" hidden>
+            <h3>Quiz: Which is fully hoisted in JavaScript?</h3>
+            <button onclick="checkAnswer(this, 'function')">Functions</button>
+            <button onclick="checkAnswer(this, 'var')">var variables</button>
+            <button onclick="checkAnswer(this, 'let')">let variables</button>
+            <p class="feedback" aria-live="polite"></p>
+          </div>
+          <button aria-label="Go to next slide" onclick="nextSlide()">
+            Next ➡️
+          </button>
+        </section>
+
+        <!-- Slide 3 -->
+        <section aria-live="polite" aria-label="Temporal Dead Zone (TDZ)">
+          <h2>
+            <span class="emoji" aria-hidden="true">⏰</span> Temporal Dead Zone
+            (TDZ)
+          </h2>
+          <p>
+            <code>let</code> and <code>const</code> are special! They are
+            hoisted but <strong>not usable</strong> until their line runs.
+          </p>
+          <p>
+            This waiting time is called the <em>Temporal Dead Zone</em> (TDZ) —
+            trying to use them early causes an error!
+          </p>
+          <pre><code>console.log(color); // ReferenceError!
+let color = "blue";</code></pre>
+          <p>
+            It’s like you have a special box that appears on the shelf but you
+            can’t open it until you unlock it.
+          </p>
+          <button
+            aria-label="Show quiz for this slide"
+            onclick="toggleQuiz('quiz4')"
+          >
+            Take Quiz 📝
+          </button>
+          <div id="quiz4" class="quiz" hidden>
+            <h3>
+              Quiz: What happens if you use <code>let</code> before declaration?
+            </h3>
+            <button onclick="checkAnswer(this, 'error')">ReferenceError</button>
+            <button onclick="checkAnswer(this, 'undefined')">undefined</button>
+            <button onclick="checkAnswer(this, 'null')">null</button>
+            <p class="feedback" aria-live="polite"></p>
+          </div>
+          <button aria-label="Go to next slide" onclick="nextSlide()">
+            Next ➡️
+          </button>
+        </section>
+
+        <!-- Slide 4 -->
+        <section aria-live="polite" aria-label="Scope: What is Scope?">
+          <h2>
+            <span class="emoji" aria-hidden="true">🌍</span> What is Scope?
+          </h2>
+          <p>
+            Scope is like the <strong>playground area</strong> where your boxes
+            (variables) live and can be used.
+          </p>
+          <p>There are two main playgrounds:</p>
+          <ul>
+            <li>
+              <strong>Global scope:</strong> The whole playground — boxes here
+              can be used anywhere.
+            </li>
+            <li>
+              <strong>Block scope:</strong> Smaller fenced areas (like inside
+              curly braces <code>{ }</code>) where some boxes live and only work
+              inside.
+            </li>
+          </ul>
+          <p><code>var</code> boxes belong to global or function scope.</p>
+          <p>
+            <code>let</code> and <code>const</code> boxes belong to block scope.
+          </p>
+          <pre><code>{
+  let secret = "shh"; // Only inside this block
+  var message = "hello"; // Function or global scope
+}</code></pre>
+          <button
+            aria-label="Show quiz for this slide"
+            onclick="toggleQuiz('quiz5')"
+          >
+            Take Quiz 📝
+          </button>
+          <div id="quiz5" class="quiz" hidden>
+            <h3>Quiz: Which variables have block scope?</h3>
+            <button onclick="checkAnswer(this, 'let')">let and const</button>
+            <button onclick="checkAnswer(this, 'var')">var</button>
+            <button onclick="checkAnswer(this, 'all')">All variables</button>
+            <p class="feedback" aria-live="polite"></p>
+          </div>
+          <button aria-label="Go to next slide" onclick="nextSlide()">
+            Next ➡️
+          </button>
+        </section>
+
+        <!-- Slide 5 -->
+        <section
+          aria-live="polite"
+          aria-label="Summary & Tips on Hoisting and Scope"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">🎯</span> Summary & Best Tips
+          </h2>
+          <ul>
+            <li>
+              <strong>Hoisting</strong> moves declarations to the top before
+              running code.
+            </li>
+            <li>
+              <code>function</code> declarations are
+              <strong>fully hoisted</strong> — you can call them early.
+            </li>
+            <li>
+              <code>var</code> declarations are
+              <strong>partially hoisted</strong> — only the name moves, not the
+              value.
+            </li>
+            <li>
+              <code>let</code> and <code>const</code> are hoisted but in a
+              <strong>Temporal Dead Zone</strong> until assigned.
+            </li>
+            <li>
+              <strong>Scope</strong> decides where variables can be used —
+              <code>var</code> has function/global scope, <code>let</code> and
+              <code>const</code> have block scope.
+            </li>
+            <li>
+              Always declare variables properly to avoid bugs and keep your code
+              clean!
+            </li>
+          </ul>
+          <p>
+            Think of your code as a well-organized playground with clear fences
+            and labeled boxes! 🏰📦
+          </p>
+          <button aria-label="Restart the lesson" onclick="restartLesson()">
+            Restart 🔄
+          </button>
+        </section>
+      </main>
+
+      <nav aria-label="Slide navigation">
+        <button aria-label="Previous slide" onclick="prevSlide()">
+          ⬅️ Previous
+        </button>
+        <button aria-label="Next slide" onclick="nextSlide()">Next ➡️</button>
+      </nav>
+    </div>
+
+    <script>
+      let currentSlide = 0;
+      const sections = document.querySelectorAll("main section");
+
+      function showSlide(index) {
+        if (index < 0) index = sections.length - 1;
+        if (index >= sections.length) index = 0;
+        sections.forEach((sec, i) => {
+          sec.classList.toggle("active", i === index);
+          // Hide quizzes when changing slides
+          const quizzes = sec.querySelectorAll(".quiz");
+          quizzes.forEach((q) => (q.hidden = true));
+          const feedbacks = sec.querySelectorAll(".feedback");
+          feedbacks.forEach((f) => (f.textContent = ""));
+        });
+        currentSlide = index;
+      }
+
+      function nextSlide() {
+        showSlide(currentSlide + 1);
+      }
+
+      function prevSlide() {
+        showSlide(currentSlide - 1);
+      }
+
+      function restartLesson() {
+        showSlide(0);
+      }
+
+      function toggleQuiz(id) {
+        const quiz = document.getElementById(id);
+        if (quiz) {
+          quiz.hidden = !quiz.hidden;
+          if (!quiz.hidden) {
+            // Focus first button in quiz for accessibility
+            const btn = quiz.querySelector("button");
+            if (btn) btn.focus();
+          }
+        }
+      }
+
+      function checkAnswer(button, correctAnswer) {
+        const quiz = button.closest(".quiz");
+        const feedback = quiz.querySelector(".feedback");
+        const userAnswer = button.textContent.toLowerCase();
+        const isCorrect = userAnswer.includes(correctAnswer);
+        if (isCorrect) {
+          feedback.textContent = "Correct! 🎉";
+          feedback.className = "feedback correct";
+        } else {
+          feedback.textContent = "Try again! ❌";
+          feedback.className = "feedback wrong";
+        }
+      }
+    </script>
+  </body>
+</html>

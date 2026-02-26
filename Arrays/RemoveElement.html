@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Remove Element Visualization</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f0f4f8;
+        text-align: center;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+      #array-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 40px;
+      }
+      .box {
+        width: 50px;
+        height: 50px;
+        background: #4a90e2;
+        color: white;
+        font-weight: bold;
+        line-height: 50px;
+        border-radius: 6px;
+        position: relative;
+        transition: background-color 0.5s ease, opacity 0.5s ease;
+      }
+      .removed {
+        background: #d9534f;
+        opacity: 0.3;
+      }
+      .pointer {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-left: 15px solid transparent;
+        border-right: 15px solid transparent;
+        border-bottom: 15px solid #333;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .pointer-label {
+        position: absolute;
+        top: -50px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        font-weight: bold;
+        color: #333;
+      }
+      .m20 {
+        marginy: 20px;
+      }
+      .k-label {
+        position: absolute;
+        top: -60px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        font-weight: bold;
+        color: #333;
+      }
+      #controls {
+        margin-top: 20px;
+      }
+      button {
+        background: #4a90e2;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      button:disabled {
+        background: #a0b8d9;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Remove Element Visualization (Two Pointers)</h1>
+    <br />
+    <br />
+    <div id="array-container"></div>
+
+    <div id="controls">
+      <button id="next-btn">Next Step</button>
+    </div>
+
+    <script>
+      const nums = [0, 1, 2, 2, 3, 0, 4, 2];
+      const val = 2;
+
+      let start = 0;
+      let k = 0;
+      let step = 0;
+
+      const container = document.getElementById("array-container");
+      const nextBtn = document.getElementById("next-btn");
+
+      // Create boxes for the array elements
+      function renderArray() {
+        container.innerHTML = "";
+        nums.forEach((num, idx) => {
+          const box = document.createElement("div");
+          box.className = "box";
+          box.textContent = num;
+          box.dataset.index = idx;
+
+          // Add pointer arrows and labels
+          if (idx === start) {
+            const pointer = document.createElement("div");
+            pointer.className = "pointer";
+            box.appendChild(pointer);
+            const label = document.createElement("div");
+            label.className = "pointer-label";
+            label.textContent = "start";
+            box.appendChild(label);
+          }
+          if (idx === k) {
+            const pointer = document.createElement("div");
+            pointer.className = "pointer";
+            pointer.style.borderBottomColor = "#e67e22";
+            box.appendChild(pointer);
+            const label = document.createElement("div");
+            label.className = "k-label";
+            label.style.color = "#e67e22";
+            label.textContent = "k";
+            box.appendChild(label);
+          }
+
+          container.appendChild(box);
+        });
+      }
+
+      // Animate one step of the two-pointer algorithm
+      function nextStep() {
+        if (start >= nums.length) {
+          nextBtn.disabled = true;
+          alert(`Done! New length: ${k}`);
+          return;
+        }
+
+        const currentBox = container.querySelector(
+          `.box[data-index="${start}"]`
+        );
+
+        if (nums[start] !== val) {
+          // Keep element: overwrite nums[k] with nums[start]
+          nums[k] = nums[start];
+          k++;
+          currentBox.style.backgroundColor = "#27ae60"; // green for kept
+        } else {
+          // Remove element: mark as removed
+          currentBox.classList.add("removed");
+        }
+
+        start++;
+        renderArray();
+
+        // Highlight kept elements
+        for (let i = 0; i < k; i++) {
+          const box = container.querySelector(`.box[data-index="${i}"`);
+          if (box) box.style.backgroundColor = "#27ae60";
+        }
+      }
+
+      renderArray();
+
+      nextBtn.addEventListener("click", nextStep);
+    </script>
+  </body>
+</html>

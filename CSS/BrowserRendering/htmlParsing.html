@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HTML Parsing Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f4ff;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      header {
+        background: #2563eb;
+        color: white;
+        padding: 1rem 2rem;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      #main {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+      #leftPanel,
+      #rightPanel {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      #leftPanel {
+        background: white;
+        border-right: 2px solid #e0e7ff;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      #byteStream,
+      #charStream,
+      #tokenStream {
+        background: #e0e7ff;
+        border-radius: 8px;
+        padding: 15px;
+        font-family: monospace;
+        font-size: 1.1rem;
+        min-height: 60px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        user-select: none;
+      }
+      #descriptions {
+        font-size: 1rem;
+        line-height: 1.4;
+        background: #dbeafe;
+        padding: 15px;
+        border-radius: 8px;
+      }
+      #rightPanel {
+        background: #fff;
+        position: relative;
+      }
+      h2 {
+        color: #2563eb;
+        margin-bottom: 10px;
+      }
+      ul.tree {
+        list-style: none;
+        padding-left: 20px;
+      }
+      ul.tree li {
+        position: relative;
+        margin: 5px 0;
+        cursor: default;
+        padding-left: 18px;
+        user-select: none;
+      }
+      ul.tree li::before {
+        content: "";
+        position: absolute;
+        left: 5px;
+        top: 10px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #60a5fa;
+        opacity: 0.3;
+        transition: opacity 0.3s ease;
+      }
+      ul.tree li.highlight {
+        background-color: #bfdbfe;
+        border-radius: 6px;
+      }
+      ul.tree li.highlight::before {
+        opacity: 1;
+      }
+      .attribute {
+        color: #d97706;
+        font-style: italic;
+        margin-left: 8px;
+      }
+      #controls {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+      }
+      button {
+        background: #2563eb;
+        border: none;
+        color: white;
+        padding: 10px 16px;
+        font-size: 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      button:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+      }
+      /* Scrollbar for right panel */
+      #rightPanel::-webkit-scrollbar {
+        width: 8px;
+      }
+      #rightPanel::-webkit-scrollbar-thumb {
+        background-color: #93c5fd;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>HTML Parsing Visualization - Step by Step</header>
+
+    <div id="main">
+      <div id="leftPanel">
+        <div>
+          <h2>Step Description</h2>
+          <div id="descriptions">
+            Welcome! This visualization shows how the browser parses HTML from
+            bytes to a DOM tree.
+          </div>
+        </div>
+        <div>
+          <h2>Byte Stream (Network Response)</h2>
+          <div id="byteStream">
+            &lt;html&gt;&lt;body&gt;&lt;p class="intro"&gt;Hello World
+          </div>
+        </div>
+        <div>
+          <h2>Character Stream (After Decoding)</h2>
+          <div id="charStream"></div>
+        </div>
+        <div>
+          <h2>Token Stream (Tokenizer Output)</h2>
+          <div id="tokenStream"></div>
+        </div>
+        <div id="controls">
+          <button id="prevBtn" disabled>Previous</button>
+          <button id="nextBtn">Next</button>
+        </div>
+      </div>
+      <div id="rightPanel">
+        <h2>DOM Tree Construction</h2>
+        <ul id="domTree" class="tree"></ul>
+      </div>
+    </div>
+
+    <script>
+      const byteStreamEl = document.getElementById("byteStream");
+      const charStreamEl = document.getElementById("charStream");
+      const tokenStreamEl = document.getElementById("tokenStream");
+      const descriptionsEl = document.getElementById("descriptions");
+      const domTreeEl = document.getElementById("domTree");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      // The raw byte stream (network response)
+      const byteStream = '<html><body><p class="intro">Hello World';
+
+      // Steps for the visualization
+      const steps = [
+        {
+          desc: "Step 1: The browser receives the HTML as a byte stream from the network.",
+          charStream: "",
+          tokens: [],
+          dom: [],
+          highlightToken: null,
+        },
+        {
+          desc: "Step 2: The byte stream is decoded into characters (UTF-8 decoding).",
+          charStream: byteStream,
+          tokens: [],
+          dom: [],
+          highlightToken: null,
+        },
+        {
+          desc: "Step 3: The tokenizer reads characters and creates tokens: start tags, attributes, and text.",
+          charStream: byteStream,
+          tokens: [
+            { type: "startTag", name: "html", attrs: {} },
+            { type: "startTag", name: "body", attrs: {} },
+            { type: "startTag", name: "p", attrs: { class: "intro" } },
+            { type: "text", content: "Hello World" },
+          ],
+          dom: [],
+          highlightToken: 0,
+        },
+        {
+          desc: "Step 4: Tokens are processed to build the DOM tree. Start tags create nodes, text tokens create text nodes.",
+          charStream: byteStream,
+          tokens: [
+            { type: "startTag", name: "html", attrs: {} },
+            { type: "startTag", name: "body", attrs: {} },
+            { type: "startTag", name: "p", attrs: { class: "intro" } },
+            { type: "text", content: "Hello World" },
+          ],
+          dom: [
+            {
+              name: "html",
+              attrs: {},
+              children: [
+                {
+                  name: "body",
+                  attrs: {},
+                  children: [
+                    {
+                      name: "p",
+                      attrs: { class: "intro" },
+                      children: [{ name: "#text", content: "Hello World" }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          highlightToken: 3,
+        },
+        {
+          desc: "Step 5: The HTML parser auto-closes missing tags like </p>, </body>, and </html> as per HTML parsing rules.",
+          charStream: byteStream,
+          tokens: [
+            { type: "startTag", name: "html", attrs: {} },
+            { type: "startTag", name: "body", attrs: {} },
+            { type: "startTag", name: "p", attrs: { class: "intro" } },
+            { type: "text", content: "Hello World" },
+            { type: "endTag", name: "p" },
+            { type: "endTag", name: "body" },
+            { type: "endTag", name: "html" },
+          ],
+          dom: [
+            {
+              name: "html",
+              attrs: {},
+              children: [
+                {
+                  name: "body",
+                  attrs: {},
+                  children: [
+                    {
+                      name: "p",
+                      attrs: { class: "intro" },
+                      children: [{ name: "#text", content: "Hello World" }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          highlightToken: 5,
+        },
+        {
+          desc: "Step 6: Whitespace handling - whitespace between tags is collapsed in normal flow unless CSS white-space rules apply.",
+          charStream: byteStream + "   ",
+          tokens: [
+            { type: "startTag", name: "html", attrs: {} },
+            { type: "startTag", name: "body", attrs: {} },
+            { type: "startTag", name: "p", attrs: { class: "intro" } },
+            { type: "text", content: "Hello World   " },
+            { type: "endTag", name: "p" },
+            { type: "endTag", name: "body" },
+            { type: "endTag", name: "html" },
+          ],
+          dom: [
+            {
+              name: "html",
+              attrs: {},
+              children: [
+                {
+                  name: "body",
+                  attrs: {},
+                  children: [
+                    {
+                      name: "p",
+                      attrs: { class: "intro" },
+                      children: [{ name: "#text", content: "Hello World   " }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          highlightToken: null,
+        },
+      ];
+
+      let currentStep = 0;
+
+      // Helper to render tokens with highlighting
+      function renderTokens(tokens, highlightIndex) {
+        if (!tokens.length) {
+          tokenStreamEl.textContent = "(No tokens yet)";
+          return;
+        }
+        tokenStreamEl.innerHTML = "";
+        tokens.forEach((token, i) => {
+          const span = document.createElement("span");
+          span.style.marginRight = "12px";
+          span.style.padding = "2px 6px";
+          span.style.borderRadius = "4px";
+          span.style.fontWeight = "600";
+          span.style.userSelect = "text";
+
+          if (i === highlightIndex) {
+            span.style.backgroundColor = "#bfdbfe";
+            span.style.color = "#1e40af";
+          } else {
+            span.style.backgroundColor = "#dbeafe";
+            span.style.color = "#2563eb";
+          }
+
+          if (token.type === "startTag") {
+            let attrStr = "";
+            for (const [k, v] of Object.entries(token.attrs)) {
+              attrStr += ` <span class="attribute">${k}="${v}"</span>`;
+            }
+            span.innerHTML = `&lt;<strong>${token.name}</strong>${attrStr}&gt;`;
+          } else if (token.type === "endTag") {
+            span.innerHTML = `&lt;/<strong>${token.name}</strong>&gt;`;
+          } else if (token.type === "text") {
+            span.textContent = `"${token.content}"`;
+          }
+          tokenStreamEl.appendChild(span);
+        });
+      }
+
+      // Helper to render DOM tree recursively
+      function renderDOMTree(nodes, container) {
+        container.innerHTML = "";
+        function createNodeEl(node) {
+          const li = document.createElement("li");
+          if (node.name === "#text") {
+            li.textContent = `"${node.content}" (text node)`;
+            li.style.fontStyle = "italic";
+            li.style.color = "#374151";
+          } else {
+            li.textContent = `<${node.name}>`;
+            if (node.attrs && Object.keys(node.attrs).length) {
+              const attrSpan = document.createElement("span");
+              attrSpan.className = "attribute";
+              attrSpan.textContent =
+                " " +
+                Object.entries(node.attrs)
+                  .map(([k, v]) => `${k}="${v}"`)
+                  .join(" ");
+              li.appendChild(attrSpan);
+            }
+          }
+          if (node.children && node.children.length) {
+            const ul = document.createElement("ul");
+            ul.className = "tree";
+            node.children.forEach((child) => {
+              ul.appendChild(createNodeEl(child));
+            });
+            li.appendChild(ul);
+          }
+          return li;
+        }
+        nodes.forEach((node) => container.appendChild(createNodeEl(node)));
+      }
+
+      function updateUI() {
+        const step = steps[currentStep];
+        descriptionsEl.textContent = step.desc;
+
+        // Show character stream
+        charStreamEl.textContent = step.charStream || "";
+
+        // Show tokens
+        renderTokens(step.tokens, step.highlightToken);
+
+        // Show DOM tree
+        renderDOMTree(step.dom, domTreeEl);
+
+        // Disable prev if first step
+        prevBtn.disabled = currentStep === 0;
+        // Disable next if last step
+        nextBtn.disabled = currentStep === steps.length - 1;
+      }
+
+      prevBtn.addEventListener("click", () => {
+        if (currentStep > 0) {
+          currentStep--;
+          updateUI();
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (currentStep < steps.length - 1) {
+          currentStep++;
+          updateUI();
+        }
+      });
+
+      // Initialize
+      updateUI();
+    </script>
+  </body>
+</html>

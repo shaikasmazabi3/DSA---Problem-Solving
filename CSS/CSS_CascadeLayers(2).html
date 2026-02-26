@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advanced CSS Concepts Interactive Presentation - Part 2</title>
+    <style>
+      /* Base styles (same as Part 1) */
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #121212;
+        color: #eee;
+        overflow-x: hidden;
+        user-select: none;
+      }
+      .container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 1rem 2rem;
+        background: #1e1e1e;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+        position: relative;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #f0a500;
+        margin-bottom: 0.5rem;
+      }
+      p {
+        line-height: 1.5;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+      code {
+        background: #333;
+        padding: 0.2em 0.4em;
+        border-radius: 4px;
+        font-family: monospace;
+        color: #f0a500;
+      }
+      /* Slide styles */
+      .slide {
+        display: none;
+        opacity: 0;
+        transform: translateX(50px);
+        transition: all 0.6s ease;
+      }
+      .slide.active {
+        display: block;
+        opacity: 1;
+        transform: translateX(0);
+      }
+      /* Navigation controls */
+      .nav-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      button {
+        background: #f0a500;
+        border: none;
+        color: #121212;
+        font-weight: bold;
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s ease;
+        user-select: none;
+      }
+      button:hover {
+        background: #d18e00;
+      }
+      button:disabled {
+        background: #555;
+        cursor: not-allowed;
+      }
+      /* Progress bar */
+      .progress-bar {
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        margin-top: 1rem;
+        overflow: hidden;
+      }
+      .progress-bar-inner {
+        height: 100%;
+        background: #f0a500;
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+      /* Visualization containers */
+      .visualization {
+        margin-top: 1rem;
+        background: #222;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 0 10px #f0a500;
+      }
+      .layer-box {
+        background: #333;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        color: #eee;
+        font-family: monospace;
+        font-size: 1rem;
+      }
+      .layer-box h4 {
+        color: #f0a500;
+        margin-top: 0;
+      }
+      /* Animation for layers */
+      .layer {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+        color: #121212;
+        font-weight: bold;
+      }
+      .base-layer {
+        background: #ffb347;
+      }
+      .component-layer {
+        background: #55efc4;
+      }
+      .utility-layer {
+        background: #0984e3;
+      }
+      /* Architecture Patterns */
+      .pattern-list {
+        list-style-type: none;
+        padding-left: 0;
+        color: #eee;
+      }
+      .pattern-list li {
+        margin-bottom: 1rem;
+      }
+      .pattern-name {
+        font-weight: bold;
+        color: #f0a500;
+      }
+      /* Rendering pipeline */
+      .pipeline-step {
+        margin-bottom: 1rem;
+      }
+      .step-number {
+        background: #f0a500;
+        color: #121212;
+        font-weight: bold;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+        font-size: 1rem;
+      }
+      /* Responsive */
+      @media (max-width: 600px) {
+        .container {
+          padding: 1rem;
+          margin: 1rem;
+        }
+        p {
+          font-size: 1rem;
+        }
+        button {
+          padding: 0.5rem 1rem;
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="container"
+      role="main"
+      aria-label="Advanced CSS Concepts Presentation Part 2"
+    >
+      <!-- Slide 4 -->
+      <section
+        class="slide active"
+        aria-live="polite"
+        aria-atomic="true"
+        id="slide-4"
+      >
+        <h1>Cascade Layers (<code>@layer</code>) in CSS</h1>
+        <p>
+          <code>@layer</code> allows grouping CSS rules into layers with
+          explicit priority, controlling how styles override one another.
+        </p>
+
+        <div class="visualization" aria-label="Cascade layers visualization">
+          <div class="layer-box">
+            <h4>Example Layers</h4>
+            <div
+              class="layer base-layer"
+              style="animation: fadeIn 0.8s ease forwards"
+            >
+              @layer base { body { font-family: sans-serif; } }
+            </div>
+            <div
+              class="layer component-layer"
+              style="animation: fadeIn 1.6s ease forwards"
+            >
+              @layer components { .btn { background: blue; color: white; } }
+            </div>
+            <div
+              class="layer utility-layer"
+              style="animation: fadeIn 2.4s ease forwards"
+            >
+              @layer utilities { .text-center { text-align: center; } }
+            </div>
+          </div>
+
+          <p>
+            <strong>Priority Order:</strong>
+            <code>utilities &gt; components &gt; base</code>
+          </p>
+          <p>
+            Styles in higher layers override lower layers regardless of selector
+            specificity.
+          </p>
+
+          <p>
+            <strong>Using <code>@import</code> with layers:</strong>
+          </p>
+          <pre><code>&lt;style&gt;
+@layer components {
+  @import url('external-styles.css');
+}
+&lt;/style&gt;</code></pre>
+          <p>
+            This wraps external CSS in a layer without editing the external
+            file.
+          </p>
+        </div>
+      </section>
+
+      <!-- Slide 5 -->
+      <section class="slide" aria-live="polite" aria-atomic="true" id="slide-5">
+        <h1>CSS Architecture Patterns</h1>
+        <p>
+          Large-scale CSS projects benefit from structured patterns for
+          maintainability and scalability.
+        </p>
+
+        <ul class="pattern-list">
+          <li>
+            <span class="pattern-name">BEM (Block Element Modifier):</span>
+            Naming convention that makes specificity predictable and avoids
+            conflicts.
+          </li>
+          <li>
+            <span class="pattern-name">OOCSS (Object-Oriented CSS):</span>
+            Separates structure and skin to promote reuse.
+          </li>
+          <li>
+            <span class="pattern-name">SMACSS:</span> Categorizes styles into
+            Base, Layout, Module, State, and Theme for modularity.
+          </li>
+          <li>
+            <span class="pattern-name"
+              >Utility-First CSS (e.g., Tailwind):</span
+            >
+            Uses small classes for individual CSS properties enabling rapid
+            styling.
+          </li>
+        </ul>
+
+        <p>
+          Using <code>@layer</code> can organize these categories to avoid
+          specificity wars and improve overrides.
+        </p>
+      </section>
+
+      <!-- Slide 6 -->
+      <section class="slide" aria-live="polite" aria-atomic="true" id="slide-6">
+        <h1>CSS Rendering Pipeline and Render-Blocking</h1>
+        <p>
+          Browser rendering involves multiple steps before content appears on
+          screen.
+        </p>
+
+        <div class="visualization" aria-label="Rendering pipeline steps">
+          <div class="pipeline-step">
+            <span class="step-number">1</span> Parse HTML → Build DOM Tree
+          </div>
+          <div class="pipeline-step">
+            <span class="step-number">2</span> Parse CSS → Build CSSOM Tree
+          </div>
+          <div class="pipeline-step">
+            <span class="step-number">3</span> Execute JavaScript (may modify
+            DOM/CSSOM)
+          </div>
+          <div class="pipeline-step">
+            <span class="step-number">4</span> Construct Render Tree (visible
+            elements + styles)
+          </div>
+          <div class="pipeline-step">
+            <span class="step-number">5</span> Layout (calculate geometry)
+          </div>
+          <div class="pipeline-step">
+            <span class="step-number">6</span> Paint (draw pixels)
+          </div>
+        </div>
+
+        <p>
+          <strong>Render-Blocking:</strong> CSS is render-blocking by default
+          because the browser must build the CSSOM before painting.
+        </p>
+        <p>JavaScript can also block rendering if it modifies DOM or CSSOM.</p>
+        <p>
+          <strong>Optimization tips:</strong> inline critical CSS, defer
+          non-critical CSS, minimize CSS size.
+        </p>
+      </section>
+
+      <!-- Navigation -->
+      <div class="nav-buttons" role="navigation" aria-label="Slide navigation">
+        <button id="prevBtn" aria-label="Previous Slide">Previous</button>
+        <button id="playPauseBtn" aria-label="Play Presentation">Play</button>
+        <button id="nextBtn" aria-label="Next Slide">Next</button>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-bar" aria-hidden="true">
+        <div class="progress-bar-inner"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const slides = document.querySelectorAll(".slide");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const playPauseBtn = document.getElementById("playPauseBtn");
+        const progressBar = document.querySelector(".progress-bar-inner");
+        let current = 0;
+        let playing = false;
+        let timer = null;
+        const slideCount = slides.length;
+        const slideDuration = 8000; // 8 seconds per slide
+
+        function showSlide(index) {
+          slides.forEach((slide, i) => {
+            slide.classList.toggle("active", i === index);
+          });
+          current = index;
+          prevBtn.disabled = current === 0;
+          nextBtn.disabled = current === slideCount - 1;
+          updateProgress();
+        }
+
+        function nextSlide() {
+          if (current < slideCount - 1) {
+            showSlide(current + 1);
+          } else {
+            pausePresentation();
+          }
+        }
+
+        function prevSlide() {
+          if (current > 0) {
+            showSlide(current - 1);
+          }
+        }
+
+        function playPresentation() {
+          playing = true;
+          playPauseBtn.textContent = "Pause";
+          timer = setInterval(() => {
+            if (current < slideCount - 1) {
+              nextSlide();
+            } else {
+              pausePresentation();
+            }
+          }, slideDuration);
+        }
+
+        function pausePresentation() {
+          playing = false;
+          playPauseBtn.textContent = "Play";
+          clearInterval(timer);
+        }
+
+        function togglePlayPause() {
+          if (playing) {
+            pausePresentation();
+          } else {
+            playPresentation();
+          }
+        }
+
+        function updateProgress() {
+          const percent = ((current + 1) / slideCount) * 100;
+          progressBar.style.width = percent + "%";
+        }
+
+        // Event listeners
+        prevBtn.addEventListener("click", () => {
+          pausePresentation();
+          prevSlide();
+        });
+        nextBtn.addEventListener("click", () => {
+          pausePresentation();
+          nextSlide();
+        });
+        playPauseBtn.addEventListener("click", togglePlayPause);
+
+        // Keyboard navigation support
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowRight") {
+            pausePresentation();
+            nextSlide();
+          } else if (e.key === "ArrowLeft") {
+            pausePresentation();
+            prevSlide();
+          } else if (e.key === " ") {
+            e.preventDefault();
+            togglePlayPause();
+          }
+        });
+
+        // Initialize
+        showSlide(0);
+      })();
+    </script>
+  </body>
+</html>

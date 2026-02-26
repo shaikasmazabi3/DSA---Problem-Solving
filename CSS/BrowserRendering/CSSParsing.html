@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CSS Parsing & CSSOM Visualization</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4ff;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  header {
+    background: #2563eb;
+    color: white;
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  #leftPanel, #rightPanel {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  #leftPanel {
+    background: white;
+    border-right: 2px solid #e0e7ff;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  #cssText, #tokenStream {
+    background: #e0e7ff;
+    border-radius: 8px;
+    padding: 15px;
+    font-family: monospace;
+    font-size: 1.1rem;
+    min-height: 60px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    user-select: none;
+  }
+  #descriptions {
+    font-size: 1rem;
+    line-height: 1.4;
+    background: #dbeafe;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  #rightPanel {
+    background: #fff;
+    position: relative;
+  }
+  h2 {
+    color: #2563eb;
+    margin-bottom: 10px;
+  }
+  ul.tree {
+    list-style: none;
+    padding-left: 20px;
+  }
+  ul.tree li {
+    position: relative;
+    margin: 5px 0;
+    cursor: default;
+    padding-left: 18px;
+    user-select: none;
+  }
+  ul.tree li::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #60a5fa;
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+  }
+  ul.tree li.highlight {
+    background-color: #bfdbfe;
+    border-radius: 6px;
+  }
+  .token-selector {
+    color: #2563eb;
+    font-weight: 700;
+  }
+  .token-property {
+    color: #d97706;
+    font-style: italic;
+  }
+  .token-value {
+    color: #059669;
+  }
+  #controls {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+  button {
+    background: #2563eb;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+  }
+  /* Scrollbar for right panel */
+  #rightPanel::-webkit-scrollbar {
+    width: 8px;
+  }
+  #rightPanel::-webkit-scrollbar-thumb {
+    background-color: #93c5fd;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header>CSS Parsing & CSSOM Construction Visualization</header>
+
+<div id="main">
+  <div id="leftPanel">
+    <div>
+      <h2>Step Description</h2>
+      <div id="descriptions">
+        Welcome! This visualization shows how the browser parses CSS text into tokens and builds the CSSOM tree.
+      </div>
+    </div>
+    <div>
+      <h2>CSS Text Input</h2>
+      <div id="cssText">
+        body { color: black; }
+        h1 { font-size: 2em; }
+        p.intro { margin: 10px 0; color: blue; }
+      </div>
+    </div>
+    <div>
+      <h2>Token Stream (Tokenizer Output)</h2>
+      <div id="tokenStream">(No tokens yet)</div>
+    </div>
+    <div id="controls">
+      <button id="prevBtn" disabled>Previous</button>
+      <button id="nextBtn">Next</button>
+    </div>
+  </div>
+  <div id="rightPanel">
+    <h2>CSSOM Tree Construction</h2>
+    <ul id="cssomTree" class="tree"></ul>
+  </div>
+</div>
+
+<script>
+  const cssTextEl = document.getElementById("cssText");
+  const tokenStreamEl = document.getElementById("tokenStream");
+  const descriptionsEl = document.getElementById("descriptions");
+  const cssomTreeEl = document.getElementById("cssomTree");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
+  // CSS text input (trimmed for clarity)
+  const cssText = `body { color: black; }
+h1 { font-size: 2em; }
+p.intro { margin: 10px 0; color: blue; }`;
+
+  // Steps for visualization
+  const steps = [
+    {
+      desc: "Step 1: The browser receives CSS text from the network or <style> tags.",
+      tokens: [],
+      cssom: [],
+      highlightToken: null,
+    },
+    {
+      desc: "Step 2: The CSS tokenizer splits the text into tokens: selectors, braces, properties, values, semicolons.",
+      tokens: [
+        { type: "selector", value: "body" },
+        { type: "brace", value: "{" },
+        { type: "property", value: "color" },
+        { type: "colon", value: ":" },
+        { type: "value", value: "black" },
+        { type: "semicolon", value: ";" },
+        { type: "brace", value: "}" },
+      ],
+      cssom: [],
+      highlightToken: 0,
+    },
+    {
+      desc: "Step 3: Tokens are parsed into a CSS rule with selector and declarations.",
+      tokens: [
+        { type: "selector", value: "body" },
+        { type: "brace", value: "{" },
+        { type: "property", value: "color" },
+        { type: "colon", value: ":" },
+        { type: "value", value: "black" },
+        { type: "semicolon", value: ";" },
+        { type: "brace", value: "}" },
+      ],
+      cssom: [
+        {
+          selector: "body",
+          declarations: [
+            { property: "color", value: "black" }
+          ]
+        }
+      ],
+      highlightToken: 6,
+    },
+    {
+      desc: "Step 4: Next CSS rule tokens for h1 selector.",
+      tokens: [
+        { type: "selector", value: "h1" },
+        { type: "brace", value: "{" },
+        { type: "property", value: "font-size" },
+        { type: "colon", value: ":" },
+        { type: "value", value: "2em" },
+        { type: "semicolon", value: ";" },
+        { type: "brace", value: "}" },
+      ],
+      cssom: [
+        {
+          selector: "body",
+          declarations: [
+            { property: "color", value: "black" }
+          ]
+        },
+        {
+          selector: "h1",
+          declarations: [
+            { property: "font-size", value: "2em" }
+          ]
+        }
+      ],
+      highlightToken: 13,
+    },
+    {
+      desc: "Step 5: Final CSS rule tokens for p.intro selector.",
+      tokens: [
+        { type: "selector", value: "p.intro" },
+        { type: "brace", value: "{" },
+        { type: "property", value: "margin" },
+        { type: "colon", value: ":" },
+        { type: "value", value: "10px 0" },
+        { type: "semicolon", value: ";" },
+        { type: "property", value: "color" },
+        { type: "colon", value: ":" },
+        { type: "value", value: "blue" },
+        { type: "semicolon", value: ";" },
+        { type: "brace", value: "}" },
+      ],
+      cssom: [
+        {
+          selector: "body",
+          declarations: [
+            { property: "color", value: "black" }
+          ]
+        },
+        {
+          selector: "h1",
+          declarations: [
+            { property: "font-size", value: "2em" }
+          ]
+        },
+        {
+          selector: "p.intro",
+          declarations: [
+            { property: "margin", value: "10px 0" },
+            { property: "color", value: "blue" }
+          ]
+        }
+      ],
+      highlightToken: 23,
+    },
+    {
+      desc: "Step 6: The CSSOM tree is complete and ready to be combined with the DOM for rendering.",
+      tokens: [],
+      cssom: [
+        {
+          selector: "body",
+          declarations: [
+            { property: "color", value: "black" }
+          ]
+        },
+        {
+          selector: "h1",
+          declarations: [
+            { property: "font-size", value: "2em" }
+          ]
+        },
+        {
+          selector: "p.intro",
+          declarations: [
+            { property: "margin", value: "10px 0" },
+            { property: "color", value: "blue" }
+          ]
+        }
+      ],
+      highlightToken: null,
+    }
+  ];
+
+  let currentStep = 0;
+
+  // Render tokens with highlights and color coding
+  function renderTokens(tokens, highlightIndex) {
+    if (!tokens.length) {
+      tokenStreamEl.textContent = "(No tokens yet)";
+      return;
+    }
+    tokenStreamEl.innerHTML = "";
+    tokens.forEach((token, i) => {
+      const span = document.createElement("span");
+      span.style.marginRight = "10px";
+      span.style.padding = "3px 6px";
+      span.style.borderRadius = "4px";
+      span.style.fontWeight = "600";
+      span.style.userSelect = "text";
+
+      if (i === highlightIndex) {
+        span.style.backgroundColor = "#bfdbfe";
+        span.style.color = "#1e40af";
+      } else {
+        span.style.backgroundColor = "#dbeafe";
+        span.style.color = "#2563eb";
+      }
+
+      switch (token.type) {
+        case "selector":
+          span.className = "token-selector";
+          span.textContent = token.value;
+          break;
+        case "property":
+          span.className = "token-property";
+          span.textContent = token.value;
+          break;
+        case "value":
+          span.className = "token-value";
+          span.textContent = token.value;
+          break;
+        case "brace":
+        case "colon":
+        case "semicolon":
+          span.textContent = token.value;
+          span.style.fontWeight = "normal";
+          span.style.color = "#374151";
+          break;
+        default:
+          span.textContent = token.value;
+      }
+
+      tokenStreamEl.appendChild(span);
+    });
+  }
+
+  // Render CSSOM tree
+  function renderCSSOMTree(cssom, container) {
+    container.innerHTML = "";
+    function createRuleNode(rule) {
+      const li = document.createElement("li");
+      li.textContent = rule.selector;
+      if (rule.declarations && rule.declarations.length) {
+        const ul = document.createElement("ul");
+        ul.className = "tree";
+        rule.declarations.forEach(decl => {
+          const declLi = document.createElement("li");
+          declLi.innerHTML = `<span class="token-property">${decl.property}</span>: <span class="token-value">${decl.value}</span>`;
+          ul.appendChild(declLi);
+        });
+        li.appendChild(ul);
+      }
+      return li;
+    }
+    cssom.forEach(rule => container.appendChild(createRuleNode(rule)));
+  }
+
+  function updateUI() {
+    const step = steps[currentStep];
+    descriptionsEl.textContent = step.desc;
+
+    renderTokens(step.tokens, step.highlightToken);
+    renderCSSOMTree(step.cssom, cssomTreeEl);
+
+    prevBtn.disabled = currentStep === 0;
+    nextBtn.disabled = currentStep === steps.length - 1;
+  }
+
+  prevBtn.addEventListener("click", () => {
+    if (currentStep > 0) {
+      currentStep--;
+      updateUI();
+    }
+  });
+
+  nextBtn.addEventListener("click", () => {
+    if (currentStep < steps.length - 1) {
+      currentStep++;
+      updateUI();
+    }
+  });
+
+  // Initialize UI
+  updateUI();
+</script>
+
+</body>
+</html>

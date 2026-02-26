@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Map Usage Visualization: twoSum Correct vs Incorrect</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f7fa;
+        color: #333;
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      h2 {
+        margin-bottom: 20px;
+        font-weight: 700;
+        font-size: 2rem;
+        color: #222;
+      }
+      .container {
+        display: flex;
+        flex-direction: row;
+        gap: 40px;
+
+        justify-content: center;
+        max-width: 900px;
+        width: 100%;
+      }
+      .panel {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+        padding: 20px;
+        width: 400px;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+      }
+      .panel h3 {
+        margin-top: 0;
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+      #arrayDisplay {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      .box {
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        background: #e3f2fd;
+        color: #1565c0;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        user-select: none;
+      }
+      .current {
+        background-color: #ffcc00;
+        color: #5a4b00;
+        box-shadow: 0 0 8px 2px #ffcc00aa;
+      }
+      .map-entries {
+        flex-grow: 1;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 1rem;
+      }
+      .map-entry {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 10px;
+        border-radius: 6px;
+        background-color: #e8f0fe;
+        margin-bottom: 6px;
+      }
+      .info {
+        margin-top: 10px;
+        font-weight: 600;
+        min-height: 48px;
+        text-align: center;
+        color: #222;
+      }
+      button {
+        margin-top: 15px;
+        padding: 10px 16px;
+        font-weight: 700;
+        font-size: 1rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        background-color: #0078d4;
+        color: white;
+        transition: background-color 0.3s ease;
+      }
+      button:disabled {
+        background-color: #a0c4ff;
+        cursor: not-allowed;
+      }
+      button:hover:not(:disabled) {
+        background-color: #005ea2;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>twoSum Map: Correct vs Incorrect Usage Visualization</h2>
+
+    <div id="arrayDisplay"></div>
+
+    <div class="container">
+      <div class="panel" id="correctPanel">
+        <h3>Correct Map Usage</h3>
+        <div class="map-entries" id="correctMapEntries">Map is empty.</div>
+        <div class="info" id="correctInfo">Press "Next Step" to start.</div>
+      </div>
+
+      <div class="panel" id="incorrectPanel">
+        <h3>Incorrect Map Usage</h3>
+        <div class="map-entries" id="incorrectMapEntries">Map is empty.</div>
+        <div class="info" id="incorrectInfo">Press "Next Step" to start.</div>
+      </div>
+    </div>
+
+    <button id="nextStepBtn">Next Step</button>
+
+    <script>
+      const arr = [2, 6, 5, 8];
+      const target = 14;
+
+      const arrayDisplay = document.getElementById("arrayDisplay");
+      const correctMapEntries = document.getElementById("correctMapEntries");
+      const incorrectMapEntries = document.getElementById(
+        "incorrectMapEntries"
+      );
+      const correctInfo = document.getElementById("correctInfo");
+      const incorrectInfo = document.getElementById("incorrectInfo");
+      const nextStepBtn = document.getElementById("nextStepBtn");
+
+      // Render array with highlight on current index
+      function renderArray(currentIndex = -1) {
+        arrayDisplay.innerHTML = "";
+        arr.forEach((val, idx) => {
+          const box = document.createElement("div");
+          box.className = "box" + (idx === currentIndex ? " current" : "");
+          box.textContent = val;
+          arrayDisplay.appendChild(box);
+        });
+      }
+
+      // Render map entries in the panel
+      function renderMapEntries(map, container) {
+        container.innerHTML = "";
+        if (map.size === 0) {
+          container.textContent = "Map is empty.";
+          return;
+        }
+        for (const [key, value] of map.entries()) {
+          const entry = document.createElement("div");
+          entry.className = "map-entry";
+          entry.textContent = `Key: ${key} → Value: ${value}`;
+          container.appendChild(entry);
+        }
+      }
+
+      // State variables for stepping through visualization
+      let i = 0;
+      let correctMap = new Map();
+      let incorrectMap = new Map();
+      let finished = false;
+
+      function nextStep() {
+        if (finished) {
+          nextStepBtn.disabled = true;
+          return;
+        }
+
+        if (i >= arr.length) {
+          correctInfo.textContent =
+            "No pair found with target sum in correct map.";
+          incorrectInfo.textContent =
+            "No pair found with target sum in incorrect map.";
+          finished = true;
+          nextStepBtn.disabled = true;
+          return;
+        }
+
+        renderArray(i);
+
+        const currentVal = arr[i];
+        const expected = target - currentVal;
+
+        // Correct approach
+        if (correctMap.has(expected)) {
+          correctInfo.textContent = `Found pair! arr[${correctMap.get(
+            expected
+          )}] = ${expected} + arr[${i}] = ${currentVal} = ${target}`;
+          renderMapEntries(correctMap, correctMapEntries);
+          finished = true;
+          nextStepBtn.disabled = true;
+        } else {
+          correctMap.set(currentVal, i);
+          correctInfo.textContent = `No complement ${expected} found. Storing value ${currentVal} at key ${currentVal} with index ${i}.`;
+          renderMapEntries(correctMap, correctMapEntries);
+        }
+
+        // Incorrect approach
+        if (incorrectMap.has(expected)) {
+          incorrectInfo.textContent = `Found pair! arr[${incorrectMap.get(
+            expected
+          )}] = ${expected} + arr[${i}] = ${currentVal} = ${target}`;
+          renderMapEntries(incorrectMap, incorrectMapEntries);
+          finished = true;
+          nextStepBtn.disabled = true;
+        } else {
+          incorrectMap.set(i, currentVal);
+          incorrectInfo.textContent = `No complement ${expected} found. Storing index ${i} at key ${i} with value ${currentVal}.`;
+          renderMapEntries(incorrectMap, incorrectMapEntries);
+        }
+
+        i++;
+      }
+
+      nextStepBtn.addEventListener("click", nextStep);
+
+      // Initial render
+      renderArray();
+      renderMapEntries(correctMap, correctMapEntries);
+      renderMapEntries(incorrectMap, incorrectMapEntries);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Browser Rendering Pipeline Visualizer</title>
+    <style>
+      /* Basic reset and layout */
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f4ff;
+        color: #1e293b;
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        background: #2563eb;
+        color: white;
+        padding: 1rem 2rem;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      #container {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+      }
+      nav {
+        width: 250px;
+        background: #1e293b;
+        color: #cbd5e1;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+      }
+      nav button {
+        background: none;
+        border: none;
+        color: inherit;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        text-align: left;
+        font-size: 1rem;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+      }
+      nav button.active,
+      nav button:hover {
+        background-color: #2563eb;
+        color: white;
+      }
+      main {
+        flex: 1;
+        background: white;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      #moduleTitle {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #2563eb;
+      }
+      #moduleContent {
+        min-height: 400px;
+      }
+      #stepControls {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+      }
+      #stepControls button {
+        background: #2563eb;
+        border: none;
+        color: white;
+        padding: 10px 16px;
+        font-size: 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      #stepControls button:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <header>Browser Rendering Pipeline Visualizer</header>
+
+    <div id="container">
+      <nav id="moduleNav">
+        <button data-module="htmlParsing" class="active">HTML Parsing</button>
+        <button data-module="cssParsing">CSS Parsing & CSSOM</button>
+        <button data-module="renderTree">Render Tree Construction</button>
+        <button data-module="jsExecution">JavaScript Execution</button>
+        <button data-module="layoutPaint">Layout & Paint</button>
+        <button data-module="accessibilitySeo">Accessibility & SEO</button>
+      </nav>
+      <main>
+        <div id="moduleTitle">HTML Parsing</div>
+        <div id="moduleContent"></div>
+        <div id="stepControls">
+          <button id="prevStepBtn" disabled>Previous Step</button>
+          <button id="nextStepBtn">Next Step</button>
+        </div>
+      </main>
+    </div>
+
+    <script>
+            const modules = {
+
+              htmlParsing: {
+                title: "HTML Parsing",
+                steps: [
+                  {
+                    desc: "Step 1: The browser receives the HTML as a byte stream from the network.",
+                    byteStream: '<html><body><p class="intro">Hello World',
+                    charStream: "",
+                    tokens: [],
+                    dom: [],
+                  },
+                  {
+                    desc: "Step 2: The byte stream is decoded into characters (UTF-8 decoding).",
+                    byteStream: '<html><body><p class="intro">Hello World',
+                    charStream: '<html><body><p class="intro">Hello World',
+                    tokens: [],
+                    dom: [],
+                  },
+                  {
+                    desc: "Step 3: The tokenizer reads characters and creates tokens: start tags, attributes, and text.",
+                    byteStream: '<html><body><p class="intro">Hello World',
+                    charStream: '<html><body><p class="intro">Hello World',
+                    tokens: [
+                      { type: "startTag", name: "html", attrs: {} },
+                      { type: "startTag", name: "body", attrs: {} },
+                      { type: "startTag", name: "p", attrs: { class: "intro" } },
+                      { type: "text", content: "Hello World" },
+                    ],
+                    dom: [],
+                  },
+                  {
+                    desc: "Step 4: Tokens are processed to build the DOM tree.",
+                    byteStream: '<html><body><p class="intro">Hello World',
+                    charStream: '<html><body><p class="intro">Hello World',
+                    tokens: [
+                      { type: "startTag", name: "html", attrs: {} },
+                      { type: "startTag", name: "body", attrs: {} },
+                      { type: "startTag", name: "p", attrs: { class: "intro" } },
+                      { type: "text", content: "Hello World" },
+                    ],
+                    dom: [
+                      {
+                        name: "html",
+                        attrs: {},
+                        children: [
+                          {
+                            name: "body",
+                            attrs: {},
+                            children: [
+                              {
+                                name: "p",
+                                attrs: { class: "intro" },
+                                children: [{ name: "#text", content: "Hello World" }],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    desc: "Step 5: The parser auto-closes missing tags like </p>, </body>, and </html>.",
+                    byteStream: '<html><body><p class="intro">Hello World',
+                    charStream: '<html><body><p class="intro">Hello World',
+                    tokens: [
+                      { type: "startTag", name: "html", attrs: {} },
+                      { type: "startTag", name: "body", attrs: {} },
+                      { type: "startTag", name: "p", attrs: { class: "intro" } },
+                      { type: "text", content: "Hello World" },
+                      { type: "endTag", name: "p" },
+                      { type: "endTag", name: "body" },
+                      { type: "endTag", name: "html" },
+                    ],
+                    dom: [
+                      {
+                        name: "html",
+                        attrs: {},
+                        children: [
+                          {
+                            name: "body",
+                            attrs: {},
+                            children: [
+                              {
+                                name: "p",
+                                attrs: { class: "intro" },
+                                children: [{ name: "#text", content: "Hello World" }],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+                renderStep: function (stepIndex, container) {
+                  container.innerHTML = "";
+
+                  const step = this.steps[stepIndex];
+
+                  // Description
+                  const descEl = document.createElement("p");
+                  descEl.textContent = step.desc;
+                  descEl.style.marginBottom = "1rem";
+                  container.appendChild(descEl);
+
+                  // Byte Stream Visualization
+                  const byteStreamEl = document.createElement("pre");
+                  byteStreamEl.textContent =
+                    "Byte Stream:\n" + (step.byteStream || "(empty)");
+                  byteStreamEl.style.background = "#e0e7ff";
+                  byteStreamEl.style.padding = "10px";
+                  byteStreamEl.style.borderRadius = "6px";
+                  container.appendChild(byteStreamEl);
+
+                  // Character Stream Visualization
+                  if (step.charStream !== undefined) {
+                    const charStreamEl = document.createElement("pre");
+                    charStreamEl.textContent =
+                      "Character Stream:\n" + (step.charStream || "(empty)");
+                    charStreamEl.style.background = "#dbeafe";
+                    charStreamEl.style.padding = "10px";
+                    charStreamEl.style.borderRadius = "6px";
+                    charStreamEl.style.marginTop = "10px";
+                    container.appendChild(charStreamEl);
+                  }
+
+                  // Token Stream Visualization
+                  if (step.tokens && step.tokens.length) {
+                    const tokenStreamEl = document.createElement("div");
+                    tokenStreamEl.textContent = "Tokens:";
+                    tokenStreamEl.style.marginTop = "10px";
+                    tokenStreamEl.style.display = "flex";
+                    tokenStreamEl.style.flexWrap = "wrap";
+                    tokenStreamEl.style.gap = "8px";
+
+                    step.tokens.forEach((token) => {
+                      const tokenEl = document.createElement("span");
+                      tokenEl.style.padding = "4px 8px";
+                      tokenEl.style.borderRadius = "6px";
+                      tokenEl.style.background = "#bfdbfe";
+                      tokenEl.style.color = "#1e40af";
+                      tokenEl.style.fontWeight = "600";
+                      tokenEl.style.userSelect = "text";
+
+                      if (token.type === "startTag") {
+                        const attrs = Object.entries(token.attrs)
+                          .map(([k, v]) => `${k}="${v}"`)
+                          .join(" ");
+                        tokenEl.textContent = `<${token.name}${attrs ? " " + attrs : ""}>`;
+                      } else if (token.type === "endTag") {
+                        tokenEl.textContent = `</${token.name}>`;
+                      } else if (token.type === "text") {
+                        tokenEl.textContent = `"${token.content}"`;
+                        tokenEl.style.fontStyle = "italic";
+                        tokenEl.style.background = "#dbeafe";
+                        tokenEl.style.color = "#2563eb";
+                      } else {
+                        tokenEl.textContent = JSON.stringify(token);
+                      }
+                      tokenStreamEl.appendChild(tokenEl);
+                    });
+
+                    container.appendChild(tokenStreamEl);
+                  }
+
+                  // DOM Tree Visualization
+                  if (step.dom && step.dom.length) {
+                    const domTitle = document.createElement("h4");
+                    domTitle.textContent = "DOM Tree:";
+                    domTitle.style.marginTop = "15px";
+                    container.appendChild(domTitle);
+
+                    const domTreeEl = document.createElement("ul");
+                    domTreeEl.style.listStyle = "none";
+                    domTreeEl.style.paddingLeft = "20px";
+
+                    function createDomNode(node) {
+                      const li = document.createElement("li");
+                      if (node.name === "#text") {
+                        li.textContent = `"${node.content}" (text node)`;
+                        li.style.fontStyle = "italic";
+                        li.style.color = "#374151";
+                      } else {
+                        li.textContent = `<${node.name}>`;
+                        if (node.attrs && Object.keys(node.attrs).length) {
+                          const attrSpan = document.createElement("span");
+                          attrSpan.style.color = "#d97706";
+                          attrSpan.style.marginLeft = "8px";
+                          attrSpan.textContent = Object.entries(node.attrs)
+                            .map(([k, v]) => `${k}="${v}"`)
+                            .join(" ");
+                          li.appendChild(attrSpan);
+                        }
+                      }
+                      if (node.children && node.children.length) {
+                        const ul = document.createElement("ul");
+                        ul.style.listStyle = "none";
+                        ul.style.paddingLeft = "20px";
+                        node.children.forEach((child) =>
+                          ul.appendChild(createDomNode(child)),
+                        );
+                        li.appendChild(ul);
+                      }
+                      return li;
+                    }
+
+                    step.dom.forEach((node) =>
+                      domTreeEl.appendChild(createDomNode(node)),
+                    );
+                    container.appendChild(domTreeEl);
+                  }
+                },
+              },
+              cssParsing: {
+                title: "CSS Parsing & CSSOM",
+                steps: [
+                  {
+                    desc: "Step 1: The browser receives CSS text from the network or <style> tags.",
+                    cssText: `body { color: black; }
+      h1 { font-size: 2em; }
+      p.intro { margin: 10px 0; color: blue; }`,
+                    tokens: [],
+                    cssom: [],
+                  },
+                  {
+                    desc: "Step 2: The CSS tokenizer splits the text into tokens: selectors, braces, properties, values, semicolons.",
+                    cssText: `body { color: black; }`,
+                    tokens: [
+                      { type: "selector", value: "body" },
+                      { type: "brace", value: "{" },
+                      { type: "property", value: "color" },
+                      { type: "colon", value: ":" },
+                      { type: "value", value: "black" },
+                      { type: "semicolon", value: ";" },
+                      { type: "brace", value: "}" },
+                    ],
+                    cssom: [],
+                  },
+                  {
+                    desc: "Step 3: Tokens are parsed into a CSS rule with selector and declarations.",
+                    cssText: `body { color: black; }`,
+                    tokens: [
+                      { type: "selector", value: "body" },
+                      { type: "brace", value: "{" },
+                      { type: "property", value: "color" },
+                      { type: "colon", value: ":" },
+                      { type: "value", value: "black" },
+                      { type: "semicolon", value: ";" },
+                      { type: "brace", value: "}" },
+                    ],
+                    cssom: [
+                      {
+                        selector: "body",
+                        declarations: [{ property: "color", value: "black" }],
+                      },
+                    ],
+                  },
+                  {
+                    desc: "Step 4: Additional CSS rules are tokenized and parsed.",
+                    cssText: `h1 { font-size: 2em; }
+      p.intro { margin: 10px 0; color: blue; }`,
+                    tokens: [
+                      // tokens for h1 rule (similar format)
+                      { type: "selector", value: "h1" },
+                      { type: "brace", value: "{" },
+                      { type: "property", value: "font-size" },
+                      { type: "colon", value: ":" },
+                      { type: "value", value: "2em" },
+                      { type: "semicolon", value: ";" },
+                      { type: "brace", value: "}" },
+                      // tokens for p.intro rule
+                      { type: "selector", value: "p.intro" },
+                      { type: "brace", value: "{" },
+                      { type: "property", value: "margin" },
+                      { type: "colon", value: ":" },
+                      { type: "value", value: "10px 0" },
+                      { type: "semicolon", value: ";" },
+                      { type: "property", value: "color" },
+                      { type: "colon", value: ":" },
+                      { type: "value", value: "blue" },
+                      { type: "semicolon", value: ";" },
+                      { type: "brace", value: "}" },
+                    ],
+                    cssom: [
+                      {
+                        selector: "body",
+                        declarations: [{ property: "color", value: "black" }],
+                      },
+                      {
+                        selector: "h1",
+                        declarations: [{ property: "font-size", value: "2em" }],
+                      },
+                      {
+                        selector: "p.intro",
+                        declarations: [
+                          { property: "margin", value: "10px 0" },
+                          { property: "color", value: "blue" },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+                renderStep: function (stepIndex, container) {
+                  container.innerHTML = "";
+                  const step = this.steps[stepIndex];
+
+                  // Description
+                  const descEl = document.createElement("p");
+                  descEl.textContent = step.desc;
+                  descEl.style.marginBottom = "1rem";
+                  container.appendChild(descEl);
+
+                  // CSS Text Visualization
+                  if (step.cssText) {
+                    const cssTextEl = document.createElement("pre");
+                    cssTextEl.textContent = step.cssText;
+                    cssTextEl.style.background = "#e0e7ff";
+                    cssTextEl.style.padding = "10px";
+                    cssTextEl.style.borderRadius = "6px";
+                    container.appendChild(cssTextEl);
+                  }
+
+                  // Token Stream Visualization
+                  if (step.tokens && step.tokens.length) {
+                    const tokenStreamEl = document.createElement("div");
+                    tokenStreamEl.textContent = "Tokens:";
+                    tokenStreamEl.style.marginTop = "10px";
+                    tokenStreamEl.style.display = "flex";
+                    tokenStreamEl.style.flexWrap = "wrap";
+                    tokenStreamEl.style.gap = "8px";
+
+                    step.tokens.forEach((token) => {
+                      const tokenEl = document.createElement("span");
+                      tokenEl.style.padding = "4px 8px";
+                      tokenEl.style.borderRadius = "6px";
+                      tokenEl.style.background = "#bfdbfe";
+                      tokenEl.style.color = "#1e40af";
+                      tokenEl.style.fontWeight = "600";
+                      tokenEl.style.userSelect = "text";
+
+                      switch (token.type) {
+                        case "selector":
+                          tokenEl.textContent = token.value;
+                          tokenEl.style.color = "#2563eb";
+                          tokenEl.style.fontWeight = "700";
+                          break;
+                        case "property":
+                          tokenEl.textContent = token.value;
+                          tokenEl.style.color = "#d97706";
+                          tokenEl.style.fontStyle = "italic";
+                          break;
+                        case "value":
+                          tokenEl.textContent = token.value;
+                          tokenEl.style.color = "#059669";
+                          break;
+                        case "brace":
+                        case "colon":
+                        case "semicolon":
+                          tokenEl.textContent = token.value;
+                          tokenEl.style.fontWeight = "normal";
+                          tokenEl.style.color = "#374151";
+                          break;
+                        default:
+                          tokenEl.textContent = token.value;
+                      }
+                      tokenStreamEl.appendChild(tokenEl);
+                    });
+                    container.appendChild(tokenStreamEl);
+                  }
+
+                  // CSSOM Tree Visualization
+                  if (step.cssom && step.cssom.length) {
+                    const cssomTitle = document.createElement("h4");
+                    cssomTitle.textContent = "CSSOM Tree:";
+                    cssomTitle.style.marginTop = "15px";
+                    container.appendChild(cssomTitle);
+
+                    const cssomTreeEl = document.createElement("ul");
+                    cssomTreeEl.style.listStyle = "none";
+                    cssomTreeEl.style.paddingLeft = "20px";
+
+                    step.cssom.forEach((rule) => {
+                      const li = document.createElement("li");
+                      li.textContent = rule.selector;
+                      if (rule.declarations && rule.declarations.length) {
+                        const ul = document.createElement("ul");
+                        ul.style.listStyle = "none";
+                        ul.style.paddingLeft = "20px";
+                        rule.declarations.forEach((decl) => {
+                          const declLi = document.createElement("li");
+                          declLi.textContent = `${decl.property}: ${decl.value}`;
+                          ul.appendChild(declLi);
+                        });
+                        li.appendChild(ul);
+                      }
+                      cssomTreeEl.appendChild(li);
+                    });
+                    container.appendChild(cssomTreeEl);
+                  }
+                },
+              },
+              renderTree : {
+        title: "Render Tree Construction",
+        steps: [
+          {
+            desc: "Step 1: Starting with the full DOM tree and CSSOM tree.",
+            dom: [
+              { name: "html", attrs: {}, children: [
+                { name: "body", attrs: {}, children: [
+                  { name: "h1", attrs: { style: "display: block" }, children: [] },
+                  { name: "p", attrs: { style: "display: none" }, children: [
+                    { name: "#text", content: "Hidden paragraph" }
+                  ]},
+                  { name: "div", attrs: { style: "display: block" }, children: [
+                    { name: "span", attrs: { style: "display: inline" }, children: [
+                      { name: "#text", content: "Visible text" }
+                    ]}
+                  ]}
+                ]}
+              ]}
+            ],
+            cssom: [
+              { selector: "body", declarations: [{ property: "color", value: "black" }] },
+              { selector: "h1", declarations: [{ property: "font-size", value: "2em" }] },
+              { selector: "p", declarations: [{ property: "display", value: "none" }] },
+              { selector: "div", declarations: [{ property: "display", value: "block" }] },
+              { selector: "span", declarations: [{ property: "display", value: "inline" }] }
+            ],
+            renderTree: []
+          },
+          {
+            desc: "Step 2: Filter out nodes with 'display: none' style (like the <p> element).",
+            dom: [],
+            cssom: [],
+            renderTree: [
+              { name: "html", style: {}, children: [
+                { name: "body", style: {}, children: [
+                  { name: "h1", style: { display: "block" }, children: [] },
+                  { name: "div", style: { display: "block" }, children: [
+                    { name: "span", style: { display: "inline" }, children: [
+                      { name: "#text", content: "Visible text", style: {} }
+                    ]}
+                  ]}
+                ]}
+              ]}
+            ]
+          },
+          {
+            desc: "Step 3: The render tree contains only visible nodes styled according to CSSOM.",
+            dom: [],
+            cssom: [],
+            renderTree: [
+              { name: "html", style: {}, children: [
+                { name: "body", style: { color: "black" }, children: [
+                  { name: "h1", style: { display: "block", fontSize: "2em" }, children: [] },
+                  { name: "div", style: { display: "block" }, children: [
+                    { name: "span", style: { display: "inline" }, children: [
+                      { name: "#text", content: "Visible text", style: {} }
+                    ]}
+                  ]}
+                ]}
+              ]}
+            ]
+          }
+        ],
+        renderStep: function(stepIndex, container) {
+          container.innerHTML = "";
+          const step = this.steps[stepIndex];
+
+          // Description
+          const descEl = document.createElement("p");
+          descEl.textContent = step.desc;
+          descEl.style.marginBottom = "1rem";
+          container.appendChild(descEl);
+
+          // Function to render tree recursively
+          function renderTree(nodes, type) {
+            const ul = document.createElement("ul");
+            ul.style.listStyle = "none";
+            ul.style.paddingLeft = "20px";
+
+            nodes.forEach(node => {
+              const li = document.createElement("li");
+              if (node.name === "#text") {
+                li.textContent = `"${node.content}" (text node)`;
+                li.style.fontStyle = "italic";
+                li.style.color = "#374151";
+              } else {
+                li.textContent = `<${node.name}>`;
+                if (type === "dom" && node.attrs && Object.keys(node.attrs).length) {
+                  const attrSpan = document.createElement("span");
+                  attrSpan.style.color = "#d97706";
+                  attrSpan.style.marginLeft = "8px";
+                  attrSpan.textContent = Object.entries(node.attrs).map(([k,v]) => `${k}="${v}"`).join(" ");
+                  li.appendChild(attrSpan);
+                }
+                if (type === "render" && node.style && Object.keys(node.style).length) {
+                  const styleSpan = document.createElement("span");
+                  styleSpan.style.color = "#059669";
+                  styleSpan.style.marginLeft = "8px";
+                  styleSpan.textContent = Object.entries(node.style).map(([k,v]) => `${k}: ${v}`).join("; ");
+                  li.appendChild(styleSpan);
+                }
+              }
+
+              if (node.children && node.children.length) {
+                li.appendChild(renderTree(node.children, type));
+              }
+              ul.appendChild(li);
+            });
+            return ul;
+          }
+
+          // Render DOM Tree if present
+          if (step.dom && step.dom.length) {
+            const domTitle = document.createElement("h4");
+            domTitle.textContent = "DOM Tree:";
+            container.appendChild(domTitle);
+            container.appendChild(renderTree(step.dom, "dom"));
+          }
+
+          // Render CSSOM Tree if present
+          if (step.cssom && step.cssom.length) {
+            const cssomTitle = document.createElement("h4");
+            cssomTitle.textContent = "CSSOM Tree:";
+            container.appendChild(cssomTitle);
+            const cssomUl = document.createElement("ul");
+            cssomUl.style.listStyle = "none";
+            cssomUl.style.paddingLeft = "20px";
+
+            step.cssom.forEach(rule => {
+              const li = document.createElement("li");
+              li.textContent = rule.selector;
+              if (rule.declarations && rule.declarations.length) {
+                const declUl = document.createElement("ul");
+                declUl.style.listStyle = "none";
+                declUl.style.paddingLeft = "20px";
+                rule.declarations.forEach(decl => {
+                  const declLi = document.createElement("li");
+                  declLi.textContent = `${decl.property}: ${decl.value}`;
+                  declUl.appendChild(declLi);
+                });
+                li.appendChild(declUl);
+              }
+              cssomUl.appendChild(li);
+            });
+            container.appendChild(cssomUl);
+          }
+
+          // Render Render Tree if present
+          if (step.renderTree && step.renderTree.length) {
+            const renderTitle = document.createElement("h4");
+            renderTitle.textContent = "Render Tree:";
+            container.appendChild(renderTitle);
+            container.appendChild(renderTree(step.renderTree, "render"));
+          }
+        }
+      },
+              jsExecution = {
+        title: "JavaScript Execution",
+        steps: [
+          {
+            desc: "Step 1: JavaScript code is parsed into an Abstract Syntax Tree (AST).",
+            jsCode: [
+              "const p = document.createElement('p');",
+              "p.textContent = 'Hello from JavaScript!';",
+              "document.body.appendChild(p);"
+            ],
+            highlightLine: -1,
+            dom: [
+              { name: "html", children: [
+                { name: "body", children: [] }
+              ]}
+            ]
+          },
+          {
+            desc: "Step 2: Execution starts. The createElement('p') creates a new &lt;p&gt; element but does not add it to the DOM yet.",
+            jsCode: [
+              "const p = document.createElement('p');",
+              "p.textContent = 'Hello from JavaScript!';",
+              "document.body.appendChild(p);"
+            ],
+            highlightLine: 0,
+            dom: [
+              { name: "html", children: [
+                { name: "body", children: [] }
+              ]}
+            ]
+          },
+          {
+            desc: "Step 3: The textContent property sets the text inside the new &lt;p&gt; element.",
+            jsCode: [
+              "const p = document.createElement('p');",
+              "p.textContent = 'Hello from JavaScript!';",
+              "document.body.appendChild(p);"
+            ],
+            highlightLine: 1,
+            dom: [
+              { name: "html", children: [
+                { name: "body", children: [] }
+              ]}
+            ]
+          },
+          {
+            desc: "Step 4: The appendChild method inserts the new &lt;p&gt; element into the DOM under &lt;body&gt;.",
+            jsCode: [
+              "const p = document.createElement('p');",
+              "p.textContent = 'Hello from JavaScript!';",
+              "document.body.appendChild(p);"
+            ],
+            highlightLine: 2,
+            dom: [
+              { name: "html", children: [
+                { name: "body", children: [
+                  { name: "p", children: [
+                    { name: "#text", content: "Hello from JavaScript!" }
+                  ]}
+                ]}
+              ]}
+            ]
+          }
+        ],
+        renderStep: function(stepIndex, container) {
+          container.innerHTML = "";
+          const step = this.steps[stepIndex];
+
+          // Description
+          const descEl = document.createElement("p");
+          descEl.textContent = step.desc;
+          descEl.style.marginBottom = "1rem";
+          container.appendChild(descEl);
+
+          // JS Code block with highlighted line
+          const pre = document.createElement("pre");
+          pre.style.background = "#e0e7ff";
+          pre.style.padding = "10px";
+          pre.style.borderRadius = "6px";
+          pre.style.fontFamily = "monospace";
+          pre.style.fontSize = "1.1rem";
+          pre.style.userSelect = "text";
+
+          step.jsCode.forEach((line, i) => {
+            const lineSpan = document.createElement("div");
+            lineSpan.textContent = line;
+            if (i === step.highlightLine) {
+              lineSpan.style.backgroundColor = "#bfdbfe";
+              lineSpan.style.fontWeight = "600";
+            }
+            pre.appendChild(lineSpan);
+          });
+          container.appendChild(pre);
+
+          // DOM Tree Visualization
+          if (step.dom && step.dom.length) {
+            const domTitle = document.createElement("h4");
+            domTitle.textContent = "DOM Tree:";
+            domTitle.style.marginTop = "15px";
+            container.appendChild(domTitle);
+
+            const domTreeEl = document.createElement("ul");
+            domTreeEl.style.listStyle = "none";
+            domTreeEl.style.paddingLeft = "20px";
+
+            function createDomNode(node) {
+              const li = document.createElement("li");
+              if (node.name === "#text") {
+                li.textContent = `"${node.content}" (text node)`;
+                li.style.fontStyle = "italic";
+                li.style.color = "#374151";
+              } else {
+                li.textContent = `<${node.name}>`;
+              }
+              if (node.children && node.children.length) {
+                const ul = document.createElement("ul");
+                ul.style.listStyle = "none";
+                ul.style.paddingLeft = "20px";
+                node.children.forEach(child => ul.appendChild(createDomNode(child)));
+                li.appendChild(ul);
+              }
+              return li;
+            }
+
+            step.dom.forEach(node => domTreeEl.appendChild(createDomNode(node)));
+            container.appendChild(domTreeEl);
+          }
+        }
+      },
+      layoutPaint : {
+        title: "Layout (Reflow) and Paint",
+        steps: [
+          {
+            desc: "Step 1: The browser starts layout (reflow) by calculating sizes and positions of elements based on the render tree.",
+            renderTree: {
+              name: "body",
+              size: { width: 600, height: 400 },
+              children: [
+                {
+                  name: "h1",
+                  size: { width: 580, height: 60 },
+                  style: { color: "#2563eb", fontSize: "2em" },
+                  children: []
+                },
+                {
+                  name: "div",
+                  size: { width: 580, height: 100 },
+                  style: { backgroundColor: "#bfdbfe" },
+                  children: [
+                    {
+                      name: "span",
+                      size: { width: 200, height: 30 },
+                      style: { color: "#059669" },
+                      children: [
+                        {
+                          name: "#text",
+                          text: "Visible text",
+                          size: { width: 180, height: 20 }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            highlightNodes: ["body"]
+          },
+          {
+            desc: "Step 2: Layout continues, calculating sizes and positions of child elements like <h1> and <div>.",
+            renderTree: {
+              name: "body",
+              size: { width: 600, height: 400 },
+              children: [
+                {
+                  name: "h1",
+                  size: { width: 580, height: 60 },
+                  style: { color: "#2563eb", fontSize: "2em" },
+                  children: []
+                },
+                {
+                  name: "div",
+                  size: { width: 580, height: 100 },
+                  style: { backgroundColor: "#bfdbfe" },
+                  children: [
+                    {
+                      name: "span",
+                      size: { width: 200, height: 30 },
+                      style: { color: "#059669" },
+                      children: [
+                        {
+                          name: "#text",
+                          text: "Visible text",
+                          size: { width: 180, height: 20 }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            highlightNodes: ["h1", "div"]
+          },
+          {
+            desc: "Step 3: The <span> and text nodes inside the <div> get their sizes and positions calculated.",
+            renderTree: {
+              name: "body",
+              size: { width: 600, height: 400 },
+              children: [
+                {
+                  name: "h1",
+                  size: { width: 580, height: 60 },
+                  style: { color: "#2563eb", fontSize: "2em" },
+                  children: []
+                },
+                {
+                  name: "div",
+                  size: { width: 580, height: 100 },
+                  style: { backgroundColor: "#bfdbfe" },
+                  children: [
+                    {
+                      name: "span",
+                      size: { width: 200, height: 30 },
+                      style: { color: "#059669" },
+                      children: [
+                        {
+                          name: "#text",
+                          text: "Visible text",
+                          size: { width: 180, height: 20 }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            highlightNodes: ["span", "#text"]
+          },
+          {
+            desc: "Step 4: Paint phase begins, applying colors, fonts, and backgrounds to pixels on screen.",
+            renderTree: {
+              name: "body",
+              size: { width: 600, height: 400 },
+              children: [
+                {
+                  name: "h1",
+                  size: { width: 580, height: 60 },
+                  style: { color: "#2563eb", fontSize: "2em" },
+                  children: []
+                },
+                {
+                  name: "div",
+                  size: { width: 580, height: 100 },
+                  style: { backgroundColor: "#bfdbfe" },
+                  children: [
+                    {
+                      name: "span",
+                      size: { width: 200, height: 30 },
+                      style: { color: "#059669" },
+                      children: [
+                        {
+                          name: "#text",
+                          text: "Visible text",
+                          size: { width: 180, height: 20 }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            highlightNodes: ["body", "h1", "div", "span", "#text"]
+          }
+        ],
+        renderStep: function(stepIndex, container) {
+          container.innerHTML = "";
+          const step = this.steps[stepIndex];
+
+          // Description
+          const descEl = document.createElement("p");
+          descEl.textContent = step.desc;
+          descEl.style.marginBottom = "1rem";
+          container.appendChild(descEl);
+
+          // Recursive function to create boxes for render tree nodes
+          function createBox(node) {
+            const div = document.createElement("div");
+            div.className = "box";
+            div.style.width = node.size ? node.size.width + "px" : "auto";
+            div.style.height = node.size ? node.size.height + "px" : "auto";
+            div.style.position = "relative";
+            div.style.marginLeft = "20px";
+            div.style.marginTop = "10px";
+            div.style.padding = "10px";
+            div.style.border = "2px solid #60a5fa";
+            div.style.borderRadius = "6px";
+            div.style.background = "#bfdbfe";
+            div.style.transition = "all 0.5s ease";
+
+            if (node.name === "#text") {
+              div.textContent = node.text;
+              div.style.fontStyle = "italic";
+              div.style.color = "#374151";
+              div.style.background = "transparent";
+              div.style.border = "none";
+              div.style.padding = "0";
+              div.style.marginLeft = "40px";
+            } else {
+              div.textContent = `<${node.name}>`;
+              if (node.style) {
+                if (node.style.color) div.style.color = node.style.color;
+                if (node.style.fontSize) div.style.fontSize = node.style.fontSize;
+                if (node.style.backgroundColor) div.style.backgroundColor = node.style.backgroundColor;
+              }
+            }
+
+            if (node.children && node.children.length) {
+              node.children.forEach(child => {
+                div.appendChild(createBox(child));
+              });
+            }
+            return div;
+          }
+
+          // Render tree container
+          const treeContainer = document.createElement("div");
+          treeContainer.style.position = "relative";
+          treeContainer.style.border = "1px solid #93c5fd";
+          treeContainer.style.borderRadius = "8px";
+          treeContainer.style.background = "white";
+          treeContainer.style.padding = "20px";
+          treeContainer.style.minHeight = "300px";
+          treeContainer.style.overflow = "auto";
+
+          const rootBox = createBox(step.renderTree);
+          treeContainer.appendChild(rootBox);
+          container.appendChild(treeContainer);
+
+          // Highlight nodes
+          function highlightNodesByName(container, names) {
+            function recursiveHighlight(element) {
+              if (!element) return;
+              // Remove previous highlights
+              element.classList.remove("highlight");
+              Array.from(element.children).forEach(recursiveHighlight);
+            }
+            recursiveHighlight(container);
+
+            function recursiveAddHighlight(element) {
+              if (!element) return;
+              const text = element.firstChild && element.firstChild.textContent;
+              if (text) {
+                // Remove angle brackets for name comparison
+                const name = text.replace(/[<>]/g, "");
+                if (names.includes(name)) {
+                  element.classList.add("highlight");
+                }
+              }
+              Array.from(element.children).forEach(recursiveAddHighlight);
+            }
+            recursiveAddHighlight(container);
+          }
+
+          highlightNodesByName(treeContainer, step.highlightNodes);
+        }
+      },
+      accessibilitySeo : {
+        title: "Accessibility Tree & SEO",
+        steps: [
+          {
+            desc: "Step 1: The accessibility tree is derived from the DOM, excluding hidden elements like the <div> with display:none.",
+            dom: [
+              { name: "html", attrs: {}, children: [
+                { name: "body", attrs: {}, children: [
+                  { name: "nav", attrs: { role: "navigation" }, children: [
+                    { name: "ul", attrs: {}, children: [
+                      { name: "li", attrs: {}, children: [
+                        { name: "a", attrs: { href: "#", "aria-label": "Home" }, children: [
+                          { name: "#text", content: "Home" }
+                        ]}
+                      ]}
+                    ]}
+                  ]},
+                  { name: "main", attrs: {}, children: [
+                    { name: "article", attrs: {}, children: [
+                      { name: "h1", attrs: {}, children: [
+                        { name: "#text", content: "Welcome to Our Site" }
+                      ]},
+                      { name: "p", attrs: {}, children: [
+                        { name: "#text", content: "This is an example paragraph." }
+                      ]}
+                    ]}
+                  ]},
+                  { name: "button", attrs: { "aria-pressed": "false" }, children: [
+                    { name: "#text", content: "Click me" }
+                  ]},
+                  { name: "div", attrs: { style: "display:none" }, children: [
+                    { name: "#text", content: "Hidden content" }
+                  ]}
+                ]}
+              ]}
+            ],
+            accessibilityTree: [
+              { name: "html", children: [
+                { name: "body", children: [
+                  { name: "navigation", role: "navigation", children: [
+                    { name: "list", children: [
+                      { name: "listitem", children: [
+                        { name: "link", ariaLabel: "Home", children: [
+                          { name: "#text", content: "Home" }
+                        ]}
+                      ]}
+                    ]}
+                  ]},
+                  { name: "main", children: [
+                    { name: "article", children: [
+                      { name: "heading", level: 1, children: [
+                        { name: "#text", content: "Welcome to Our Site" }
+                      ]},
+                      { name: "paragraph", children: [
+                        { name: "#text", content: "This is an example paragraph." }
+                      ]}
+                    ]}
+                  ]},
+                  { name: "button", ariaPressed: "false", children: [
+                    { name: "#text", content: "Click me" }
+                  ]}
+                ]}
+              ]}
+            ]
+          },
+          {
+            desc: "Step 2: Semantic HTML elements and ARIA attributes enhance accessibility and SEO by providing meaningful context.",
+            dom: [],
+            accessibilityTree: [
+              { name: "html", children: [
+                { name: "body", children: [
+                  { name: "navigation", role: "navigation", children: [
+                    { name: "list", children: [
+                      { name: "listitem", children: [
+                        { name: "link", ariaLabel: "Home", children: [
+                          { name: "#text", content: "Home" }
+                        ]}
+                      ]}
+                    ]}
+                  ]},
+                  { name: "main", children: [
+                    { name: "article", children: [
+                      { name: "heading", level: 1, children: [
+                        { name: "#text", content: "Welcome to Our Site" }
+                      ]},
+                      { name: "paragraph", children: [
+                        { name: "#text", content: "This is an example paragraph." }
+                      ]}
+                    ]}
+                  ]},
+                  { name: "button", ariaPressed: "false", children: [
+                    { name: "#text", content: "Click me" }
+                  ]}
+                ]}
+              ]}
+            ]
+          }
+        ],
+        renderStep: function(stepIndex, container) {
+          container.innerHTML = "";
+          const step = this.steps[stepIndex];
+
+          // Description
+          const descEl = document.createElement("p");
+          descEl.textContent = step.desc;
+          descEl.style.marginBottom = "1rem";
+          container.appendChild(descEl);
+
+          // Function to render tree recursively with attributes and ARIA
+          function renderTree(nodes, type) {
+            const ul = document.createElement("ul");
+            ul.style.listStyle = "none";
+            ul.style.paddingLeft = "20px";
+
+            nodes.forEach(node => {
+              const li = document.createElement("li");
+              if (node.name === "#text") {
+                li.textContent = `"${node.content}" (text node)`;
+                li.style.fontStyle = "italic";
+                li.style.color = "#374151";
+              } else {
+                let text = `<${node.name}>`;
+                if (type === "dom" && node.attrs && Object.keys(node.attrs).length) {
+                  const attrSpan = document.createElement("span");
+                  attrSpan.style.color = "#d97706";
+                  attrSpan.style.marginLeft = "8px";
+                  attrSpan.textContent = Object.entries(node.attrs).map(([k,v]) => `${k}="${v}"`).join(" ");
+                  li.appendChild(document.createTextNode(text));
+                  li.appendChild(attrSpan);
+                  text = "";
+                } else if (type === "access") {
+                  if (node.role) text += ` (role="${node.role}")`;
+                  if (node.ariaLabel) text += ` (aria-label="${node.ariaLabel}")`;
+                  if (node.ariaPressed) text += ` (aria-pressed="${node.ariaPressed}")`;
+                  if (node.level) text += ` (level=${node.level})`;
+                  li.textContent = text;
+                } else {
+                  li.textContent = text;
+                }
+              }
+              if (node.children && node.children.length) {
+                li.appendChild(renderTree(node.children, type));
+              }
+              ul.appendChild(li);
+            });
+            return ul;
+          }
+
+          // Render DOM tree if present
+          if(step.dom && step.dom.length){
+            const domTitle = document.createElement("h4");
+            domTitle.textContent = "DOM Tree:";
+            container.appendChild(domTitle);
+            container.appendChild(renderTree(step.dom, "dom"));
+          }
+
+          // Render Accessibility tree if present
+          if(step.accessibilityTree && step.accessibilityTree.length){
+            const accessTitle = document.createElement("h4");
+            accessTitle.textContent = "Accessibility Tree:";
+            container.appendChild(accessTitle);
+            container.appendChild(renderTree(step.accessibilityTree, "access"));
+          }
+        }
+      };
+      };
+
+            let currentModule = "htmlParsing";
+            let currentStep = 0;
+
+            const moduleTitleEl = document.getElementById("moduleTitle");
+            const moduleContentEl = document.getElementById("moduleContent");
+            const prevStepBtn = document.getElementById("prevStepBtn");
+            const nextStepBtn = document.getElementById("nextStepBtn");
+            const moduleNav = document.getElementById("moduleNav");
+
+            function loadModule(moduleName) {
+              currentModule = moduleName;
+              currentStep = 0;
+              updateUI();
+              Array.from(moduleNav.children).forEach((btn) => {
+                btn.classList.toggle("active", btn.dataset.module === moduleName);
+              });
+            }
+
+            function updateUI() {
+              const module = modules[currentModule];
+              moduleTitleEl.textContent = module.title;
+              module.renderStep(currentStep, moduleContentEl);
+              prevStepBtn.disabled = currentStep === 0;
+              nextStepBtn.disabled = currentStep === module.steps.length - 1;
+            }
+
+            prevStepBtn.addEventListener("click", () => {
+              if (currentStep > 0) {
+                currentStep--;
+                updateUI();
+              }
+            });
+
+            nextStepBtn.addEventListener("click", () => {
+              const module = modules[currentModule];
+              if (currentStep < module.steps.length - 1) {
+                currentStep++;
+                updateUI();
+              }
+            });
+
+            moduleNav.addEventListener("click", (e) => {
+              if (e.target.tagName === "BUTTON") {
+                loadModule(e.target.dataset.module);
+              }
+            });
+
+            // Initialize
+            loadModule(currentModule);
+    </script>
+  </body>
+</html>

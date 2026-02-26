@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Counting Sort - Complete Step-by-Step Visualization</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .header h1 {
+        font-size: 36px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 16px;
+        opacity: 0.9;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .control-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+      }
+
+      .control-panel h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 18px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      .input-group label {
+        display: block;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+
+      .input-group input:focus {
+        outline: none;
+        border-color: #f5576c;
+      }
+
+      .info-section {
+        background: #f0f0f0;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #555;
+      }
+
+      .info-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .info-item {
+        margin-bottom: 8px;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #f5576c;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 13px;
+      }
+
+      .start-btn {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+      }
+
+      .start-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+      }
+
+      .reset-btn {
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      .reset-btn:hover {
+        background: #e0e0e0;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .visualization-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      .step-header {
+        margin-bottom: 30px;
+      }
+
+      .step-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .step-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #f5576c;
+        text-align: center;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #f5576c;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        font-family: "Courier New", monospace;
+      }
+
+      .visualization {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        min-height: 500px;
+      }
+
+      .vis-title {
+        font-weight: 600;
+        color: #f5576c;
+        margin-bottom: 20px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .vis-section {
+        margin-bottom: 30px;
+      }
+
+      .vis-section-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 13px;
+      }
+
+      .bars-container {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 8px;
+        height: 200px;
+        margin-bottom: 20px;
+      }
+
+      .count-array {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .count-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .count-index {
+        font-weight: 600;
+        color: #666;
+        font-size: 12px;
+        background: #f0f0f0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        min-width: 30px;
+        text-align: center;
+      }
+
+      .count-value {
+        width: 50px;
+        height: 50px;
+        border: 2px solid #f5576c;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        font-weight: bold;
+        font-size: 18px;
+        color: #f5576c;
+        transition: all 0.3s;
+      }
+
+      .count-value.counting {
+        background: #f5576c;
+        color: white;
+        box-shadow: 0 0 15px rgba(245, 87, 108, 0.6);
+      }
+
+      .count-value.active {
+        background: #ffc107;
+        border-color: #ffc107;
+        color: #333;
+      }
+
+      .bar {
+        flex: 1;
+        background: #f5576c;
+        border-radius: 4px 4px 0 0;
+        transition: all 0.3s ease;
+        position: relative;
+        min-width: 30px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+      }
+
+      .bar-value {
+        background : white;
+        border-radius: 4px;
+        padding : 3px 12px;
+        border: 1px solid #f5576c;
+        color: #f5576c;
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 5px;
+      }
+
+      .bar.counting {
+        background: #ffc107;
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+      }
+
+      .bar.sorted {
+        background: #28a745;
+      }
+
+      .step-info {
+        background: #fff3e0;
+        border-left: 4px solid #ff9800;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+      }
+
+      .step-info-title {
+        font-weight: 700;
+        color: #ff9800;
+        margin-bottom: 10px;
+        font-size: 15px;
+      }
+
+      .step-info-content {
+        color: #555;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .nav-buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      .nav-btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 14px;
+      }
+
+      .prev-btn {
+        background: #e0e0e0;
+        color: #333;
+      }
+
+      .prev-btn:hover:not(:disabled) {
+        background: #d0d0d0;
+      }
+
+      .next-btn {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+      }
+
+      .next-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+      }
+
+      .prev-btn:disabled,
+      .next-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .progress {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 13px;
+        color: #666;
+        font-weight: 600;
+      }
+
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #555;
+      }
+
+      .legend-color {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+      }
+
+      .color-counting {
+        background: #ffc107;
+      }
+
+      .color-sorted {
+        background: #28a745;
+      }
+
+      .color-default {
+        background: #f5576c;
+      }
+
+      .back-link {
+        display: inline-block;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 1024px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .control-panel {
+          position: static;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 24px;
+        }
+
+        .bars-container {
+          height: 150px;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .count-cell {
+          gap: 4px;
+        }
+
+        .count-value {
+          width: 40px;
+          height: 40px;
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="sorting-index.html" class="back-link">← Back to Index</a>
+
+      <div class="header">
+        <h1>📈 Counting Sort Visualization</h1>
+        <p>Count Frequencies & Reconstruct - Step by Step</p>
+      </div>
+
+      <div class="main-grid">
+        <!-- Control Panel -->
+        <div class="control-panel">
+          <h2>⚙️ Controls</h2>
+
+          <div class="input-group">
+            <label>Max Value (Range)</label>
+            <input type="number" id="maxInput" value="20" min="10" max="50" />
+          </div>
+
+          <div class="input-group">
+            <label>Array Size</label>
+            <input type="number" id="sizeInput" value="10" min="5" max="20" />
+          </div>
+
+          <div class="input-group">
+            <label>Animation Speed</label>
+            <input
+              type="range"
+              id="speedInput"
+              min="100"
+              max="1000"
+              value="300"
+              style="width: 100%"
+            />
+            <small style="color: #999">Faster ← → Slower</small>
+          </div>
+
+          <div class="buttons">
+            <button class="start-btn" onclick="startVisualization()">
+              Start
+            </button>
+            <button class="reset-btn" onclick="resetVisualization()">
+              Reset
+            </button>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">Algorithm Info</div>
+            <div class="info-item">
+              <span class="info-label">Type:</span> Non-Comparative
+            </div>
+            <div class="info-item">
+              <span class="info-label">Time:</span> O(n + k)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Space:</span> O(k)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Stable:</span> ✓ Yes
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">How It Works</div>
+            <div style="font-size: 12px; line-height: 1.6; color: #666">
+              1. Create count array<br />
+              2. Count frequencies<br />
+              3. Build output array<br />
+              4. Place elements back<br />
+              5. Best for small range
+            </div>
+          </div>
+        </div>
+
+        <!-- Visualization Panel -->
+        <div class="visualization-panel">
+          <div class="step-header">
+            <div class="step-title" id="stepTitle">Initialization</div>
+            <div class="step-description" id="stepDescription">
+              Click "Start" to begin the visualization
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Elements Counted</div>
+              <div class="stat-value" id="counted">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Count Array Size</div>
+              <div class="stat-value" id="countSize">-</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Phase</div>
+              <div class="stat-value" id="phase">-</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Sorted</div>
+              <div class="stat-value" id="sorted">0</div>
+            </div>
+          </div>
+
+          <div class="visualization">
+            <div class="vis-title">Array Visualization</div>
+
+            <div class="vis-section">
+              <div class="vis-section-title">Input Array</div>
+              <div class="bars-container" id="barsContainer"></div>
+            </div>
+
+            <div class="vis-section">
+              <div class="vis-section-title">Count Array (Frequency Map)</div>
+              <div class="count-array" id="countArray"></div>
+            </div>
+          </div>
+
+          <div class="step-info" id="stepInfo" style="display: none">
+            <div class="step-info-title" id="stepInfoTitle">
+              Step Information
+            </div>
+            <div class="step-info-content" id="stepInfoContent"></div>
+          </div>
+
+          <div class="nav-buttons">
+            <button
+              class="nav-btn prev-btn"
+              id="prevBtn"
+              onclick="previousStep()"
+              disabled
+            >
+              ← Previous
+            </button>
+            <button
+              class="nav-btn next-btn"
+              id="nextBtn"
+              onclick="nextStep()"
+              disabled
+            >
+              Next →
+            </button>
+          </div>
+
+          <div class="progress" id="progress">Ready to start</div>
+
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color color-default"></div>
+              <span>Unsorted</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-counting"></div>
+              <span>Counting</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-sorted"></div>
+              <span>Sorted</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let array = [];
+      let steps = [];
+      let currentStep = 0;
+
+      function generateRandomArray(size, maxVal) {
+        return Array.from(
+          { length: size },
+          () => Math.floor(Math.random() * maxVal) + 1,
+        );
+      }
+
+      function createSteps() {
+        steps = [];
+        const arr = [...array];
+        const maxVal = Math.max(...arr);
+        const countArr = Array(maxVal + 1).fill(0);
+
+        // Initial state
+        steps.push({
+          array: [...arr],
+          countArray: [...countArr],
+          counting: -1,
+          phase: "Setup",
+          sorted: 0,
+          title: "Initial Array",
+          description: "Ready for Counting Sort. Will count frequencies first.",
+        });
+
+        // Count phase
+        for (let i = 0; i < arr.length; i++) {
+          const val = arr[i];
+          countArr[val]++;
+
+          steps.push({
+            array: [...arr],
+            countArray: [...countArr],
+            counting: val,
+            phase: "Counting",
+            sorted: 0,
+            title: `Counting Element ${val}`,
+            description: `Increment count[${val}] to ${countArr[val]}`,
+          });
+        }
+
+        // Reconstruct phase
+        let outputIdx = 0;
+        const output = [];
+
+        for (let i = 1; i < countArr.length; i++) {
+          for (let j = 0; j < countArr[i]; j++) {
+            output.push(i);
+
+            steps.push({
+              array: [...output],
+              countArray: [...countArr],
+              counting: -1,
+              phase: "Reconstruct",
+              sorted: output.length,
+              title: `Placing Element ${i}`,
+              description: `Placed sorted element ${i} at position ${output.length - 1}`,
+            });
+          }
+        }
+
+        // Final step
+        steps.push({
+          array: [...output],
+          countArray: [...countArr],
+          counting: -1,
+          phase: "Complete",
+          sorted: output.length,
+          title: "✅ Sorting Complete!",
+          description: `Array sorted using Counting Sort!`,
+        });
+      }
+
+      function renderBars(array, counting = -1, sorted = 0) {
+        const container = document.getElementById("barsContainer");
+        container.innerHTML = "";
+        const maxValue = Math.max(...array);
+
+        array.forEach((value, index) => {
+          const bar = document.createElement("div");
+          bar.className = "bar";
+
+          if (index < sorted) {
+            bar.classList.add("sorted");
+          } else if (value === counting) {
+            bar.classList.add("counting");
+          }
+
+          const height = (value / maxValue) * 100;
+          bar.style.height = height + "%";
+
+          const valueSpan = document.createElement("div");
+          valueSpan.className = "bar-value";
+          valueSpan.textContent = value;
+          bar.appendChild(valueSpan);
+
+          container.appendChild(bar);
+        });
+      }
+
+      function renderCountArray(countArray, activeIdx = -1) {
+        const container = document.getElementById("countArray");
+        container.innerHTML = "";
+
+        countArray.forEach((count, index) => {
+          if (count > 0) {
+            const cell = document.createElement("div");
+            cell.className = "count-cell";
+
+            const indexLabel = document.createElement("div");
+            indexLabel.className = "count-index";
+            indexLabel.textContent = index;
+
+            const value = document.createElement("div");
+            value.className = "count-value";
+            if (index === activeIdx) {
+              value.classList.add("active");
+            }
+            value.textContent = count;
+
+            cell.appendChild(indexLabel);
+            cell.appendChild(value);
+            container.appendChild(cell);
+          }
+        });
+      }
+
+      function displayStep(stepIndex) {
+        if (stepIndex < 0 || stepIndex >= steps.length) return;
+
+        const step = steps[stepIndex];
+
+        document.getElementById("stepTitle").textContent = step.title;
+        document.getElementById("stepDescription").textContent =
+          step.description;
+        document.getElementById("counted").textContent = step.array.length;
+        document.getElementById("countSize").textContent =
+          step.countArray.length;
+        document.getElementById("phase").textContent = step.phase;
+        document.getElementById("sorted").textContent = step.sorted;
+
+        renderBars(step.array, step.counting, step.sorted);
+        renderCountArray(step.countArray, step.counting);
+
+        document.getElementById("stepInfo").style.display = "block";
+        document.getElementById("stepInfoTitle").textContent =
+          "Counting Sort Concept";
+        document.getElementById("stepInfoContent").innerHTML = `
+                <strong>Phase:</strong> ${step.phase}<br>
+                <strong>Array Length:</strong> ${step.array.length}<br>
+                <strong>Count Array Size:</strong> ${step.countArray.length}
+            `;
+
+        document.getElementById("prevBtn").disabled = stepIndex === 0;
+        document.getElementById("nextBtn").disabled =
+          stepIndex === steps.length - 1;
+        document.getElementById("progress").textContent =
+          `Step ${stepIndex + 1} of ${steps.length}`;
+
+        currentStep = stepIndex;
+      }
+
+      function startVisualization() {
+        const size = parseInt(document.getElementById("sizeInput").value);
+        const maxVal = parseInt(document.getElementById("maxInput").value);
+        array = generateRandomArray(size, maxVal);
+        createSteps();
+        displayStep(0);
+      }
+
+      function nextStep() {
+        if (currentStep < steps.length - 1) {
+          displayStep(currentStep + 1);
+        }
+      }
+
+      function previousStep() {
+        if (currentStep > 0) {
+          displayStep(currentStep - 1);
+        }
+      }
+
+      function resetVisualization() {
+        array = [];
+        steps = [];
+        currentStep = 0;
+        document.getElementById("barsContainer").innerHTML = "";
+        document.getElementById("countArray").innerHTML = "";
+        document.getElementById("stepTitle").textContent = "Initialization";
+        document.getElementById("stepDescription").textContent =
+          'Click "Start" to begin the visualization';
+        document.getElementById("counted").textContent = "0";
+        document.getElementById("countSize").textContent = "-";
+        document.getElementById("phase").textContent = "-";
+        document.getElementById("sorted").textContent = "0";
+        document.getElementById("stepInfo").style.display = "none";
+        document.getElementById("prevBtn").disabled = true;
+        document.getElementById("nextBtn").disabled = true;
+        document.getElementById("progress").textContent = "Ready to start";
+      }
+    </script>
+  </body>
+</html>

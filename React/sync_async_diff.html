@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Synchronous vs Asynchronous Visualization</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    button {
+      margin: 10px 5px 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .log {
+      margin-top: 20px;
+      max-width: 600px;
+    }
+    .task {
+      margin: 5px 0;
+      padding: 8px;
+      color: white;
+      border-radius: 4px;
+      width: fit-content;
+      min-width: 150px;
+    }
+    .sync {
+      background-color: #d9534f; /* red */
+    }
+    .async {
+      background-color: #5bc0de; /* blue */
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Synchronous vs Asynchronous Task Visualization</h1>
+
+  <button id="syncBtn">Run Synchronous Tasks</button>
+  <button id="asyncBtn">Run Asynchronous Tasks</button>
+
+  <div class="log" id="log"></div>
+
+  <script>
+    const logContainer = document.getElementById('log');
+
+    // Simulate a task that takes 'duration' milliseconds
+    function simulateTask(name, duration, isSync) {
+      return new Promise((resolve) => {
+        const startTime = new Date().toLocaleTimeString();
+        log(`${name} started at ${startTime}`, isSync);
+
+        setTimeout(() => {
+          const endTime = new Date().toLocaleTimeString();
+          log(`${name} completed at ${endTime}`, isSync);
+          resolve();
+        }, duration);
+      });
+    }
+
+    // Logging function to display messages with color coding
+    function log(message, isSync) {
+      const div = document.createElement('div');
+      div.textContent = message;
+      div.className = 'task ' + (isSync ? 'sync' : 'async');
+      logContainer.appendChild(div);
+      // Scroll to bottom so latest logs are visible
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    // Synchronous tasks: run one after another, waiting for each to finish
+    async function runSynchronousTasks() {
+      logContainer.innerHTML = ''; // Clear previous logs
+      log('Starting synchronous tasks...', true);
+
+      await simulateTask('Task 1', 2000, true);
+      await simulateTask('Task 2', 1500, true);
+      await simulateTask('Task 3', 1000, true);
+
+      log('Synchronous tasks completed.', true);
+    }
+
+    // Asynchronous tasks: start all at once, complete independently
+    function runAsynchronousTasks() {
+      logContainer.innerHTML = ''; // Clear previous logs
+      log('Starting asynchronous tasks...', false);
+
+      simulateTask('Task 1', 2000, false);
+      simulateTask('Task 2', 1500, false);
+      simulateTask('Task 3', 1000, false);
+
+      // Log completion after all promises settle
+      Promise.all([
+        simulateTask('Task 1', 2000, false),
+        simulateTask('Task 2', 1500, false),
+        simulateTask('Task 3', 1000, false),
+      ]).then(() => {
+        log('Asynchronous tasks completed.', false);
+      });
+    }
+
+    document.getElementById('syncBtn').addEventListener('click', runSynchronousTasks);
+    document.getElementById('asyncBtn').addEventListener('click', runAsynchronousTasks);
+  </script>
+
+</body>
+</html>

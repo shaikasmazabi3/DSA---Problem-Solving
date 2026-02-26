@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>How CSS Blocks Rendering - Interactive Lesson for Beginners</title>
+    <style>
+      /* Reset and basics */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f8ff;
+        margin: 0;
+        padding: 0;
+        color: #222;
+      }
+      h1,
+      h2 {
+        color: #004080;
+      }
+      main {
+        max-width: 720px;
+        margin: 1rem auto 4rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 0 15px #a0c4ff88;
+      }
+      section {
+        display: none;
+        padding: 1rem 0;
+      }
+      section.active {
+        display: block;
+      }
+      .nav-buttons {
+        text-align: center;
+        margin: 2rem 0 1rem;
+      }
+      button {
+        font-size: 1rem;
+        background-color: #007acc;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.6rem 1.2rem;
+        margin: 0 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      button:focus {
+        outline: 3px solid #ffbf47;
+      }
+      button:hover:not(:disabled) {
+        background-color: #005fa3;
+      }
+      button:disabled {
+        background-color: #a0a0a0;
+        cursor: default;
+      }
+      /* Visual Boxes */
+      .box {
+        border-radius: 10px;
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        box-shadow: 0 0 10px #90caf9;
+        background: #e3f2fd;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      /* Tree diagram container */
+      .tree-container {
+        background: #dbe9ffcc;
+        border-radius: 12px;
+        padding: 1rem;
+        margin: 1rem 0 2rem;
+        position: relative;
+      }
+      /* Tree nodes */
+      .tree-node {
+        background: #90caf9;
+        color: #003366;
+        border-radius: 10px;
+        padding: 0.6rem 1rem;
+        margin: 0.5rem auto;
+        width: fit-content;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.3s ease;
+      }
+      .tree-node:hover,
+      .tree-node:focus {
+        background-color: #42a5f5;
+        outline: none;
+      }
+      .tree-node.expanded {
+        background-color: #1e88e5;
+        color: white;
+      }
+      /* Arrows */
+      .arrow-down {
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 15px solid #90caf9;
+        margin: 0 auto;
+        transition: border-top-color 0.3s ease;
+      }
+      .arrow-down.expanded {
+        border-top-color: #1e88e5;
+      }
+      /* Animations */
+      @keyframes progressBarAnim {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+      .progress-bar {
+        height: 12px;
+        border-radius: 6px;
+        background: #90caf9;
+        width: 0;
+        animation-fill-mode: forwards;
+      }
+      .progress-container {
+        width: 100%;
+        background: #cfd8dc;
+        border-radius: 6px;
+        margin: 0.5rem 0 1.5rem;
+        overflow: hidden;
+      }
+      /* Quiz styles */
+      .quiz {
+        background: #e8f5e9;
+        border: 2px solid #4caf50;
+        border-radius: 10px;
+        padding: 1rem;
+        margin: 1rem 0;
+      }
+      .quiz button {
+        background-color: #388e3c;
+        margin-top: 1rem;
+      }
+      .quiz button:hover {
+        background-color: #2e7d32;
+      }
+      .quiz-feedback {
+        margin-top: 1rem;
+        font-weight: bold;
+      }
+      /* Code snippet style */
+      pre {
+        background: #263238;
+        color: #80d8ff;
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        overflow-x: auto;
+      }
+      /* Emoji style */
+      .emoji {
+        font-size: 1.6rem;
+      }
+      /* Accessibility */
+      [tabindex="0"]:focus {
+        outline: 3px solid #ffbf47;
+      }
+    </style>
+  </head>
+  <body>
+    <main
+      role="main"
+      aria-label="Interactive lesson on how CSS blocks rendering in browsers"
+    >
+      <h1>📚 How CSS Blocks Rendering in Browsers</h1>
+      <p>
+        Learn step-by-step how your browser shows a webpage and where
+        <strong>CSS blocks rendering</strong>. Ready for a fun journey? 🚀
+      </p>
+
+      <!-- Slide 1 -->
+      <section
+        id="slide1"
+        class="active"
+        tabindex="0"
+        aria-label="Step 1: Browser gets the webpage"
+      >
+        <h2>Step 1: Browser Gets the Webpage 📄</h2>
+        <p>
+          Imagine the browser is a mailman. It first gets the
+          <strong>HTML</strong> file from the internet.
+        </p>
+        <div class="box" aria-label="HTML file">
+          <span class="emoji" aria-hidden="true">📄</span> HTML File (the
+          webpage's structure)
+        </div>
+        <p>The browser starts reading this file to know what to show.</p>
+        <div class="progress-container" aria-label="Loading progress">
+          <div
+            class="progress-bar"
+            style="animation: progressBarAnim 3s linear"
+          ></div>
+        </div>
+      </section>
+
+      <!-- Slide 2 -->
+      <section
+        id="slide2"
+        tabindex="0"
+        aria-label="Step 2: Browser builds DOM tree"
+      >
+        <h2>Step 2: Browser Builds the DOM Tree 🌳</h2>
+        <p>
+          DOM means <strong>Document Object Model</strong>. The browser turns
+          HTML into a tree of objects it can understand.
+        </p>
+        <div class="tree-container" aria-label="DOM tree diagram">
+          <div
+            class="tree-node"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+            aria-controls="dom-children"
+            id="dom-root"
+          >
+            📄 &lt;html&gt; (root)
+          </div>
+          <div id="dom-children" hidden>
+            <div
+              class="tree-node"
+              tabindex="0"
+              role="button"
+              aria-expanded="false"
+              aria-controls="head-children"
+              id="dom-head"
+            >
+              🧠 &lt;head&gt;
+            </div>
+            <div
+              class="tree-node"
+              tabindex="0"
+              role="button"
+              aria-expanded="false"
+              aria-controls="body-children"
+              id="dom-body"
+            >
+              🖥️ &lt;body&gt;
+            </div>
+          </div>
+        </div>
+        <p>Each node is like a branch or leaf on the tree.</p>
+      </section>
+
+      <!-- Updated Slide 3 with HTML parsing pause explanation -->
+      <section
+        id="slide3"
+        tabindex="0"
+        aria-label="Step 3: Browser gets CSS file and builds CSSOM tree with parsing pause"
+      >
+        <h2>Step 3: Browser Gets CSS and Builds CSSOM Tree 🎨</h2>
+        <p>
+          CSS tells the browser how things should look — colors, sizes, and
+          positions.
+        </p>
+        <div class="box" aria-label="CSS file">
+          <span class="emoji" aria-hidden="true">🎨</span> CSS File (style
+          instructions)
+        </div>
+        <p>
+          <strong>Important:</strong> When the browser finds a CSS file, it
+          <em>pauses parsing the HTML</em> until the CSS file is downloaded and
+          fully processed.
+        </p>
+        <p>This means the browser stops building the DOM tree temporarily.</p>
+        <p>
+          Why? Because styles affect how the page looks and where things go. The
+          browser needs the CSS to build the CSSOM tree before continuing.
+        </p>
+        <div
+          class="box"
+          aria-label="CSS blocks rendering and pauses HTML parsing"
+        >
+          <span class="emoji" aria-hidden="true">⏳</span> CSS blocks rendering
+          and pauses HTML parsing until CSSOM is ready
+        </div>
+        <p>
+          Once CSSOM is ready, the browser continues parsing the rest of the
+          HTML to finish the DOM.
+        </p>
+        <div class="tree-container" aria-label="CSSOM tree diagram">
+          <div
+            class="tree-node"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+            aria-controls="cssom-children"
+            id="cssom-root"
+          >
+            🎨 CSSOM Root
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4 -->
+      <section
+        id="slide4"
+        tabindex="0"
+        aria-label="Step 4: Browser combines DOM and CSSOM to build Render Tree"
+      >
+        <h2>Step 4: Browser Combines DOM & CSSOM to Build Render Tree 🌈</h2>
+        <p>
+          The browser mixes the DOM and CSSOM to make a
+          <strong>Render Tree</strong>. This tree has only what’s visible and
+          styled.
+        </p>
+        <div class="tree-container" aria-label="Render tree diagram">
+          <div
+            class="tree-node"
+            tabindex="0"
+            role="button"
+            aria-expanded="false"
+            aria-controls="render-children"
+            id="render-root"
+          >
+            🌈 Render Tree Root
+          </div>
+        </div>
+        <p>This tree is what the browser uses to draw pixels on the screen.</p>
+      </section>
+
+      <!-- Slide 5 -->
+      <section
+        id="slide5"
+        tabindex="0"
+        aria-label="Step 5: Layout — calculating sizes and positions"
+      >
+        <h2>Step 5: Layout — Calculating Sizes & Positions 📐</h2>
+        <p>
+          The browser figures out exactly where and how big each thing should be
+          on the page.
+        </p>
+        <div class="box" aria-label="Layout calculation">
+          <span class="emoji" aria-hidden="true">📐</span> Layout step
+        </div>
+        <p>Think of it like drawing a treasure map with exact spots marked.</p>
+      </section>
+
+      <!-- Slide 6 -->
+      <section
+        id="slide6"
+        tabindex="0"
+        aria-label="Step 6: Paint — coloring pixels on screen"
+      >
+        <h2>Step 6: Paint — Coloring Pixels on the Screen 🖌️</h2>
+        <p>
+          Now the browser paints colors, text, images — every pixel you see!
+        </p>
+        <div class="box" aria-label="Paint step">
+          <span class="emoji" aria-hidden="true">🖌️</span> Paint step
+        </div>
+        <p>This is like coloring inside the lines of your treasure map.</p>
+      </section>
+
+      <!-- Slide 7 -->
+      <section
+        id="slide7"
+        tabindex="0"
+        aria-label="Step 7: JavaScript Loads and Executes ⚙️"
+      >
+        <h2>Step 7: JavaScript Loads and Executes ⚙️</h2>
+        <p>
+          JavaScript is like the wizard that can change the webpage while you
+          watch!
+        </p>
+        <div class="box" aria-label="JavaScript file">
+          <span class="emoji" aria-hidden="true">⚙️</span> JavaScript File
+        </div>
+        <p>
+          When JavaScript runs, it can change the DOM or CSSOM, causing the
+          browser to update the page.
+        </p>
+      </section>
+
+      <!-- Slide 8: Quiz -->
+      <section
+        id="quiz1"
+        tabindex="0"
+        aria-label="Quiz about CSS blocking rendering and HTML parsing pause"
+      >
+        <h2>Quiz Time! 🎉</h2>
+        <p>Why does the browser pause parsing HTML when it finds a CSS file?</p>
+        <form id="quizForm">
+          <fieldset>
+            <label
+              ><input type="radio" name="q1" value="a" /> Because it needs to
+              build the CSSOM before continuing the DOM</label
+            ><br />
+            <label
+              ><input type="radio" name="q1" value="b" /> Because CSS files are
+              always slow to download</label
+            ><br />
+            <label
+              ><input type="radio" name="q1" value="c" /> To make JavaScript run
+              faster</label
+            ><br />
+          </fieldset>
+          <button type="submit" aria-label="Submit quiz answer">
+            Submit Answer
+          </button>
+        </form>
+        <div
+          id="quizFeedback"
+          role="alert"
+          aria-live="assertive"
+          style="margin-top: 1rem; font-weight: bold"
+        ></div>
+      </section>
+
+      <!-- Navigation -->
+      <div class="nav-buttons" aria-label="Navigation buttons">
+        <button id="prevBtn" disabled aria-label="Previous slide">
+          ⬅️ Prev
+        </button>
+        <button id="nextBtn" aria-label="Next slide">Next ➡️</button>
+      </div>
+
+      <script>
+        // Slide navigation
+        const slides = Array.from(document.querySelectorAll("main > section"));
+        let current = 0;
+
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+
+        function showSlide(index) {
+          slides.forEach((slide, i) => {
+            slide.classList.toggle("active", i === index);
+            if (i === index) slide.focus();
+          });
+          prevBtn.disabled = index === 0;
+          nextBtn.disabled = index === slides.length - 1;
+          current = index;
+        }
+
+        prevBtn.addEventListener("click", () => {
+          if (current > 0) showSlide(current - 1);
+        });
+        nextBtn.addEventListener("click", () => {
+          if (current < slides.length - 1) showSlide(current + 1);
+        });
+
+        // Tree nodes expand/collapse
+        document
+          .querySelectorAll('.tree-node[role="button"]')
+          .forEach((node) => {
+            node.addEventListener("click", () => {
+              const controlsId = node.getAttribute("aria-controls");
+              if (!controlsId) return;
+              const panel = document.getElementById(controlsId);
+              if (!panel) return;
+
+              const expanded = node.getAttribute("aria-expanded") === "true";
+              node.setAttribute("aria-expanded", String(!expanded));
+              node.classList.toggle("expanded", !expanded);
+              panel.hidden = expanded;
+
+              // Arrow color toggle
+              let arrow = node.querySelector(".arrow-down");
+              if (!arrow) {
+                arrow = document.createElement("div");
+                arrow.className = "arrow-down";
+                node.appendChild(arrow);
+              }
+              arrow.classList.toggle("expanded", !expanded);
+            });
+          });
+
+        // Quiz logic
+        const quizForm = document.getElementById("quizForm");
+        const quizFeedback = document.getElementById("quizFeedback");
+
+        quizForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const answer = quizForm.q1.value;
+          if (!answer) {
+            quizFeedback.textContent =
+              "Please select an answer before submitting.";
+            quizFeedback.style.color = "#d32f2f";
+            return;
+          }
+          if (answer === "a") {
+            quizFeedback.textContent =
+              "Correct! The browser must build the CSSOM before continuing the DOM.";
+            quizFeedback.style.color = "#388e3c";
+          } else {
+            quizFeedback.textContent = "Not quite. Try again!";
+            quizFeedback.style.color = "#d32f2f";
+          }
+        });
+      </script>
+    </main>
+  </body>
+</html>

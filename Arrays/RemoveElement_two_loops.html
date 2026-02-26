@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>removeElement Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f7fa;
+        color: #333;
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      h2 {
+        margin-bottom: 30px;
+        font-weight: 700;
+        font-size: 2rem;
+        color: #222;
+      }
+      #array,
+      #subArray {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 30px;
+        position: relative;
+      }
+      .box {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        position: relative;
+        transition: background-color 0.3s ease, opacity 0.3s ease;
+        user-select: none;
+      }
+      .box.removed {
+        opacity: 0.3;
+        text-decoration: line-through;
+        box-shadow: none;
+      }
+      .pointer-label {
+        position: absolute;
+        top: -28px;
+        width: 50px;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 4px;
+        padding: 2px 4px;
+        user-select: none;
+      }
+      .pointer-i-label {
+        background-color: #ffcc00;
+        color: #5a4b00;
+        left: 0;
+      }
+      .pointer-j-label {
+        background-color: #00ccff;
+        color: #004a66;
+        left: 0;
+      }
+      .pointer-i {
+        background-color: #fff4b8;
+        box-shadow: 0 0 8px 2px #ffcc00aa;
+      }
+      .pointer-j {
+        background-color: #b8f0ff;
+        box-shadow: 0 0 8px 2px #00ccffaa;
+      }
+      /* Loop coverage highlights */
+      .outer-loop-coverage {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background-color: #fff4b8aa;
+        border-radius: 8px;
+        pointer-events: none;
+        z-index: -1;
+      }
+      .inner-loop-coverage {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background-color: #b8f0ffaa;
+        border-radius: 8px;
+        pointer-events: none;
+        z-index: -1;
+      }
+      #info {
+        margin-bottom: 20px;
+        max-width: 400px;
+        text-align: center;
+        font-size: 1rem;
+      }
+      #info span {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        vertical-align: middle;
+        border-radius: 4px;
+        margin-right: 6px;
+      }
+      .legend-i {
+        background-color: #ffcc00;
+      }
+      .legend-j {
+        background-color: #00ccff;
+      }
+      #coverage-outer {
+        display: inline-block;
+        width: 120px;
+        height: 18px;
+        background-color: #fff4b8aa;
+        border-radius: 4px;
+        margin-left: 10px;
+      }
+      #coverage-inner {
+        display: inline-block;
+        width: 120px;
+        height: 18px;
+        background-color: #b8f0ffaa;
+        border-radius: 4px;
+        margin-left: 10px;
+      }
+      #subArrayTitle {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #222;
+      }
+      #controls {
+        background: white;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px 20px;
+        justify-content: center;
+        max-width: 600px;
+        width: 100%;
+      }
+      #controls label {
+        flex: 1 0 120px;
+        align-self: center;
+        font-weight: 600;
+        color: #444;
+      }
+      #controls input[type="text"],
+      #controls input[type="number"] {
+        flex: 2 1 180px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1.5px solid #ccc;
+        font-size: 1rem;
+        transition: border-color 0.25s ease;
+      }
+      #controls input[type="text"]:focus,
+      #controls input[type="number"]:focus {
+        outline: none;
+        border-color: #0078d4;
+        box-shadow: 0 0 5px #0078d4aa;
+      }
+      #startBtn {
+        flex: 1 0 160px;
+        background-color: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      #startBtn:disabled {
+        background-color: #a0c4ff;
+        cursor: not-allowed;
+      }
+      #startBtn:hover:not(:disabled) {
+        background-color: #005ea2;
+      }
+      @media (max-width: 480px) {
+        #controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        #controls label,
+        #controls input,
+        #startBtn {
+          flex: none;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>removeElement Visualization</h2>
+
+    <div id="array" style="position: relative"></div>
+
+    <div id="subArrayTitle" style="display: none; margin-bottom: 40px">
+      Inner Loop Sub-array (from j to length - 1):
+    </div>
+    <div id="subArray"></div>
+
+    <div id="info">
+      <p><span class="legend-i"></span><strong>i pointer</strong> (yellow)</p>
+      <p><span class="legend-j"></span><strong>j pointer</strong> (blue)</p>
+      <p>
+        <strong>Outer loop coverage:</strong> Elements from <code>i</code> to
+        <code>length - 1</code> highlighted in <span id="coverage-outer"></span>
+      </p>
+      <p>
+        <strong>Inner loop coverage:</strong> Elements from <code>j</code> to
+        <code>length - 2</code> highlighted in <span id="coverage-inner"></span>
+      </p>
+    </div>
+
+    <div id="controls">
+      <label for="inputArray">Array (comma separated):</label>
+      <input
+        type="text"
+        id="inputArray"
+        value="0,1,2,2,3,0,4,2"
+        autocomplete="off"
+      />
+
+      <label for="inputVal">Value to remove:</label>
+      <input type="number" id="inputVal" value="3" autocomplete="off" />
+
+      <button id="startBtn">Start Visualization</button>
+    </div>
+
+    <script>
+      const arrayContainer = document.getElementById("array");
+      const subArrayContainer = document.getElementById("subArray");
+      const subArrayTitle = document.getElementById("subArrayTitle");
+      const startBtn = document.getElementById("startBtn");
+      const inputArray = document.getElementById("inputArray");
+      const inputVal = document.getElementById("inputVal");
+
+      // Helper to add coverage highlight divs behind the boxes
+      function addCoverageHighlight(startIdx, endIdx, className) {
+        if (startIdx > endIdx) return; // no coverage if invalid range
+        const boxes = arrayContainer.querySelectorAll(".box");
+        if (boxes.length === 0) return;
+
+        // Calculate left and right positions for the highlight div
+        const left = boxes[startIdx].offsetLeft;
+        const rightBox = boxes[endIdx];
+        const right = rightBox.offsetLeft + rightBox.offsetWidth;
+
+        const highlight = document.createElement("div");
+        highlight.classList.add(className);
+        highlight.style.left = left + "px";
+        highlight.style.width = right - left + "px";
+
+        // Insert highlight behind all boxes
+        arrayContainer.insertBefore(highlight, arrayContainer.firstChild);
+      }
+
+      function renderArray(nums, i = -1, j = -1, length = nums.length) {
+        arrayContainer.innerHTML = "";
+        for (let k = 0; k < nums.length; k++) {
+          const box = document.createElement("div");
+          box.classList.add("box");
+          box.textContent = nums[k];
+          if (k >= length) box.classList.add("removed");
+          if (k === i) box.classList.add("pointer-i");
+          if (k === j) box.classList.add("pointer-j");
+
+          // Add pointer labels above boxes
+          if (k === i) {
+            const labelI = document.createElement("div");
+            labelI.textContent = "i";
+            labelI.classList.add("pointer-label", "pointer-i-label");
+            labelI.style.left = box.offsetLeft + "px";
+            box.appendChild(labelI);
+          }
+          if (k === j) {
+            const labelJ = document.createElement("div");
+            labelJ.textContent = "j";
+            labelJ.classList.add("pointer-label", "pointer-j-label");
+            labelJ.style.left = box.offsetLeft + "px";
+            box.appendChild(labelJ);
+          }
+
+          arrayContainer.appendChild(box);
+        }
+
+        // Add coverage highlights for loops
+        if (i >= 0 && i < length) {
+          addCoverageHighlight(i, length - 1, "outer-loop-coverage");
+        }
+        if (j >= 0 && j < length - 1) {
+          addCoverageHighlight(j, length - 2, "inner-loop-coverage");
+        }
+      }
+
+      function renderSubArray(nums, j, length) {
+        subArrayContainer.innerHTML = "";
+        if (j < 0 || j >= length) {
+          subArrayTitle.style.display = "none";
+          return;
+        }
+        subArrayTitle.style.display = "block";
+        const subArr = nums.slice(j, length);
+        subArr.forEach((val, idx) => {
+          const box = document.createElement("div");
+          box.classList.add("box");
+          box.textContent = val;
+          // Highlight the first element in sub-array (j pointer equivalent)
+          if (idx === 0) {
+            box.classList.add("pointer-j");
+            const labelJ = document.createElement("div");
+            labelJ.textContent = "j";
+            labelJ.classList.add("pointer-label", "pointer-j-label");
+            labelJ.style.left = box.offsetLeft + "px";
+            box.appendChild(labelJ);
+          }
+          subArrayContainer.appendChild(box);
+        });
+      }
+
+      async function delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      async function visualizeRemoveElement(nums, val) {
+        let length = nums.length;
+        for (let i = 0; i < length; ) {
+          renderArray(nums, i, -1, length);
+          renderSubArray(nums, -1, length);
+          await delay(1000);
+
+          if (nums[i] === val) {
+            for (let j = i; j < length - 1; j++) {
+              renderArray(nums, i, j, length);
+              renderSubArray(nums, j, length);
+              await delay(500);
+              nums[j] = nums[j + 1];
+              renderArray(nums, i, j, length);
+              renderSubArray(nums, j, length);
+              await delay(500);
+            }
+            length--;
+            renderArray(nums, i, -1, length);
+            renderSubArray(nums, -1, length);
+            await delay(1000);
+          } else {
+            i++;
+          }
+        }
+        return length;
+      }
+
+      startBtn.addEventListener("click", async () => {
+        let arrStr = inputArray.value.trim();
+        if (!arrStr) return alert("Please enter a valid array");
+        const nums = arrStr
+          .split(",")
+          .map((x) => parseInt(x.trim()))
+          .filter((x) => !isNaN(x));
+        const val = parseInt(inputVal.value);
+        if (isNaN(val)) return alert("Please enter a valid value to remove");
+
+        startBtn.disabled = true;
+        inputArray.disabled = true;
+        inputVal.disabled = true;
+
+        const newLength = await visualizeRemoveElement([...nums], val);
+
+        alert(`Finished! New length: ${newLength}`);
+
+        startBtn.disabled = false;
+        inputArray.disabled = false;
+        inputVal.disabled = false;
+      });
+
+      // Initial render
+      renderArray([0, 1, 2, 2, 3, 0, 4, 2]);
+    </script>
+  </body>
+</html>
+
+
+
+You had generated the inital html file explaining the entire tree data structure, with different slides, also by including some leet code problems, 
+that is great but in that code you have not highlighted in the visualization where the current node is on , 
+also for the leetode problems you have not included the problem statement and the explanation of the solution,
+can you please include those as well in the visualization code with step by step controls you had generated before.
+
+I eed the visualizations and animations as good as it is in the removeElement code that I gave you for reference. 
+
+Please give me the updated visualization code for the tree data structure with the above mentioned changes.

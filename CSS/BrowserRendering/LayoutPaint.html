@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Layout (Reflow) and Paint Visualization</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4ff;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  header {
+    background: #2563eb;
+    color: white;
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  #leftPanel, #rightPanel {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  #leftPanel {
+    background: white;
+    border-right: 2px solid #e0e7ff;
+    display: flex;
+    flex-direction: column;
+  }
+  #rightPanel {
+    background: white;
+    position: relative;
+  }
+  h2 {
+    color: #2563eb;
+    margin-bottom: 10px;
+  }
+  #renderTreeContainer {
+    position: relative;
+    flex-grow: 1;
+    border: 1px solid #93c5fd;
+    border-radius: 8px;
+    background: white;
+    overflow: auto;
+    padding: 20px;
+  }
+  .box {
+    position: relative;
+    border: 2px solid #60a5fa;
+    border-radius: 6px;
+    margin: 10px;
+    padding: 10px;
+    background: #bfdbfe;
+    transition: all 0.5s ease;
+  }
+  .text-node {
+    font-style: italic;
+    color: #374151;
+  }
+  .highlight {
+    box-shadow: 0 0 12px 4px #2563ebaa;
+  }
+  #descriptions {
+    font-size: 1rem;
+    line-height: 1.4;
+    background: #dbeafe;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    min-height: 100px;
+  }
+  #controls {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+  button {
+    background: #2563eb;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+
+<header>Layout (Reflow) and Paint Visualization</header>
+
+<div id="main">
+  <div id="leftPanel">
+    <h2>Render Tree Visualization</h2>
+    <div id="renderTreeContainer"></div>
+    <div id="controls">
+      <button id="prevBtn" disabled>Previous</button>
+      <button id="nextBtn">Next</button>
+    </div>
+  </div>
+  <div id="rightPanel">
+    <h2>Step Description</h2>
+    <div id="descriptions">
+      Use the buttons to step through layout and paint phases.
+    </div>
+  </div>
+</div>
+
+<script>
+  const renderTreeContainer = document.getElementById("renderTreeContainer");
+  const descriptionsEl = document.getElementById("descriptions");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
+  // Render tree nodes with sizes and styles
+  const renderTreeData = {
+    name: "body",
+    size: { width: 600, height: 400 },
+    children: [
+      {
+        name: "h1",
+        size: { width: 580, height: 60 },
+        style: { color: "#2563eb", fontSize: "2em" },
+        children: []
+      },
+      {
+        name: "div",
+        size: { width: 580, height: 100 },
+        style: { backgroundColor: "#bfdbfe" },
+        children: [
+          {
+            name: "span",
+            size: { width: 200, height: 30 },
+            style: { color: "#059669" },
+            children: [
+              {
+                name: "#text",
+                text: "Visible text",
+                size: { width: 180, height: 20 }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+
+  // Steps to visualize layout and paint
+  const steps = [
+    {
+      desc: "Step 1: The browser starts layout (reflow) by calculating sizes and positions of elements based on the render tree.",
+      highlightNodes: ["body"]
+    },
+    {
+      desc: "Step 2: Layout continues, calculating sizes and positions of child elements like <h1> and <div>.",
+      highlightNodes: ["h1", "div"]
+    },
+    {
+      desc: "Step 3: The <span> and text nodes inside the <div> get their sizes and positions calculated.",
+      highlightNodes: ["span", "#text"]
+    },
+    {
+      desc: "Step 4: Paint phase begins, applying colors, fonts, and backgrounds to pixels on screen.",
+      highlightNodes: ["body", "h1", "div", "span", "#text"]
+    }
+  ];
+
+  let currentStep = 0;
+
+  // Helper to create box elements recursively
+  function createBox(node) {
+    const div = document.createElement("div");
+    div.className = "box";
+    div.style.width = node.size ? node.size.width + "px" : "auto";
+    div.style.height = node.size ? node.size.height + "px" : "auto";
+    div.style.position = "relative";
+    div.style.marginLeft = "20px";
+
+    if (node.name === "#text") {
+      div.textContent = node.text;
+      div.classList.add("text-node");
+      div.style.width = node.size.width + "px";
+      div.style.height = node.size.height + "px";
+      div.style.padding = "0";
+      div.style.border = "none";
+      div.style.background = "transparent";
+    } else {
+      div.textContent = `<${node.name}>`;
+      if (node.style) {
+        if (node.style.color) div.style.color = node.style.color;
+        if (node.style.fontSize) div.style.fontSize = node.style.fontSize;
+        if (node.style.backgroundColor) div.style.backgroundColor = node.style.backgroundColor;
+      }
+    }
+
+    if (node.children && node.children.length) {
+      node.children.forEach(child => {
+        div.appendChild(createBox(child));
+      });
+    }
+    return div;
+  }
+
+  // Render entire render tree
+  function renderTree() {
+    renderTreeContainer.innerHTML = "";
+    const treeRoot = createBox(renderTreeData);
+    renderTreeContainer.appendChild(treeRoot);
+  }
+
+  // Highlight nodes by name
+  function highlightNodes(names) {
+    // Remove existing highlights
+    const boxes = renderTreeContainer.querySelectorAll(".box");
+    boxes.forEach(box => box.classList.remove("highlight"));
+
+    // Highlight matching nodes
+    function recursiveHighlight(element) {
+      if (!element) return;
+      if (names.includes(element.textContent.replace(/[<>]/g, ""))) {
+        element.classList.add("highlight");
+      }
+      Array.from(element.children).forEach(recursiveHighlight);
+    }
+    recursiveHighlight(renderTreeContainer.firstChild);
+  }
+
+  function updateUI() {
+    renderTree();
+    const step = steps[currentStep];
+    descriptionsEl.textContent = step.desc;
+    highlightNodes(step.highlightNodes);
+
+    prevBtn.disabled = currentStep === 0;
+    nextBtn.disabled = currentStep === steps.length - 1;
+  }
+
+  prevBtn.addEventListener("click", () => {
+    if (currentStep > 0) {
+      currentStep--;
+      updateUI();
+    }
+  });
+
+  nextBtn.addEventListener("click", () => {
+    if (currentStep < steps.length - 1) {
+      currentStep++;
+      updateUI();
+    }
+  });
+
+  updateUI();
+</script>
+
+</body>
+</html>

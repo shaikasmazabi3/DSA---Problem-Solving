@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>04 - Critical Rendering Path & Performance Metrics</title>
+    <style>
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: #f0f8ff;
+        margin: 0;
+        color: #333;
+      }
+      .container {
+        max-width: 900px;
+        margin: 2em auto;
+        background: white;
+        padding: 2em;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      }
+      h1,
+      h2 {
+        margin-bottom: 0.5em;
+      }
+      ul {
+        list-style: none;
+        padding-left: 0;
+      }
+      ul li {
+        margin-bottom: 0.7em;
+      }
+      .progress-bar {
+        width: 100%;
+        background: #ddd;
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 1em 0;
+        height: 20px;
+      }
+      .progress-fill {
+        height: 100%;
+        background: #0078d7;
+        width: 0;
+        transition: width 1.5s ease;
+      }
+      nav {
+        margin-top: 2em;
+        text-align: center;
+      }
+      nav a {
+        background: #0078d7;
+        color: white;
+        padding: 0.7em 1.5em;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        margin: 0 0.5em;
+        display: inline-block;
+      }
+      nav a:hover {
+        background: #005ea2;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="container"
+      role="main"
+      aria-label="Critical Rendering Path and Performance Metrics"
+    >
+      <h1>Critical Rendering Path</h1>
+      <p>The browser wants to show you the page as fast as possible.</p>
+      <ol>
+        <li>
+          Loads the <strong>critical resources</strong> (HTML, CSS, JS needed
+          for first screen).
+        </li>
+        <li>Builds DOM and CSSOM.</li>
+        <li>Creates Render Tree.</li>
+        <li>
+          Paints the page quickly so you see something (First Contentful Paint).
+        </li>
+        <li>Loads other stuff in the background.</li>
+      </ol>
+
+      <h2>Performance Metrics</h2>
+      <ul>
+        <li>
+          <strong>TTFB</strong>: Time to First Byte – how fast the server
+          responds.
+        </li>
+        <li>
+          <strong>FCP</strong>: First Contentful Paint – when first content
+          appears.
+        </li>
+        <li>
+          <strong>LCP</strong>: Largest Contentful Paint – when biggest part is
+          loaded.
+        </li>
+        <li>
+          <strong>TTI</strong>: Time to Interactive – when page is usable.
+        </li>
+        <li>
+          <strong>CLS</strong>: Cumulative Layout Shift – how much things jump
+          around.
+        </li>
+      </ul>
+      <div class="progress-bar" aria-label="Performance progress bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <nav>
+        <a
+          href="03-lazy-loading-caching.html"
+          aria-label="Previous lesson: Lazy Loading and Caching"
+          >⬅️ Previous</a
+        >
+        <a
+          href="05-optimization-risks.html"
+          aria-label="Next lesson: Optimization Risks and Big Companies"
+          >Next ➡️</a
+        >
+      </nav>
+
+      <script>
+        window.addEventListener("load", () => {
+          const progressFill = document.getElementById("progressFill");
+          setTimeout(() => {
+            progressFill.style.width = "80%";
+          }, 100);
+        });
+      </script>
+    </div>
+  </body>
+</html>

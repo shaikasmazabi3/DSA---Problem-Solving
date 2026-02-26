@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>twoSum Nested Loops Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f7fa;
+        color: #333;
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      h2 {
+        margin-bottom: 30px;
+        font-weight: 700;
+        font-size: 2rem;
+        color: #222;
+      }
+      #array {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 30px;
+        position: relative;
+      }
+      .box {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        position: relative;
+        transition: background-color 0.3s ease, opacity 0.3s ease;
+        user-select: none;
+      }
+      .pointer-label {
+        position: absolute;
+        top: -28px;
+        width: 50px;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 4px;
+        padding: 2px 4px;
+        user-select: none;
+      }
+      .pointer-i-label {
+        background-color: #ffcc00;
+        color: #5a4b00;
+        left: 0;
+      }
+      .pointer-j-label {
+        background-color: #00ccff;
+        color: #004a66;
+        left: 0;
+      }
+      .pointer-i {
+        background-color: #fff4b8;
+        box-shadow: 0 0 8px 2px #ffcc00aa;
+      }
+      .pointer-j {
+        background-color: #b8f0ff;
+        box-shadow: 0 0 8px 2px #00ccffaa;
+      }
+      /* Loop coverage highlights */
+      .outer-loop-coverage {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background-color: #fff4b8aa;
+        border-radius: 8px;
+        pointer-events: none;
+        z-index: -1;
+        transition: left 0.5s ease, width 0.5s ease;
+      }
+      .inner-loop-coverage {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background-color: #b8f0ffaa;
+        border-radius: 8px;
+        pointer-events: none;
+        z-index: -1;
+        transition: left 0.5s ease, width 0.5s ease;
+      }
+      #info {
+        margin-bottom: 20px;
+        max-width: 400px;
+        text-align: center;
+        font-size: 1rem;
+      }
+      #info span {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        vertical-align: middle;
+        border-radius: 4px;
+        margin-right: 6px;
+      }
+      .legend-i {
+        background-color: #ffcc00;
+      }
+      .legend-j {
+        background-color: #00ccff;
+      }
+      #coverage-outer {
+        display: inline-block;
+        width: 120px;
+        height: 18px;
+        background-color: #fff4b8aa;
+        border-radius: 4px;
+        margin-left: 10px;
+      }
+      #coverage-inner {
+        display: inline-block;
+        width: 120px;
+        height: 18px;
+        background-color: #b8f0ffaa;
+        border-radius: 4px;
+        margin-left: 10px;
+      }
+      #currentPair {
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-top: 15px;
+        min-height: 28px;
+        color: #222;
+      }
+      #controls {
+        background: white;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px 20px;
+        justify-content: center;
+        max-width: 600px;
+        width: 100%;
+      }
+      #controls label {
+        flex: 1 0 120px;
+        align-self: center;
+        font-weight: 600;
+        color: #444;
+      }
+      #controls input[type="text"],
+      #controls input[type="number"] {
+        flex: 2 1 180px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1.5px solid #ccc;
+        font-size: 1rem;
+        transition: border-color 0.25s ease;
+      }
+      #controls input[type="text"]:focus,
+      #controls input[type="number"]:focus {
+        outline: none;
+        border-color: #0078d4;
+        box-shadow: 0 0 5px #0078d4aa;
+      }
+      #startBtn {
+        flex: 1 0 160px;
+        background-color: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      #startBtn:disabled {
+        background-color: #a0c4ff;
+        cursor: not-allowed;
+      }
+      #startBtn:hover:not(:disabled) {
+        background-color: #005ea2;
+      }
+      @media (max-width: 480px) {
+        #controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        #controls label,
+        #controls input,
+        #startBtn {
+          flex: none;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>twoSum Nested Loops Visualization</h2>
+
+    <div id="array" style="position: relative display:block"></div>
+
+    <div id="info">
+      <p><span class="legend-i"></span><strong>i pointer</strong> (yellow)</p>
+      <p><span class="legend-j"></span><strong>j pointer</strong> (blue)</p>
+      <p>
+        <strong>Outer loop coverage:</strong> Elements from <code>i</code> to
+        <code>length - 1</code> highlighted in <span id="coverage-outer"></span>
+      </p>
+      <p>
+        <strong>Inner loop coverage:</strong> Elements from <code>j</code> to
+        <code>length</code> highlighted in <span id="coverage-inner"></span>
+      </p>
+    </div>
+
+    <div id="currentPair"></div>
+
+    <div id="controls">
+      <label for="inputArray">Array (comma separated):</label>
+      <input type="text" id="inputArray" value="2,7,11,15" autocomplete="off" />
+
+      <label for="inputTarget">Target sum:</label>
+      <input type="number" id="inputTarget" value="9" autocomplete="off" />
+
+      <button id="startBtn">Start Visualization</button>
+    </div>
+
+    <script>
+      const arrayContainer = document.getElementById("array");
+      const currentPairText = document.getElementById("currentPair");
+      const startBtn = document.getElementById("startBtn");
+      const inputArray = document.getElementById("inputArray");
+      const inputTarget = document.getElementById("inputTarget");
+
+      let outerHighlight, innerHighlight;
+
+      function createHighlight(className) {
+        const div = document.createElement("div");
+        div.classList.add(className);
+        arrayContainer.appendChild(div);
+        return div;
+      }
+
+      function clearHighlights() {
+        if (outerHighlight) outerHighlight.remove();
+        if (innerHighlight) innerHighlight.remove();
+      }
+
+      function renderArray(arr, i = -1, j = -1) {
+        arrayContainer.innerHTML = "";
+        clearHighlights();
+
+        for (let idx = 0; idx < arr.length; idx++) {
+          const box = document.createElement("div");
+          box.className = "box";
+          box.textContent = arr[idx];
+
+          if (idx === i) {
+            box.classList.add("pointer-i");
+            const labelI = document.createElement("div");
+            labelI.textContent = "i";
+            labelI.className = "pointer-label pointer-i-label";
+            box.appendChild(labelI);
+          }
+          if (idx === j) {
+            box.classList.add("pointer-j");
+            const labelJ = document.createElement("div");
+            labelJ.textContent = "j";
+            labelJ.className = "pointer-label pointer-j-label";
+            box.appendChild(labelJ);
+          }
+
+          arrayContainer.appendChild(box);
+        }
+
+        // Add highlights for coverage
+        if (i >= 0) {
+          outerHighlight = createHighlight("outer-loop-coverage");
+          const boxes = arrayContainer.querySelectorAll(".box");
+          const left = boxes[i].offsetLeft;
+          const right =
+            boxes[boxes.length - 1].offsetLeft +
+            boxes[boxes.length - 1].offsetWidth;
+          outerHighlight.style.left = left + "px";
+          outerHighlight.style.width = right - left + "px";
+        }
+        if (j >= 0) {
+          innerHighlight = createHighlight("inner-loop-coverage");
+          const boxes = arrayContainer.querySelectorAll(".box");
+          const left = boxes[j].offsetLeft;
+          const right =
+            boxes[boxes.length - 1].offsetLeft +
+            boxes[boxes.length - 1].offsetWidth;
+          innerHighlight.style.left = left + "px";
+          innerHighlight.style.width = right - left + "px";
+        }
+      }
+
+      function delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      async function visualizeTwoSum(arr, target) {
+        startBtn.disabled = true;
+        currentPairText.textContent = "";
+
+        for (let i = 0; i < arr.length - 1; i++) {
+          for (let j = i + 1; j < arr.length; j++) {
+            renderArray(arr, i, j);
+            currentPairText.textContent = `Checking arr[${i}] + arr[${j}]: ${
+              arr[i]
+            } + ${arr[j]} = ${arr[i] + arr[j]}`;
+            await delay(1000);
+
+            if (arr[i] + arr[j] === target) {
+              currentPairText.textContent = `Found! Indices: [${i}, ${j}] with sum ${target}`;
+              renderArray(arr, i, j);
+              startBtn.disabled = false;
+              return;
+            }
+          }
+        }
+        currentPairText.textContent = "No pair found with the target sum.";
+        startBtn.disabled = false;
+      }
+
+      startBtn.addEventListener("click", () => {
+        const arr = inputArray.value
+          .split(",")
+          .map((v) => parseInt(v.trim()))
+          .filter((v) => !isNaN(v));
+        const target = parseInt(inputTarget.value);
+
+        if (arr.length < 2) {
+          alert("Please enter at least two numbers in the array.");
+          return;
+        }
+        if (isNaN(target)) {
+          alert("Please enter a valid target number.");
+          return;
+        }
+
+        visualizeTwoSum(arr, target);
+      });
+    </script>
+  </body>
+</html>

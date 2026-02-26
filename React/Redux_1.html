@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      Interactive Redux Architecture Visualization with Count (2026)
+    </title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        background: #f9fafb;
+        color: #222;
+        line-height: 1.5;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      h1 {
+        text-align: center;
+        margin: 1rem 0 0.5rem;
+        color: #1e88e5;
+        font-weight: 700;
+      }
+      .container {
+        flex-grow: 1;
+        max-width: 1100px;
+        margin: 1rem auto 2rem;
+        padding: 0 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+      .step-container {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+      }
+      .visual {
+        flex: 1 1 400px;
+        min-width: 320px;
+        height: 260px;
+        border: 2px solid #1e88e5;
+        border-radius: 10px;
+        background: #e3f2fd;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgb(30 136 229 / 0.15);
+      }
+      .code {
+        flex: 1 1 520px;
+        min-width: 400px;
+        background: #263238;
+        color: #cfd8dc;
+        font-family: "Source Code Pro", monospace;
+        font-size: 0.9rem;
+        border-radius: 10px;
+        padding: 1rem;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        box-shadow: 0 8px 20px rgb(30 136 229 / 0.15);
+      }
+      .explanation {
+        max-width: 1100px;
+        margin: 0 auto 1rem;
+        font-size: 1rem;
+        color: #0d47a1;
+        font-weight: 600;
+        text-align: center;
+      }
+      .btn-controls {
+        max-width: 1100px;
+        margin: 0 auto 1rem;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+      }
+      button {
+        background: #1e88e5;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 0.5rem 1.5rem;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.3s ease;
+      }
+      button:disabled {
+        background: #90caf9;
+        cursor: not-allowed;
+      }
+      button:hover:not(:disabled) {
+        background: #1565c0;
+      }
+
+      /* Visual element styles */
+      .box {
+        position: absolute;
+        border-radius: 12px;
+        background: #42a5f5;
+        color: white;
+        font-weight: 700;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+        box-shadow: 0 4px 10px rgb(66 165 245 / 0.6);
+        transition: all 0.5s ease;
+      }
+      .store {
+        width: 140px;
+        height: 60px;
+        background: #1976d2;
+        font-size: 1.1rem;
+        border-radius: 12px;
+      }
+      .action {
+        width: 50px;
+        height: 50px;
+        background: #42a5f5;
+        font-size: 1.3rem;
+        border-radius: 50%;
+      }
+      .reducer {
+        width: 100px;
+        height: 100px;
+        background: #1e88e5;
+        font-size: 1rem;
+        border-radius: 20px;
+        padding: 10px;
+        text-align: center;
+      }
+      .slice {
+        width: 140px;
+        height: 50px;
+        background: #64b5f6;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgb(100 181 246 / 0.7);
+      }
+      .dispatch {
+        width: 50px;
+        height: 50px;
+        background: #1565c0;
+        font-size: 1rem;
+        border-radius: 50%;
+      }
+      .useSelector {
+        width: 90px;
+        height: 40px;
+        background: #42a5f5;
+        font-size: 0.85rem;
+        border-radius: 8px;
+      }
+      .component {
+        width: 120px;
+        height: 90px;
+        background: #90caf9;
+        font-size: 1rem;
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: 0 4px 12px rgb(144 202 249 / 0.7);
+      }
+      .count-display {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #0d47a1;
+        color: white;
+        font-weight: 700;
+        font-size: 1.5rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 5px 15px rgb(13 71 161 / 0.8);
+        user-select: none;
+        transition: transform 0.3s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Interactive Redux Architecture Visualization with Count</h1>
+
+    <div
+      class="explanation"
+      id="step-explanation"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <!-- Explanation text will appear here -->
+    </div>
+
+    <div class="container">
+      <div class="step-container">
+        <div
+          class="visual"
+          id="visual-area"
+          aria-label="Redux architecture visual representation"
+        >
+          <!-- Visual elements dynamically added here -->
+        </div>
+
+        <pre class="code" id="code-area" aria-label="Redux code snippet">
+      <!-- Code snippet will appear here -->
+    </pre>
+      </div>
+
+      <div
+        class="btn-controls"
+        role="group"
+        aria-label="Step navigation controls"
+      >
+        <button id="prev-btn" aria-disabled="true">← Previous</button>
+        <button id="next-btn">Next →</button>
+      </div>
+    </div>
+
+    <script>
+      // Track count state for visualization
+      let countValue = 0;
+
+      // Define each step's data: explanation, code snippet, visual elements with positions
+      // Added count display and animations for count increment on dispatch step
+      const steps = [
+        {
+          explanation:
+            "Step 1: Create the Redux Store. The store holds the entire application state and is created by passing the root reducer.",
+          code: `// store.js
+import { createStore } from 'redux';
+import counterReducer from './counterReducer';
+
+const store = createStore(counterReducer);
+
+export default store;`,
+          visualElements: [
+            {
+              type: "store",
+              label: "Store",
+              style: { top: "90px", left: "120px" },
+            },
+          ],
+          count: null,
+        },
+        {
+          explanation:
+            "Step 2: Define an Action. Actions are plain JS objects describing what happened. Here, we define an 'INCREMENT' action type and an action creator.",
+          code: `// actionTypes.js
+export const INCREMENT = 'INCREMENT';
+
+// actions.js
+export const increment = () => ({
+  type: INCREMENT
+});`,
+          visualElements: [
+            {
+              type: "action",
+              label: "A",
+              style: { top: "90px", left: "40px" },
+            },
+          ],
+          count: null,
+        },
+        {
+          explanation:
+            "Step 3: Create a Reducer. Reducers specify how the app state changes in response to actions. This reducer increments the count on INCREMENT.",
+          code: `// counterReducer.js
+import { INCREMENT } from './actionTypes';
+
+const initialState = { count: 0 };
+
+export default function counterReducer(state = initialState, action) {
+  switch(action.type) {
+    case INCREMENT:
+      return { count: state.count + 1 };
+    default:
+      return state;
+  }
+}`,
+          visualElements: [
+            {
+              type: "action",
+              label: "A",
+              style: { top: "90px", left: "40px" },
+            },
+            {
+              type: "reducer",
+              label: "Reducer",
+              style: { top: "70px", left: "140px" },
+            },
+          ],
+          count: null,
+        },
+        {
+          explanation:
+            "Step 4: Use Redux Toolkit Slice. Slices combine reducer logic and action creators for a specific piece of state, simplifying Redux code.",
+          code: `// counterSlice.js
+import { createSlice } from '@reduxjs/toolkit';
+
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState: { count: 0 },
+  reducers: {
+    increment(state) {
+      state.count += 1;
+    }
+  }
+});
+
+export const { increment } = counterSlice.actions;
+export default counterSlice.reducer;`,
+          visualElements: [
+            {
+              type: "slice",
+              label: "Counter Slice",
+              style: { top: "90px", left: "140px" },
+            },
+          ],
+          count: null,
+        },
+        {
+          explanation:
+            "Step 5: Dispatch Actions. Components dispatch actions to trigger state changes. Dispatch sends the action to the store's reducer. Watch the count increase!",
+          code: `// In React component
+import { useDispatch } from 'react-redux';
+import { increment } from './counterSlice';
+
+const Counter = () => {
+  const dispatch = useDispatch();
+
+  return (
+    <button onClick={() => dispatch(increment())}>
+      Increment
+    </button>
+  );
+};`,
+          visualElements: [
+            {
+              type: "dispatch",
+              label: "Dispatch",
+              style: { top: "40px", left: "40px" },
+            },
+            {
+              type: "reducer",
+              label: "Reducer",
+              style: { top: "90px", left: "140px" },
+            },
+            {
+              type: "store",
+              label: "Store",
+              style: { top: "90px", left: "280px" },
+            },
+          ],
+          count: 0, // will increment on this step
+        },
+        {
+          explanation:
+            "Step 6: useSelector Hook. Components read state from the store using useSelector to access the current state slice. The count is displayed here.",
+          code: `// In React component
+import { useSelector } from 'react-redux';
+
+const CounterDisplay = () => {
+  const count = useSelector(state => state.count);
+
+  return <div>Count: {count}</div>;
+};`,
+          visualElements: [
+            {
+              type: "store",
+              label: "Store",
+              style: { top: "90px", left: "40px" },
+            },
+            {
+              type: "useSelector",
+              label: "useSelector",
+              style: { top: "40px", left: "160px" },
+            },
+            {
+              type: "component",
+              label: "Component",
+              style: { top: "90px", left: "280px" },
+            },
+          ],
+          count: null,
+        },
+      ];
+
+      // Visual element creation helper
+      function createVisualElement(type, label, style) {
+        const div = document.createElement("div");
+        div.classList.add("box", type);
+        div.textContent = label;
+        Object.entries(style).forEach(([k, v]) => (div.style[k] = v));
+        return div;
+      }
+
+      // Elements references for animation
+      const visualArea = document.getElementById("visual-area");
+      const codeArea = document.getElementById("code-area");
+      const explanationArea = document.getElementById("step-explanation");
+      const prevBtn = document.getElementById("prev-btn");
+      const nextBtn = document.getElementById("next-btn");
+
+      let currentStep = 0;
+
+      // Count display element
+      let countDisplay = null;
+
+      function renderStep(index) {
+        // Clear previous visuals
+        visualArea.innerHTML = "";
+
+        // Reset count display for new step
+        countDisplay = null;
+
+        // Add new visuals
+        steps[index].visualElements.forEach(({ type, label, style }) => {
+          const el = createVisualElement(type, label, style);
+          visualArea.appendChild(el);
+        });
+
+        // Add count display if count is not null
+        if (steps[index].count !== null) {
+          if (!countDisplay) {
+            countDisplay = document.createElement("div");
+            countDisplay.classList.add("count-display");
+            visualArea.appendChild(countDisplay);
+          }
+          countDisplay.textContent = countValue;
+          countDisplay.style.top = "10px";
+          countDisplay.style.right = "10px";
+          countDisplay.style.transform = "scale(1)";
+        }
+
+        // Set code and explanation
+        codeArea.textContent = steps[index].code.trim();
+        explanationArea.textContent = steps[index].explanation;
+
+        // Update buttons
+        prevBtn.disabled = index === 0;
+        nextBtn.disabled = index === steps.length - 1;
+
+        // Animate elements for specific steps
+        animateStep(index);
+      }
+
+      // Animate count increment visually
+      function animateCountIncrement() {
+        if (!countDisplay) return;
+        countValue++;
+        countDisplay.textContent = countValue;
+        countDisplay.style.transform = "scale(1.5)";
+        setTimeout(() => {
+          countDisplay.style.transform = "scale(1)";
+        }, 300);
+      }
+
+      // Animate elements for each step
+      function animateStep(index) {
+        // Clear all animations
+        [...visualArea.children].forEach((el) => {
+          el.style.transition = "none";
+          el.style.opacity = "1";
+          el.style.transform = "none";
+          void el.offsetWidth; // trigger reflow
+          el.style.transition = "all 0.6s ease";
+          el.style.backgroundColor = ""; // reset background colors
+        });
+
+        switch (index) {
+          case 2: // Step 3: Action moves to Reducer
+            {
+              const action = [...visualArea.children].find((el) =>
+                el.classList.contains("action")
+              );
+              const reducer = [...visualArea.children].find((el) =>
+                el.classList.contains("reducer")
+              );
+              if (action && reducer) {
+                action.style.transform = "translateX(100px)";
+                setTimeout(() => {
+                  reducer.style.backgroundColor = "#1565c0";
+                }, 600);
+              }
+            }
+            break;
+          case 4: // Step 5: Dispatch -> Reducer -> Store flow + count increment
+            {
+              const dispatch = [...visualArea.children].find((el) =>
+                el.classList.contains("dispatch")
+              );
+              const reducer = [...visualArea.children].find((el) =>
+                el.classList.contains("reducer")
+              );
+              const store = [...visualArea.children].find((el) =>
+                el.classList.contains("store")
+              );
+              if (dispatch && reducer && store) {
+                dispatch.style.transform = "translateX(100px)";
+                setTimeout(() => {
+                  reducer.style.backgroundColor = "#1565c0";
+                  reducer.style.transform = "translateX(140px)";
+                }, 600);
+                setTimeout(() => {
+                  store.style.backgroundColor = "#0d47a1";
+                  store.style.transform = "translateX(40px)";
+                  animateCountIncrement();
+                }, 1300);
+              }
+            }
+            break;
+          case 5: // Step 6: Store -> useSelector -> Component
+            {
+              const store = [...visualArea.children].find((el) =>
+                el.classList.contains("store")
+              );
+              const selector = [...visualArea.children].find((el) =>
+                el.classList.contains("useSelector")
+              );
+              const component = [...visualArea.children].find((el) =>
+                el.classList.contains("component")
+              );
+              if (store && selector && component) {
+                store.style.transform = "translateX(120px)";
+                setTimeout(() => {
+                  selector.style.backgroundColor = "#1565c0";
+                  selector.style.transform = "translateX(120px)";
+                }, 600);
+                setTimeout(() => {
+                  component.style.backgroundColor = "#0d47a1";
+                  component.style.transform = "translateX(0)";
+                }, 1300);
+              }
+            }
+            break;
+          default:
+            // No animation for other steps
+            break;
+        }
+      }
+
+      prevBtn.addEventListener("click", () => {
+        if (currentStep > 0) {
+          currentStep--;
+          renderStep(currentStep);
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (currentStep < steps.length - 1) {
+          currentStep++;
+          renderStep(currentStep);
+        }
+      });
+
+      // Initial render
+      renderStep(currentStep);
+    </script>
+  </body>
+</html>

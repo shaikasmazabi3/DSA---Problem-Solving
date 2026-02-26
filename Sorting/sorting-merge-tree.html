@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Merge Sort - Full Recursive Tree Visualization</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 2000px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 36px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 16px;
+        opacity: 0.9;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .control-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+      }
+
+      .control-panel h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 18px;
+      }
+
+      .input-group {
+        margin-bottom: 18px;
+      }
+
+      .input-group label {
+        display: block;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 8px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 12px;
+      }
+
+      .input-group input:focus {
+        outline: none;
+        border-color: #4facfe;
+      }
+
+      .info-section {
+        background: #f0f0f0;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 12px;
+        color: #555;
+      }
+
+      .info-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 12px;
+      }
+
+      .info-item {
+        margin-bottom: 6px;
+        font-size: 11px;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #4facfe;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+
+      button {
+        flex: 1;
+        padding: 8px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 12px;
+      }
+
+      .start-btn {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+      }
+
+      .start-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+      }
+
+      .reset-btn {
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      .reset-btn:hover {
+        background: #e0e0e0;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .visualization-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      .step-header {
+        margin-bottom: 20px;
+      }
+
+      .step-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 8px;
+      }
+
+      .step-description {
+        font-size: 13px;
+        color: #666;
+        line-height: 1.5;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 10px;
+        border-radius: 6px;
+        border-left: 3px solid #4facfe;
+        text-align: center;
+      }
+
+      .stat-label {
+        font-size: 9px;
+        font-weight: 600;
+        color: #4facfe;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+      }
+
+      .stat-value {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        font-family: "Courier New", monospace;
+      }
+
+      /* DUAL VIEW */
+      .dual-view {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 25px;
+      }
+
+      .visualization {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        min-height: 700px;
+        overflow: auto;
+      }
+
+      .visualization-title {
+        font-weight: 700;
+        color: #4facfe;
+        margin-bottom: 12px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 3px solid #4facfe;
+        padding-bottom: 8px;
+      }
+
+      /* Tree Canvas */
+      #treeCanvas {
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: white;
+        display: block;
+        cursor: pointer;
+      }
+
+      /* Bar Chart */
+      .bars-container {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 5px;
+        height: 400px;
+        padding: 15px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+      }
+
+      .bar {
+        flex: 1;
+        background: #4facfe;
+        border-radius: 2px 2px 0 0;
+        transition: all 0.3s ease;
+        position: relative;
+        min-width: 20px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+      }
+
+      .bar-value {
+        color: white;
+        font-weight: bold;
+        font-size: 8px;
+        margin-bottom: 4px;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+      }
+
+      .bar.active {
+        background: #ffc107;
+        box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+      }
+
+      .bar.merging {
+        background: #ff6b6b;
+        box-shadow: 0 0 8px rgba(255, 107, 107, 0.6);
+      }
+
+      .bar.sorted {
+        background: #28a745;
+        box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
+      }
+
+      .array-display {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        color: #333;
+        word-break: break-all;
+        text-align: center;
+        min-height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-top: 10px;
+      }
+
+      /* Step Info */
+      .step-info {
+        background: #fff3e0;
+        border-left: 4px solid #ff9800;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+      }
+
+      .step-info-title {
+        font-weight: 700;
+        color: #ff9800;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+
+      .step-info-content {
+        color: #555;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .step-info-content strong {
+        color: #333;
+      }
+
+      .nav-buttons {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+
+      .nav-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 13px;
+      }
+
+      .prev-btn {
+        background: #e0e0e0;
+        color: #333;
+      }
+
+      .prev-btn:hover:not(:disabled) {
+        background: #d0d0d0;
+      }
+
+      .next-btn {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+      }
+
+      .next-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+      }
+
+      .prev-btn:disabled,
+      .next-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .progress {
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+        font-weight: 600;
+      }
+
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+        padding-top: 12px;
+        border-top: 1px solid #ddd;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: #555;
+      }
+
+      .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 3px;
+        border: 1px solid;
+      }
+
+      .color-unsorted {
+        background: #4facfe;
+        border-color: #4facfe;
+      }
+
+      .color-dividing {
+        background: #fff9e6;
+        border-color: #ffc107;
+      }
+
+      .color-merging {
+        background: #ffe6e6;
+        border-color: #ff6b6b;
+      }
+
+      .color-sorted {
+        background: #e6f7e6;
+        border-color: #28a745;
+      }
+
+      .back-link {
+        display: inline-block;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 30px;
+        font-size: 13px;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 1400px) {
+        .dual-view {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .control-panel {
+          position: static;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 24px;
+        }
+
+        .bars-container {
+          height: 250px;
+        }
+
+        .visualization {
+          min-height: 400px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="sorting-index.html" class="back-link">← Back to Index</a>
+
+      <div class="header">
+        <h1>🔀 Merge Sort - Full Recursive Tree Visualization</h1>
+        <p>See Complete Division Tree → Array Sorting → Merging Back</p>
+      </div>
+
+      <div class="main-grid">
+        <!-- Control Panel -->
+        <div class="control-panel">
+          <h2>⚙️ Controls</h2>
+
+          <div class="input-group">
+            <label>Array Size</label>
+            <input type="number" id="sizeInput" value="8" min="2" max="8" />
+          </div>
+
+          <div class="input-group">
+            <label>Speed</label>
+            <input
+              type="range"
+              id="speedInput"
+              min="100"
+              max="800"
+              value="400"
+              style="width: 100%"
+            />
+            <small style="color: #999">Faster ← Slower →</small>
+          </div>
+
+          <div class="buttons">
+            <button class="start-btn" onclick="startVisualization()">
+              Start
+            </button>
+            <button class="reset-btn" onclick="resetVisualization()">
+              Reset
+            </button>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">Algorithm</div>
+            <div class="info-item">
+              <span class="info-label">Type:</span> Divide & Conquer
+            </div>
+            <div class="info-item">
+              <span class="info-label">Time:</span> O(n log n)
+            </div>
+            <div class="info-item">
+              <span class="info-label">Space:</span> O(n)
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">Visualization Shows:</div>
+            <div style="font-size: 11px; line-height: 1.5; color: #666">
+              ✓ Full divide tree<br />
+              ✓ Array changes<br />
+              ✓ Merge process<br />
+              ✓ Final result
+            </div>
+          </div>
+        </div>
+
+        <!-- Visualization Panel -->
+        <div class="visualization-panel">
+          <div class="step-header">
+            <div class="step-title" id="stepTitle">
+              Merge Sort Visualization
+            </div>
+            <div class="step-description" id="stepDescription">
+              Click "Start" to see the complete divide and conquer tree with
+              array transformations
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Step</div>
+              <div class="stat-value" id="stepNum">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Phase</div>
+              <div class="stat-value" id="phase">-</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Comparisons</div>
+              <div class="stat-value" id="comparisons">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Merges</div>
+              <div class="stat-value" id="merges">0</div>
+            </div>
+          </div>
+
+          <!-- SIDE BY SIDE -->
+          <div class="dual-view">
+            <!-- LEFT: Full Tree -->
+            <div class="visualization">
+              <div class="visualization-title">🌳 Complete Division Tree</div>
+              <canvas id="treeCanvas" width="650" height="650"></canvas>
+            </div>
+
+            <!-- RIGHT: Array Changes -->
+            <div class="visualization">
+              <div class="visualization-title">📊 Array Transformation</div>
+              <div class="bars-container" id="barsContainer"></div>
+              <div class="array-display" id="arrayDisplay">[ ]</div>
+            </div>
+          </div>
+
+          <div class="step-info" id="stepInfo" style="display: none">
+            <div class="step-info-title" id="stepInfoTitle">Current Step</div>
+            <div class="step-info-content" id="stepInfoContent"></div>
+          </div>
+
+          <div class="nav-buttons">
+            <button
+              class="nav-btn prev-btn"
+              id="prevBtn"
+              onclick="previousStep()"
+              disabled
+            >
+              ← Previous
+            </button>
+            <button
+              class="nav-btn next-btn"
+              id="nextBtn"
+              onclick="nextStep()"
+              disabled
+            >
+              Next →
+            </button>
+          </div>
+
+          <div class="progress" id="progress">Ready to start</div>
+
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color color-unsorted"></div>
+              <span>Unsorted</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-dividing"></div>
+              <span>Dividing</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-merging"></div>
+              <span>Merging</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-sorted"></div>
+              <span>Sorted</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let array = [];
+      let steps = [];
+      let currentStep = 0;
+      let allStates = [];
+
+      function generateRandomArray(size) {
+        return Array.from(
+          { length: size },
+          () => Math.floor(Math.random() * 100) + 1,
+        );
+      }
+
+      function createSteps() {
+        steps = [];
+        allStates = [];
+        const arr = [...array];
+        let comparisons = 0;
+        let merges = 0;
+        let treeNodes = [];
+        let treeConnections = [];
+
+        // Build complete tree structure first
+        const buildTreeStructure = (low, high, depth = 0, parent = null) => {
+          if (low > high) return;
+
+          const node = {
+            id: `${low}-${high}`,
+            low,
+            high,
+            values: arr.slice(low, high + 1),
+            depth,
+            parent,
+            status: "dividing",
+          };
+
+          treeNodes.push(node);
+
+          if (low < high) {
+            const mid = Math.floor((low + high) / 2);
+            const leftId = `${low}-${mid}`;
+            const rightId = `${mid + 1}-${high}`;
+
+            treeConnections.push({ from: node.id, to: leftId });
+            treeConnections.push({ from: node.id, to: rightId });
+
+            buildTreeStructure(low, mid, depth + 1, node);
+            buildTreeStructure(mid + 1, high, depth + 1, node);
+          }
+        };
+
+        buildTreeStructure(0, arr.length - 1);
+
+        // Initial state
+        allStates.push({
+          array: [...arr],
+          comparisons,
+          merges,
+          phase: "Start",
+          treeNodes: JSON.parse(JSON.stringify(treeNodes)),
+          title: "Initial Array",
+          description: `Array: [${arr.join(", ")}] - Ready to divide recursively`,
+        });
+
+        // Merge sort with detailed steps
+        const mergeSort = (low, high) => {
+          if (low === high) {
+            // Single element - update tree node
+            const node = treeNodes.find(
+              (n) => n.low === low && n.high === high,
+            );
+            if (node) node.status = "sorted";
+            return;
+          }
+
+          if (low < high) {
+            const mid = Math.floor((low + high) / 2);
+
+            // Record dividing step
+            const leftNode = treeNodes.find(
+              (n) => n.low === low && n.high === mid,
+            );
+            const rightNode = treeNodes.find(
+              (n) => n.low === mid + 1 && n.high === high,
+            );
+
+            if (leftNode) leftNode.status = "dividing";
+            if (rightNode) rightNode.status = "dividing";
+
+            allStates.push({
+              array: [...arr],
+              comparisons,
+              merges,
+              phase: "Dividing",
+              treeNodes: JSON.parse(JSON.stringify(treeNodes)),
+              activeNode: `${low}-${high}`,
+              title: `Dividing [${low}...${mid}] | [${mid + 1}...${high}]`,
+              description: `Split into LEFT: [${arr.slice(low, mid + 1).join(", ")}] and RIGHT: [${arr.slice(mid + 1, high + 1).join(", ")}]`,
+            });
+
+            mergeSort(low, mid);
+            mergeSort(mid + 1, high);
+
+            // Merge phase
+            let left = low;
+            let right = mid + 1;
+            const temp = [];
+
+            while (left <= mid && right <= high) {
+              comparisons++;
+
+              allStates.push({
+                array: [...arr],
+                comparisons,
+                merges,
+                phase: "Comparing",
+                treeNodes: JSON.parse(JSON.stringify(treeNodes)),
+                title: `Comparing: ${arr[left]} vs ${arr[right]}`,
+                description: `Compare left (${arr[left]}) and right (${arr[right]})`,
+              });
+
+              if (arr[left] <= arr[right]) {
+                temp.push(arr[left]);
+                left++;
+              } else {
+                temp.push(arr[right]);
+                right++;
+              }
+            }
+
+            while (left <= mid) {
+              temp.push(arr[left]);
+              left++;
+            }
+
+            while (right <= high) {
+              temp.push(arr[right]);
+              right++;
+            }
+
+            // Copy back to original array
+            for (let i = 0; i < temp.length; i++) {
+              arr[low + i] = temp[i];
+            }
+
+            merges++;
+
+            const mergedNode = treeNodes.find(
+              (n) => n.low === low && n.high === high,
+            );
+            if (mergedNode) {
+              mergedNode.status = "merging";
+              mergedNode.values = [...temp];
+            }
+
+            allStates.push({
+              array: [...arr],
+              comparisons,
+              merges,
+              phase: "Merged",
+              treeNodes: JSON.parse(JSON.stringify(treeNodes)),
+              activeNode: `${low}-${high}`,
+              title: `Merged: [${temp.join(", ")}]`,
+              description: `Successfully merged two sorted halves into range [${low}...${high}]`,
+            });
+          }
+        };
+
+        mergeSort(0, arr.length - 1);
+
+        // Mark final state
+        treeNodes.forEach((node) => (node.status = "sorted"));
+
+        allStates.push({
+          array: [...arr],
+          comparisons,
+          merges,
+          phase: "Complete",
+          treeNodes: JSON.parse(JSON.stringify(treeNodes)),
+          title: "✅ Sorting Complete!",
+          description: `Array fully sorted! Comparisons: ${comparisons}, Merges: ${merges}`,
+        });
+
+        steps = allStates;
+      }
+
+      function drawTree(treeNodes, activeNode = null) {
+        const canvas = document.getElementById("treeCanvas");
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!treeNodes || treeNodes.length === 0) return;
+
+        const maxDepth = Math.max(...treeNodes.map((n) => n.depth));
+        const nodeRadius = 35;
+        const horizontalSpacing = canvas.width / (treeNodes.length + 2);
+        const verticalSpacing = canvas.height / (maxDepth + 2);
+
+        // Draw nodes by depth level
+        for (let depth = 0; depth <= maxDepth; depth++) {
+          const nodesAtDepth = treeNodes.filter((n) => n.depth === depth);
+          const startX =
+            canvas.width / 2 - (nodesAtDepth.length * nodeRadius * 1.5) / 2;
+
+          nodesAtDepth.forEach((node, index) => {
+            const x = startX + index * (nodeRadius * 3);
+            const y = (depth + 1) * verticalSpacing;
+
+            // Draw node
+            const isActive = activeNode && node.id === activeNode;
+            const color = getNodeColor(node.status, isActive);
+            const borderColor = getNodeBorderColor(node.status);
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, nodeRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = isActive ? 4 : 2;
+            ctx.stroke();
+
+            // Draw values
+            ctx.fillStyle = "#000";
+            ctx.font = "bold 10px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            const text = node.values.join(",");
+            const lines =
+              text.length > 10 ? [text.slice(0, 5), text.slice(5)] : [text];
+            lines.forEach((line, i) => {
+              ctx.fillText(line, x, y - 8 + i * 12);
+            });
+
+            // Draw range label
+            ctx.font = "9px Arial";
+            ctx.fillStyle = "#666";
+            ctx.fillText(`[${node.low}..${node.high}]`, x, y + 20);
+          });
+        }
+
+        // Draw connections
+        treeNodes.forEach((node) => {
+          if (node.parent) {
+            const parentNode = treeNodes.find((n) => n.id === node.parent.id);
+            if (parentNode) {
+              const maxDepth = Math.max(...treeNodes.map((n) => n.depth));
+              const verticalSpacing = canvas.height / (maxDepth + 2);
+
+              const nodesAtDepthParent = treeNodes.filter(
+                (n) => n.depth === parentNode.depth,
+              );
+              const startXParent =
+                canvas.width / 2 - (nodesAtDepthParent.length * 105) / 2;
+              const parentX =
+                startXParent + nodesAtDepthParent.indexOf(parentNode) * 105;
+              const parentY = (parentNode.depth + 1) * verticalSpacing;
+
+              const nodesAtDepthChild = treeNodes.filter(
+                (n) => n.depth === node.depth,
+              );
+              const startXChild =
+                canvas.width / 2 - (nodesAtDepthChild.length * 105) / 2;
+              const childX =
+                startXChild + nodesAtDepthChild.indexOf(node) * 105;
+              const childY = (node.depth + 1) * verticalSpacing;
+
+              ctx.strokeStyle = "#ddd";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(parentX, parentY + 35);
+              ctx.lineTo(childX, childY - 35);
+              ctx.stroke();
+            }
+          }
+        });
+      }
+
+      function getNodeColor(status, isActive = false) {
+        if (isActive) {
+          return "#ffeb99";
+        }
+        switch (status) {
+          case "dividing":
+            return "#fff9e6";
+          case "merging":
+            return "#ffe6e6";
+          case "sorted":
+            return "#e6f7e6";
+          default:
+            return "#f0f0f0";
+        }
+      }
+
+      function getNodeBorderColor(status) {
+        switch (status) {
+          case "dividing":
+            return "#ffc107";
+          case "merging":
+            return "#ff6b6b";
+          case "sorted":
+            return "#28a745";
+          default:
+            return "#999";
+        }
+      }
+
+      function renderBars(array) {
+        const container = document.getElementById("barsContainer");
+        container.innerHTML = "";
+        const maxValue = Math.max(...array);
+
+        array.forEach((value) => {
+          const bar = document.createElement("div");
+          bar.className = "bar";
+
+          const height = (value / maxValue) * 100;
+          bar.style.height = height + "%";
+
+          const valueSpan = document.createElement("div");
+          valueSpan.className = "bar-value";
+          valueSpan.textContent = value;
+          bar.appendChild(valueSpan);
+
+          container.appendChild(bar);
+        });
+
+        document.getElementById("arrayDisplay").textContent =
+          `[ ${array.join(" , ")} ]`;
+      }
+
+      function displayStep(stepIndex) {
+        if (stepIndex < 0 || stepIndex >= steps.length) return;
+
+        const step = steps[stepIndex];
+
+        document.getElementById("stepTitle").textContent = step.title;
+        document.getElementById("stepDescription").textContent =
+          step.description;
+        document.getElementById("stepNum").textContent = stepIndex + 1;
+        document.getElementById("phase").textContent = step.phase;
+        document.getElementById("comparisons").textContent = step.comparisons;
+        document.getElementById("merges").textContent = step.merges;
+
+        drawTree(step.treeNodes, step.activeNode);
+        renderBars(step.array);
+
+        document.getElementById("stepInfo").style.display = "block";
+        document.getElementById("stepInfoTitle").textContent =
+          `${step.phase} Phase`;
+        document.getElementById("stepInfoContent").innerHTML = `
+                <strong>Current Array State:</strong> [${step.array.join(", ")}]<br>
+                <strong>Comparisons:</strong> ${step.comparisons} | <strong>Merges:</strong> ${step.merges}<br>
+                <strong>Status:</strong> ${step.description}
+            `;
+
+        document.getElementById("prevBtn").disabled = stepIndex === 0;
+        document.getElementById("nextBtn").disabled =
+          stepIndex === steps.length - 1;
+        document.getElementById("progress").textContent =
+          `Step ${stepIndex + 1} / ${steps.length}`;
+
+        currentStep = stepIndex;
+      }
+
+      function startVisualization() {
+        try {
+          const size = parseInt(document.getElementById("sizeInput").value);
+
+          if (size < 2 || size > 8) {
+            alert("Please enter array size between 2 and 8");
+            return;
+          }
+
+          array = generateRandomArray(size);
+          createSteps();
+          displayStep(0);
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Error: " + error.message);
+        }
+      }
+
+      function nextStep() {
+        if (currentStep < steps.length - 1) {
+          displayStep(currentStep + 1);
+        }
+      }
+
+      function previousStep() {
+        if (currentStep > 0) {
+          displayStep(currentStep - 1);
+        }
+      }
+
+      function resetVisualization() {
+        array = [];
+        steps = [];
+        currentStep = 0;
+        allStates = [];
+        const canvas = document.getElementById("treeCanvas");
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById("barsContainer").innerHTML = "";
+        document.getElementById("arrayDisplay").innerHTML = "[ ]";
+        document.getElementById("stepTitle").textContent =
+          "Merge Sort Visualization";
+        document.getElementById("stepDescription").textContent =
+          'Click "Start" to see the visualization';
+        document.getElementById("stepNum").textContent = "0";
+        document.getElementById("phase").textContent = "-";
+        document.getElementById("comparisons").textContent = "0";
+        document.getElementById("merges").textContent = "0";
+        document.getElementById("stepInfo").style.display = "none";
+        document.getElementById("prevBtn").disabled = true;
+        document.getElementById("nextBtn").disabled = true;
+        document.getElementById("progress").textContent = "Ready to start";
+      }
+    </script>
+  </body>
+</html>

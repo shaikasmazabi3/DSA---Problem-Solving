@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sorting Algorithms Visualization - Complete Guide</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 60px;
+      }
+
+      .header h1 {
+        font-size: 48px;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 18px;
+        opacity: 0.95;
+        margin-bottom: 10px;
+      }
+
+      .sorting-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+        margin-bottom: 50px;
+      }
+
+      .sorting-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .sorting-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+      }
+
+      .card-header {
+        padding: 25px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .card-icon {
+        font-size: 36px;
+        margin-bottom: 10px;
+      }
+
+      .card-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .card-category {
+        font-size: 12px;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .card-body {
+        padding: 25px;
+      }
+
+      .card-complexity {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .complexity-item {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        border-left: 4px solid #667eea;
+      }
+
+      .complexity-label {
+        font-weight: 600;
+        color: #667eea;
+        display: block;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 11px;
+      }
+
+      .complexity-value {
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        color: #333;
+        font-weight: 600;
+      }
+
+      .card-description {
+        font-size: 14px;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .card-features {
+        margin-bottom: 20px;
+      }
+
+      .card-features-title {
+        font-weight: 600;
+        color: #333;
+        font-size: 13px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .feature-list {
+        list-style: none;
+      }
+
+      .feature-list li {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 8px;
+        padding-left: 20px;
+        position: relative;
+      }
+
+      .feature-list li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #28a745;
+        font-weight: bold;
+      }
+
+      .card-footer {
+        display: flex;
+        gap: 10px;
+        padding: 20px 25px;
+        border-top: 1px solid #eee;
+        background: #f9f9f9;
+      }
+
+      .btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+      }
+
+      .btn-visualize {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-visualize:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-code {
+        background: #f0f0f0;
+        color: #333;
+        border: 2px solid #ddd;
+      }
+
+      .btn-code:hover {
+        background: #e0e0e0;
+      }
+
+      .category-section {
+        margin-bottom: 60px;
+      }
+
+      .category-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .comparison-table {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        margin-bottom: 50px;
+      }
+
+      .table-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+      }
+
+      .table-title {
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th {
+        background: #f5f5f5;
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 2px solid #ddd;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      td {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        font-size: 13px;
+        color: #555;
+      }
+
+      tr:hover {
+        background: #f9f9f9;
+      }
+
+      .best {
+        color: #28a745;
+        font-weight: 600;
+      }
+
+      .worst {
+        color: #dc3545;
+        font-weight: 600;
+      }
+
+      .footer-section {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 30px;
+        color: white;
+        margin-top: 50px;
+      }
+
+      .footer-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }
+
+      .footer-text {
+        line-height: 1.8;
+        font-size: 14px;
+        opacity: 0.95;
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 32px;
+        }
+
+        .sorting-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .card-complexity {
+          grid-template-columns: 1fr;
+        }
+
+        .category-title {
+          font-size: 20px;
+        }
+
+        table {
+          font-size: 12px;
+        }
+
+        th,
+        td {
+          padding: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📊 Sorting Algorithms Visualization</h1>
+        <p>
+          Interactive Step-by-Step Learning for All Major Sorting Algorithms
+        </p>
+        <p style="font-size: 14px; margin-top: 20px; opacity: 0.85">
+          Master sorting algorithms with deep visualizations, complexity
+          analysis, and real-world applications
+        </p>
+      </div>
+
+      <!-- SIMPLE SORTS -->
+      <div class="category-section">
+        <div class="category-title">
+          🔵 Simple Sorting Algorithms (Beginner Level)
+        </div>
+        <div class="sorting-grid">
+          <!-- Bubble Sort -->
+          <div class="sorting-card">
+            <div class="card-header">
+              <div class="card-icon">🫧</div>
+              <div class="card-title">Bubble Sort</div>
+              <div class="card-category">Comparison-Based, Simple</div>
+            </div>
+            <div class="card-body">
+              <div class="card-complexity">
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Avg)</span>
+                  <span class="complexity-value">O(n²)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Best)</span>
+                  <span class="complexity-value">O(n)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Space</span>
+                  <span class="complexity-value">O(1)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Stable</span>
+                  <span class="complexity-value">✓ Yes</span>
+                </div>
+              </div>
+              <div class="card-description">
+                Repeatedly steps through the list, compares adjacent elements,
+                and swaps them if they're in the wrong order. "Bubbles" larger
+                elements to the end.
+              </div>
+              <div class="card-features">
+                <div class="card-features-title">Key Concepts</div>
+                <ul class="feature-list">
+                  <li>Adjacent element comparison</li>
+                  <li>Multiple passes through array</li>
+                  <li>Early termination optimization</li>
+                  <li>Best for nearly sorted data</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="sorting-bubble.html" class="btn btn-visualize"
+                >Visualize →</a
+              >
+            </div>
+          </div>
+
+          <!-- Selection Sort -->
+          <div class="sorting-card">
+            <div class="card-header">
+              <div class="card-icon">🎯</div>
+              <div class="card-title">Selection Sort</div>
+              <div class="card-category">Comparison-Based, Simple</div>
+            </div>
+            <div class="card-body">
+              <div class="card-complexity">
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Avg)</span>
+                  <span class="complexity-value">O(n²)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Best)</span>
+                  <span class="complexity-value">O(n²)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Space</span>
+                  <span class="complexity-value">O(1)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Stable</span>
+                  <span class="complexity-value">✗ No</span>
+                </div>
+              </div>
+              <div class="card-description">
+                Divides array into sorted and unsorted sections. Repeatedly
+                finds the minimum element and moves it to the sorted section.
+              </div>
+              <div class="card-features">
+                <div class="card-features-title">Key Concepts</div>
+                <ul class="feature-list">
+                  <li>Find minimum element</li>
+                  <li>Minimum selections</li>
+                  <li>Sorted vs unsorted sections</li>
+                  <li>Linear search for minimum</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="sorting-selection.html" class="btn btn-visualize"
+                >Visualize →</a
+              >
+            </div>
+          </div>
+
+          <!-- Insertion Sort -->
+          <div class="sorting-card">
+            <div class="card-header">
+              <div class="card-icon">💳</div>
+              <div class="card-title">Insertion Sort</div>
+              <div class="card-category">Comparison-Based, Simple</div>
+            </div>
+            <div class="card-body">
+              <div class="card-complexity">
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Avg)</span>
+                  <span class="complexity-value">O(n²)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Best)</span>
+                  <span class="complexity-value">O(n)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Space</span>
+                  <span class="complexity-value">O(1)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Stable</span>
+                  <span class="complexity-value">✓ Yes</span>
+                </div>
+              </div>
+              <div class="card-description">
+                Builds sorted array one item at a time by inserting elements
+                into their correct position in the sorted section.
+              </div>
+              <div class="card-features">
+                <div class="card-features-title">Key Concepts</div>
+                <ul class="feature-list">
+                  <li>Building sorted array</li>
+                  <li>Shifting elements</li>
+                  <li>Finding insertion position</li>
+                  <li>Best for small datasets</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="sorting-insertion.html" class="btn btn-visualize"
+                >Visualize →</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERMEDIATE SORTS -->
+      <div class="category-section">
+        <div class="category-title">
+          🟠 Intermediate Sorting Algorithms (Intermediate Level)
+        </div>
+        <div class="sorting-grid">
+          <!-- Merge Sort -->
+          <div class="sorting-card">
+            <div class="card-header">
+              <div class="card-icon">🔀</div>
+              <div class="card-title">Merge Sort</div>
+              <div class="card-category">Divide & Conquer, Stable</div>
+            </div>
+            <div class="card-body">
+              <div class="card-complexity">
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Avg)</span>
+                  <span class="complexity-value">O(n log n)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Best)</span>
+                  <span class="complexity-value">O(n log n)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Space</span>
+                  <span class="complexity-value">O(n)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Stable</span>
+                  <span class="complexity-value">✓ Yes</span>
+                </div>
+              </div>
+              <div class="card-description">
+                Divides array into halves, recursively sorts them, then merges
+                the sorted halves. Guaranteed O(n log n) performance.
+              </div>
+              <div class="card-features">
+                <div class="card-features-title">Key Concepts</div>
+                <ul class="feature-list">
+                  <li>Divide & conquer approach</li>
+                  <li>Recursive splitting</li>
+                  <li>Merging sorted arrays</li>
+                  <li>Guaranteed O(n log n)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="sorting-merge.html" class="btn btn-visualize"
+                >Visualize →</a
+              >
+            </div>
+          </div>
+
+          <!-- Quick Sort -->
+          <div class="sorting-card">
+            <div class="card-header">
+              <div class="card-icon">⚡</div>
+              <div class="card-title">Quick Sort</div>
+              <div class="card-category">Divide & Conquer, Fast</div>
+            </div>
+            <div class="card-body">
+              <div class="card-complexity">
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Avg)</span>
+                  <span class="complexity-value">O(n log n)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Worst)</span>
+                  <span class="complexity-value">O(n²)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Space</span>
+                  <span class="complexity-value">O(log n)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Stable</span>
+                  <span class="complexity-value">✗ No</span>
+                </div>
+              </div>
+              <div class="card-description">
+                Selects a pivot element and partitions array around it.
+                Recursively sorts the partitions. Fast in practice with good
+                pivot selection.
+              </div>
+              <div class="card-features">
+                <div class="card-features-title">Key Concepts</div>
+                <ul class="feature-list">
+                  <li>Pivot selection strategies</li>
+                  <li>Partitioning logic</li>
+                  <li>Recursive subdivision</li>
+                  <li>Cache-friendly in practice</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="sorting-quick.html" class="btn btn-visualize"
+                >Visualize →</a
+              >
+            </div>
+          </div>
+
+          <!-- Heap Sort -->
+          <div class="sorting-card">
+            <div class="card-header">
+              <div class="card-icon">📚</div>
+              <div class="card-title">Heap Sort</div>
+              <div class="card-category">Heap-Based, Guaranteed</div>
+            </div>
+            <div class="card-body">
+              <div class="card-complexity">
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Avg)</span>
+                  <span class="complexity-value">O(n log n)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Best)</span>
+                  <span class="complexity-value">O(n log n)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Space</span>
+                  <span class="complexity-value">O(1)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Stable</span>
+                  <span class="complexity-value">✗ No</span>
+                </div>
+              </div>
+              <div class="card-description">
+                Builds a max heap and repeatedly extracts the maximum element.
+                Guaranteed O(n log n) with O(1) space.
+              </div>
+              <div class="card-features">
+                <div class="card-features-title">Key Concepts</div>
+                <ul class="feature-list">
+                  <li>Heap structure & properties</li>
+                  <li>Heapify operations</li>
+                  <li>Building max heap</li>
+                  <li>Extracting heap root</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="sorting-heap.html" class="btn btn-visualize"
+                >Visualize →</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPECIALIZED SORTS -->
+      <div class="category-section">
+        <div class="category-title">
+          🟢 Specialized Sorting Algorithms (Advanced Level)
+        </div>
+        <div class="sorting-grid">
+          <!-- Counting Sort -->
+          <div class="sorting-card">
+            <div class="card-header">
+              <div class="card-icon">📈</div>
+              <div class="card-title">Counting Sort</div>
+              <div class="card-category">Non-Comparative, Linear</div>
+            </div>
+            <div class="card-body">
+              <div class="card-complexity">
+                <div class="complexity-item">
+                  <span class="complexity-label">Time</span>
+                  <span class="complexity-value">O(n + k)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Space</span>
+                  <span class="complexity-value">O(k)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Stable</span>
+                  <span class="complexity-value">✓ Yes</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Best For</span>
+                  <span class="complexity-value">Small Range</span>
+                </div>
+              </div>
+              <div class="card-description">
+                Counts occurrences of each value and uses that to determine the
+                correct position for each element.
+              </div>
+              <div class="card-features">
+                <div class="card-features-title">Key Concepts</div>
+                <ul class="feature-list">
+                  <li>Count array creation</li>
+                  <li>Frequency counting</li>
+                  <li>Prefix sum calculation</li>
+                  <li>Backwards placement</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="sorting-counting.html" class="btn btn-visualize"
+                >Visualize →</a
+              >
+            </div>
+          </div>
+
+          <!-- Radix Sort -->
+          <div class="sorting-card">
+            <div class="card-header">
+              <div class="card-icon">🔢</div>
+              <div class="card-title">Radix Sort</div>
+              <div class="card-category">Non-Comparative, Digit-Based</div>
+            </div>
+            <div class="card-body">
+              <div class="card-complexity">
+                <div class="complexity-item">
+                  <span class="complexity-label">Time</span>
+                  <span class="complexity-value">O(d × n)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Space</span>
+                  <span class="complexity-value">O(n + k)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Stable</span>
+                  <span class="complexity-value">✓ Yes</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Best For</span>
+                  <span class="complexity-value">Integers</span>
+                </div>
+              </div>
+              <div class="card-description">
+                Sorts numbers digit by digit, from least significant to most
+                significant using counting sort.
+              </div>
+              <div class="card-features">
+                <div class="card-features-title">Key Concepts</div>
+                <ul class="feature-list">
+                  <li>Digit extraction</li>
+                  <li>Multiple counting sorts</li>
+                  <li>LSD vs MSD approach</li>
+                  <li>Stable sub-sorting</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="sorting-radix.html" class="btn btn-visualize"
+                >Visualize →</a
+              >
+            </div>
+          </div>
+
+          <!-- Bucket Sort -->
+          <div class="sorting-card">
+            <div class="card-header">
+              <div class="card-icon">🪣</div>
+              <div class="card-title">Bucket Sort</div>
+              <div class="card-category">Non-Comparative, Distribution</div>
+            </div>
+            <div class="card-body">
+              <div class="card-complexity">
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Avg)</span>
+                  <span class="complexity-value">O(n + k)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Time (Worst)</span>
+                  <span class="complexity-value">O(n²)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Space</span>
+                  <span class="complexity-value">O(n + k)</span>
+                </div>
+                <div class="complexity-item">
+                  <span class="complexity-label">Stable</span>
+                  <span class="complexity-value">✓ Yes</span>
+                </div>
+              </div>
+              <div class="card-description">
+                Distributes elements into buckets, sorts each bucket
+                individually, then concatenates them.
+              </div>
+              <div class="card-features">
+                <div class="card-features-title">Key Concepts</div>
+                <ul class="feature-list">
+                  <li>Bucket creation</li>
+                  <li>Element distribution</li>
+                  <li>Bucket sorting</li>
+                  <li>Result concatenation</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="sorting-bucket.html" class="btn btn-visualize"
+                >Visualize →</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPARISON TABLE -->
+      <div class="comparison-table">
+        <div class="table-header">
+          <div class="table-title">📊 Complete Complexity Comparison</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Algorithm</th>
+              <th>Best Case</th>
+              <th>Average Case</th>
+              <th>Worst Case</th>
+              <th>Space</th>
+              <th>Stable</th>
+              <th>Best Used For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Bubble Sort</strong></td>
+              <td><span class="best">O(n)</span></td>
+              <td>O(n²)</td>
+              <td><span class="worst">O(n²)</span></td>
+              <td>O(1)</td>
+              <td>✓</td>
+              <td>Educational, Nearly sorted</td>
+            </tr>
+            <tr>
+              <td><strong>Selection Sort</strong></td>
+              <td>O(n²)</td>
+              <td>O(n²)</td>
+              <td><span class="worst">O(n²)</span></td>
+              <td>O(1)</td>
+              <td>✗</td>
+              <td>Minimizing writes</td>
+            </tr>
+            <tr>
+              <td><strong>Insertion Sort</strong></td>
+              <td><span class="best">O(n)</span></td>
+              <td>O(n²)</td>
+              <td><span class="worst">O(n²)</span></td>
+              <td>O(1)</td>
+              <td>✓</td>
+              <td>Small datasets, online sorting</td>
+            </tr>
+            <tr>
+              <td><strong>Merge Sort</strong></td>
+              <td><span class="best">O(n log n)</span></td>
+              <td><span class="best">O(n log n)</span></td>
+              <td><span class="best">O(n log n)</span></td>
+              <td><span class="worst">O(n)</span></td>
+              <td>✓</td>
+              <td>Guaranteed performance</td>
+            </tr>
+            <tr>
+              <td><strong>Quick Sort</strong></td>
+              <td><span class="best">O(n log n)</span></td>
+              <td><span class="best">O(n log n)</span></td>
+              <td><span class="worst">O(n²)</span></td>
+              <td>O(log n)</td>
+              <td>✗</td>
+              <td>General purpose, practical</td>
+            </tr>
+            <tr>
+              <td><strong>Heap Sort</strong></td>
+              <td><span class="best">O(n log n)</span></td>
+              <td><span class="best">O(n log n)</span></td>
+              <td><span class="best">O(n log n)</span></td>
+              <td>O(1)</td>
+              <td>✗</td>
+              <td>Guaranteed O(n log n), in-place</td>
+            </tr>
+            <tr>
+              <td><strong>Counting Sort</strong></td>
+              <td><span class="best">O(n + k)</span></td>
+              <td><span class="best">O(n + k)</span></td>
+              <td><span class="best">O(n + k)</span></td>
+              <td><span class="worst">O(k)</span></td>
+              <td>✓</td>
+              <td>Small range integers</td>
+            </tr>
+            <tr>
+              <td><strong>Radix Sort</strong></td>
+              <td><span class="best">O(d × n)</span></td>
+              <td><span class="best">O(d × n)</span></td>
+              <td><span class="best">O(d × n)</span></td>
+              <td>O(n + k)</td>
+              <td>✓</td>
+              <td>Large integer arrays</td>
+            </tr>
+            <tr>
+              <td><strong>Bucket Sort</strong></td>
+              <td><span class="best">O(n + k)</span></td>
+              <td><span class="best">O(n + k)</span></td>
+              <td><span class="worst">O(n²)</span></td>
+              <td><span class="worst">O(n + k)</span></td>
+              <td>✓</td>
+              <td>Uniformly distributed data</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer-section">
+        <div class="footer-title">🎯 Learning Roadmap</div>
+        <div class="footer-text">
+          <strong>Beginner:</strong> Start with Bubble Sort, Selection Sort, and
+          Insertion Sort. These teach fundamental concepts like comparisons and
+          swaps. <br /><br />
+          <strong>Intermediate:</strong> Move to Merge Sort and Quick Sort.
+          Understand divide & conquer and recursive thinking. <br /><br />
+          <strong>Advanced:</strong> Study Heap Sort for guaranteed performance,
+          and non-comparative algorithms (Counting, Radix, Bucket) for
+          specialized use cases. <br /><br />
+          <strong>Real-World:</strong> JavaScript uses Merge Sort and Quick Sort
+          (V8 engine). Python uses Timsort (hybrid). Understand why different
+          languages choose different algorithms.
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

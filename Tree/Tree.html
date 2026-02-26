@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tree Data Structures for Beginners</title>
+    <style>
+      /* Reset & base */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f0f8ff;
+        color: #333;
+      }
+      .container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      }
+      h1,
+      h2 {
+        color: #2c3e50;
+      }
+      p {
+        font-size: 1.1rem;
+        line-height: 1.5;
+      }
+      .slide {
+        display: none;
+        min-height: 400px;
+      }
+      .slide.active {
+        display: block;
+      }
+      .controls {
+        margin-top: 20px;
+        text-align: center;
+      }
+      button {
+        background: #2980b9;
+        border: none;
+        color: white;
+        padding: 10px 18px;
+        margin: 0 10px;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.3s ease;
+      }
+      button:disabled {
+        background: #95a5a6;
+        cursor: default;
+      }
+      button:hover:not(:disabled) {
+        background: #3498db;
+      }
+      /* Tree Visualization Styles */
+      .tree-container {
+        margin-top: 20px;
+        text-align: center;
+        user-select: none;
+      }
+      svg {
+        max-width: 100%;
+        height: 300px;
+      }
+      .node circle {
+        fill: #3498db;
+        stroke: #2980b9;
+        stroke-width: 2px;
+        transition: fill 0.3s ease;
+      }
+      .node text {
+        fill: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+        pointer-events: none;
+      }
+      .node.highlight {
+        fill: #e74c3c !important;
+        stroke: #c0392b !important;
+      }
+      .node.next {
+        fill: #f39c12 !important;
+        stroke: #d35400 !important;
+      }
+      line {
+        stroke: #2980b9;
+        stroke-width: 2px;
+      }
+      /* Traversal steps */
+      .steps {
+        margin-top: 15px;
+        font-size: 1.1rem;
+        min-height: 40px;
+        font-weight: bold;
+        color: #34495e;
+      }
+      /* Problem explanation */
+      .problem {
+        text-align: left;
+        margin-top: 15px;
+        background: #ecf0f1;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 1rem;
+      }
+      .code {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 10px;
+        border-radius: 6px;
+        font-family: "Courier New", Courier, monospace;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Learn Tree Data Structures Step-by-Step</h1>
+
+      <!-- Slides container -->
+      <div id="slides">
+        <!-- Slide 1: What is a Tree -->
+        <section class="slide active" id="slide1">
+          <h2>What is a Tree?</h2>
+          <p>
+            A tree is a special kind of data structure that looks like a family
+            tree or a real tree with branches. It has nodes connected by edges.
+            It starts from a <b>root</b> node and branches out to child nodes.
+          </p>
+          <div class="tree-container" aria-label="Simple Tree Diagram">
+            <svg viewBox="0 0 300 180" role="img" aria-labelledby="treeTitle1">
+              <title id="treeTitle1">
+                Simple tree with root and child nodes
+              </title>
+              <!-- Root -->
+              <g class="node" transform="translate(150, 30)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">Root</text>
+              </g>
+              <!-- Children -->
+              <g class="node" transform="translate(90, 90)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">A</text>
+              </g>
+              <g class="node" transform="translate(210, 90)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">B</text>
+              </g>
+              <!-- Edges -->
+              <line x1="150" y1="30" x2="90" y2="90"></line>
+              <line x1="150" y1="30" x2="210" y2="90"></line>
+            </svg>
+          </div>
+        </section>
+
+        <!-- Slide 2: Types of Trees -->
+        <section class="slide" id="slide2">
+          <h2>Types of Trees</h2>
+          <p>
+            There are many types of trees in computer science. Here are some
+            common ones:
+          </p>
+          <ul>
+            <li><b>Binary Tree</b> - Each node has at most 2 children.</li>
+            <li>
+              <b>Binary Search Tree (BST)</b> - A binary tree with ordered
+              nodes.
+            </li>
+            <li><b>AVL Tree</b> - A self-balancing binary search tree.</li>
+            <li><b>Heap</b> - A special tree for priority queues.</li>
+            <li><b>Trie</b> - A tree for storing words or prefixes.</li>
+          </ul>
+          <p>Let's focus on Binary Trees and BSTs first.</p>
+        </section>
+
+        <!-- Slide 3: Binary Tree -->
+        <section class="slide" id="slide3">
+          <h2>What is a Binary Tree?</h2>
+          <p>
+            A binary tree is a tree where each node has at most two children:
+            <b>left</b> and <b>right</b>.
+          </p>
+          <div class="tree-container" aria-label="Binary Tree Diagram">
+            <svg viewBox="0 0 300 180" role="img" aria-labelledby="treeTitle2">
+              <title id="treeTitle2">
+                Binary tree with root and two children
+              </title>
+              <!-- Root -->
+              <g class="node" transform="translate(150, 30)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">10</text>
+              </g>
+              <!-- Children -->
+              <g class="node" transform="translate(90, 90)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">5</text>
+              </g>
+              <g class="node" transform="translate(210, 90)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">15</text>
+              </g>
+              <!-- Edges -->
+              <line x1="150" y1="30" x2="90" y2="90"></line>
+              <line x1="150" y1="30" x2="210" y2="90"></line>
+            </svg>
+          </div>
+        </section>
+
+        <!-- Slide 4: Binary Search Tree -->
+        <section class="slide" id="slide4">
+          <h2>What is a Binary Search Tree (BST)?</h2>
+          <p>A BST is a binary tree where for each node:</p>
+          <ul>
+            <li>All nodes in the left subtree have smaller values.</li>
+            <li>All nodes in the right subtree have larger values.</li>
+          </ul>
+          <p>This helps us search for values quickly!</p>
+          <div class="tree-container" aria-label="Binary Search Tree Diagram">
+            <svg
+              id="bst"
+              viewBox="0 0 400 220"
+              role="img"
+              aria-labelledby="bstTitle"
+            >
+              <title id="bstTitle">Binary Search Tree example</title>
+              <!-- Nodes will be generated by JS -->
+            </svg>
+          </div>
+          <div style="margin-top: 15px; text-align: center">
+            <button id="bstStartBtn">Start Search for 13</button>
+            <button id="bstNextStepBtn" disabled>Next Step</button>
+            <button id="bstResetBtn" disabled>Reset</button>
+          </div>
+          <div class="steps" id="bstStepText" aria-live="polite"></div>
+        </section>
+
+        <!-- Slide 5: BFS Traversal -->
+        <section class="slide" id="slide5">
+          <h2>Breadth-First Search (BFS)</h2>
+          <p>
+            BFS visits nodes level by level from top to bottom and left to
+            right.
+          </p>
+          <div class="tree-container" aria-label="BFS Traversal">
+            <svg
+              id="bfsTree"
+              viewBox="0 0 400 220"
+              role="img"
+              aria-labelledby="bfsTitle"
+            >
+              <title id="bfsTitle">Binary Tree for BFS traversal</title>
+              <!-- Nodes generated by JS -->
+            </svg>
+          </div>
+          <div style="margin-top: 15px; text-align: center">
+            <button id="bfsStartBtn">Start BFS</button>
+            <button id="bfsNextStepBtn" disabled>Next Step</button>
+            <button id="bfsResetBtn" disabled>Reset</button>
+          </div>
+          <div class="steps" id="bfsStepText" aria-live="polite"></div>
+        </section>
+
+        <!-- Slide 6: Depth-First Search (DFS) -->
+        <section class="slide" id="slide6">
+          <h2>Depth-First Search (DFS)</h2>
+          <p>
+            DFS visits nodes by going deep into one branch before backtracking.
+          </p>
+          <div class="tree-container" aria-label="DFS Traversal">
+            <svg
+              id="dfsTree"
+              viewBox="0 0 400 220"
+              role="img"
+              aria-labelledby="dfsTitle"
+            >
+              <title id="dfsTitle">Binary Tree for DFS traversal</title>
+              <!-- Nodes generated by JS -->
+            </svg>
+          </div>
+          <div style="margin-top: 15px; text-align: center">
+            <button id="dfsStartBtn">Start DFS</button>
+            <button id="dfsNextStepBtn" disabled>Next Step</button>
+            <button id="dfsResetBtn" disabled>Reset</button>
+          </div>
+          <div class="steps" id="dfsStepText" aria-live="polite"></div>
+        </section>
+
+        <!-- Slide 7: Traversals - Inorder, Preorder, Postorder -->
+        <section class="slide" id="slide7">
+          <h2>Tree Traversal Types</h2>
+          <p>We visit nodes in different orders:</p>
+          <ul>
+            <li><b>Inorder</b> (Left, Root, Right) - Sorted order in BST</li>
+            <li><b>Preorder</b> (Root, Left, Right)</li>
+            <li><b>Postorder</b> (Left, Right, Root)</li>
+          </ul>
+          <div class="tree-container" aria-label="Traversal Animation">
+            <svg
+              id="traversalTree"
+              viewBox="0 0 400 220"
+              role="img"
+              aria-labelledby="traversalTitle"
+            >
+              <title id="traversalTitle">
+                Binary Tree for traversal animations
+              </title>
+              <!-- Nodes generated by JS -->
+            </svg>
+          </div>
+          <div style="margin-top: 15px; text-align: center">
+            <select id="traversalType" aria-label="Select traversal type">
+              <option value="inorder">Inorder</option>
+              <option value="preorder">Preorder</option>
+              <option value="postorder">Postorder</option>
+            </select>
+            <button id="traversalStartBtn">Start Traversal</button>
+            <button id="traversalNextStepBtn" disabled>Next Step</button>
+            <button id="traversalResetBtn" disabled>Reset</button>
+          </div>
+          <div class="steps" id="traversalStepText" aria-live="polite"></div>
+        </section>
+
+        <!-- Slide 8: Sample LeetCode Problem - Medium -->
+        <section class="slide" id="slide8">
+          <h2>LeetCode Medium Problem: Validate BST</h2>
+          <p>Check if a binary tree is a valid BST.</p>
+          <div class="problem">
+            <p>
+              <b>Problem:</b> Given a binary tree, determine if it is a valid
+              binary search tree.
+            </p>
+            <div class="code">
+              <pre>
+function isValidBST(root) {
+  return validate(root, -Infinity, Infinity);
+}
+function validate(node, min, max) {
+  if (!node) return true;
+  if (node.val <= min || node.val >= max) return false;
+  return validate(node.left, min, node.val) && validate(node.right, node.val, max);
+}
+</pre
+              >
+            </div>
+            <p>
+              This code checks if the tree obeys the BST rules by keeping track
+              of valid min and max values.
+            </p>
+          </div>
+          <p><i>Animation and step-by-step walkthrough coming soon...</i></p>
+        </section>
+
+        <!-- Slide 9: Sample LeetCode Problem - Hard -->
+        <section class="slide" id="slide9">
+          <h2>LeetCode Hard Problem: Serialize and Deserialize BST</h2>
+          <p>Convert a BST to a string and back to a BST.</p>
+          <div class="problem">
+            <p>
+              <b>Problem:</b> Design algorithms to serialize and deserialize a
+              BST.
+            </p>
+            <div class="code">
+              <pre>
+function serialize(root) {
+  let res = [];
+  function preorder(node) {
+    if (!node) return;
+    res.push(node.val);
+    preorder(node.left);
+    preorder(node.right);
+  }
+  preorder(root);
+  return res.join(',');
+}
+
+function deserialize(data) {
+  if (!data) return null;
+  let arr = data.split(',').map(Number);
+  function build(min, max) {
+    if (!arr.length) return null;
+    if (arr[0] < min || arr[0] > max) return null;
+    let val = arr.shift();
+    let node = { val: val, left: null, right: null };
+    node.left = build(min, val);
+    node.right = build(val, max);
+    return node;
+  }
+  return build(-Infinity, Infinity);
+}
+</pre
+              >
+            </div>
+          </div>
+          <p><i>Animation and step-by-step walkthrough coming soon...</i></p>
+        </section>
+      </div>
+
+      <!-- Navigation Controls -->
+      <div class="controls" role="navigation" aria-label="Slide navigation">
+        <button id="prevBtn" aria-label="Previous slide" disabled>
+          Previous
+        </button>
+        <button id="nextBtn" aria-label="Next slide">Next</button>
+      </div>
+    </div>
+
+    <script>
+      // Slide navigation
+      const slides = document.querySelectorAll(".slide");
+      let currentSlide = 0;
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      function showSlide(index) {
+        slides.forEach((s, i) => s.classList.toggle("active", i === index));
+        currentSlide = index;
+        prevBtn.disabled = index === 0;
+        nextBtn.disabled = index === slides.length - 1;
+      }
+      prevBtn.addEventListener("click", () => showSlide(currentSlide - 1));
+      nextBtn.addEventListener("click", () => showSlide(currentSlide + 1));
+
+      // ------------------------
+      // Binary Search Tree Slide Animation
+      // ------------------------
+      const bstSvg = document.getElementById("bst");
+      const bstStartBtn = document.getElementById("bstStartBtn");
+      const bstNextStepBtn = document.getElementById("bstNextStepBtn");
+      const bstResetBtn = document.getElementById("bstResetBtn");
+      const bstStepText = document.getElementById("bstStepText");
+
+      // BST nodes data: val, x, y, left, right
+      const bstNodes = [
+        { id: 0, val: 10, x: 200, y: 40, left: 1, right: 2 },
+        { id: 1, val: 5, x: 120, y: 110, left: 3, right: 4 },
+        { id: 2, val: 15, x: 280, y: 110, left: null, right: 5 },
+        { id: 3, val: 3, x: 80, y: 180, left: null, right: null },
+        { id: 4, val: 7, x: 160, y: 180, left: null, right: null },
+        { id: 5, val: 20, x: 320, y: 180, left: null, right: null },
+      ];
+
+      // Draw BST nodes and edges
+      function drawBST() {
+        bstSvg.innerHTML = "";
+        // edges
+        bstNodes.forEach((n) => {
+          if (n.left !== null) {
+            const left = bstNodes.find((x) => x.id === n.left);
+            const line = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+            );
+            line.setAttribute("x1", n.x);
+            line.setAttribute("y1", n.y);
+            line.setAttribute("x2", left.x);
+            line.setAttribute("y2", left.y);
+            bstSvg.appendChild(line);
+          }
+          if (n.right !== null) {
+            const right = bstNodes.find((x) => x.id === n.right);
+            const line = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+            );
+            line.setAttribute("x1", n.x);
+            line.setAttribute("y1", n.y);
+            line.setAttribute("x2", right.x);
+            line.setAttribute("y2", right.y);
+            bstSvg.appendChild(line);
+          }
+        });
+        // nodes
+        bstNodes.forEach((n) => {
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          g.setAttribute("class", "node");
+          g.setAttribute("transform", `translate(${n.x},${n.y})`);
+          g.setAttribute("data-id", n.id);
+          const circle = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle"
+          );
+          circle.setAttribute("r", 20);
+          g.appendChild(circle);
+          const text = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text"
+          );
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("dy", "7");
+          text.setAttribute("font-size", "18");
+          text.textContent = n.val;
+          g.appendChild(text);
+          bstSvg.appendChild(g);
+        });
+      }
+      drawBST();
+
+      // Search animation for value 13
+      const searchValue = 13;
+      let bstSearchSteps = [];
+      let bstStepIndex = -1;
+
+      // Build search steps
+      function buildSearchSteps() {
+        bstSearchSteps = [];
+        function search(id) {
+          if (id === null) return;
+          const node = bstNodes.find((n) => n.id === id);
+          bstSearchSteps.push({
+            current: id,
+            message: `Checking node with value ${node.val}`,
+          });
+          if (node.val === searchValue) {
+            bstSearchSteps.push({
+              current: id,
+              message: `Found value ${searchValue}!`,
+            });
+            return;
+          }
+          if (searchValue < node.val) {
+            bstSearchSteps.push({
+              current: id,
+              message: `${searchValue} < ${node.val}, go left`,
+            });
+            search(node.left);
+          } else {
+            bstSearchSteps.push({
+              current: id,
+              message: `${searchValue} > ${node.val}, go right`,
+            });
+            search(node.right);
+          }
+        }
+        search(0);
+      }
+      buildSearchSteps();
+
+      function clearHighlights() {
+        bstSvg.querySelectorAll(".node").forEach((n) => {
+          n.querySelector("circle").classList.remove("highlight", "next");
+        });
+      }
+
+      function highlightNode(id, cls) {
+        const node = bstSvg.querySelector(`.node[data-id="${id}"]`);
+        if (node) {
+          node.querySelector("circle").classList.add(cls);
+        }
+      }
+
+      function showStep(index) {
+        clearHighlights();
+        if (index < 0 || index >= bstSearchSteps.length) return;
+        const step = bstSearchSteps[index];
+        bstStepText.textContent = step.message;
+        highlightNode(step.current, "highlight");
+        // Highlight next node if applicable
+        if (index + 1 < bstSearchSteps.length) {
+          const nextStep = bstSearchSteps[index + 1];
+          if (nextStep.current !== step.current) {
+            highlightNode(nextStep.current, "next");
+          }
+        }
+      }
+
+      bstStartBtn.addEventListener("click", () => {
+        bstStepIndex = 0;
+        showStep(bstStepIndex);
+        bstStartBtn.disabled = true;
+        bstNextStepBtn.disabled = false;
+        bstResetBtn.disabled = false;
+      });
+      bstNextStepBtn.addEventListener("click", () => {
+        bstStepIndex++;
+        if (bstStepIndex >= bstSearchSteps.length) {
+          bstStepIndex = bstSearchSteps.length - 1;
+          bstNextStepBtn.disabled = true;
+        }
+        showStep(bstStepIndex);
+      });
+      bstResetBtn.addEventListener("click", () => {
+        bstStepIndex = -1;
+        bstStepText.textContent = "";
+        clearHighlights();
+        bstStartBtn.disabled = false;
+        bstNextStepBtn.disabled = true;
+        bstResetBtn.disabled = true;
+      });
+
+      // ------------------------
+      // BFS Traversal Animation
+      // ------------------------
+      const bfsSvg = document.getElementById("bfsTree");
+      const bfsStartBtn = document.getElementById("bfsStartBtn");
+      const bfsNextStepBtn = document.getElementById("bfsNextStepBtn");
+      const bfsResetBtn = document.getElementById("bfsResetBtn");
+      const bfsStepText = document.getElementById("bfsStepText");
+
+      // BFS tree nodes (same structure as BST for simplicity)
+      const bfsNodes = [
+        { id: 0, val: 10, x: 200, y: 40, left: 1, right: 2 },
+        { id: 1, val: 5, x: 120, y: 110, left: 3, right: 4 },
+        { id: 2, val: 15, x: 280, y: 110, left: null, right: 5 },
+        { id: 3, val: 3, x: 80, y: 180, left: null, right: null },
+        { id: 4, val: 7, x: 160, y: 180, left: null, right: null },
+        { id: 5, val: 20, x: 320, y: 180, left: null, right: null },
+      ];
+
+      function drawBFSTree() {
+        bfsSvg.innerHTML = "";
+        bfsNodes.forEach((n) => {
+          if (n.left !== null) {
+            const left = bfsNodes.find((x) => x.id === n.left);
+            const line = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+            );
+            line.setAttribute("x1", n.x);
+            line.setAttribute("y1", n.y);
+            line.setAttribute("x2", left.x);
+            line.setAttribute("y2", left.y);
+            bfsSvg.appendChild(line);
+          }
+          if (n.right !== null) {
+            const right = bfsNodes.find((x) => x.id === n.right);
+            const line = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+            );
+            line.setAttribute("x1", n.x);
+            line.setAttribute("y1", n.y);
+            line.setAttribute("x2", right.x);
+            line.setAttribute("y2", right.y);
+            bfsSvg.appendChild(line);
+          }
+        });
+        bfsNodes.forEach((n) => {
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          g.setAttribute("class", "node");
+          g.setAttribute("transform", `translate(${n.x},${n.y})`);
+          g.setAttribute("data-id", n.id);
+          const circle = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle"
+          );
+          circle.setAttribute("r", 20);
+          g.appendChild(circle);
+          const text = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text"
+          );
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("dy", "7");
+          text.setAttribute("font-size", "18");
+          text.textContent = n.val;
+          g.appendChild(text);
+          bfsSvg.appendChild(g);
+        });
+      }
+      drawBFSTree();
+
+      let bfsSteps = [];
+      let bfsStepIndex = -1;
+
+      function buildBFSSteps() {
+        bfsSteps = [];
+        let queue = [0];
+        while (queue.length > 0) {
+          const current = queue.shift();
+          bfsSteps.push(current);
+          const node = bfsNodes.find((n) => n.id === current);
+          if (node.left !== null) queue.push(node.left);
+          if (node.right !== null) queue.push(node.right);
+        }
+      }
+      buildBFSSteps();
+
+      function clearBFSHighlights() {
+        bfsSvg.querySelectorAll(".node").forEach((n) => {
+          n.querySelector("circle").classList.remove("highlight");
+        });
+      }
+
+      function showBFSStep(index) {
+        clearBFSHighlights();
+        if (index < 0 || index >= bfsSteps.length) return;
+        const currentNodeId = bfsSteps[index];
+        bfsStepText.textContent = `Visited node with value ${
+          bfsNodes.find((n) => n.id === currentNodeId).val
+        }`;
+        const node = bfsSvg.querySelector(`.node[data-id="${currentNodeId}"]`);
+        if (node) {
+          node.querySelector("circle").classList.add("highlight");
+        }
+      }
+
+      bfsStartBtn.addEventListener("click", () => {
+        bfsStepIndex = 0;
+        showBFSStep(bfsStepIndex);
+        bfsStartBtn.disabled = true;
+        bfsNextStepBtn.disabled = false;
+        bfsResetBtn.disabled = false;
+      });
+      bfsNextStepBtn.addEventListener("click", () => {
+        bfsStepIndex++;
+        if (bfsStepIndex >= bfsSteps.length) {
+          bfsStepIndex = bfsSteps.length - 1;
+          bfsNextStepBtn.disabled = true;
+        }
+        showBFSStep(bfsStepIndex);
+      });
+      bfsResetBtn.addEventListener("click", () => {
+        bfsStepIndex = -1;
+        bfsStepText.textContent = "";
+        clearBFSHighlights();
+        bfsStartBtn.disabled = false;
+        bfsNextStepBtn.disabled = true;
+        bfsResetBtn.disabled = true;
+      });
+
+      // ------------------------
+      // DFS Traversal Animation
+      // ------------------------
+      const dfsSvg = document.getElementById("dfsTree");
+      const dfsStartBtn = document.getElementById("dfsStartBtn");
+      const dfsNextStepBtn = document.getElementById("dfsNextStepBtn");
+      const dfsResetBtn = document.getElementById("dfsResetBtn");
+      const dfsStepText = document.getElementById("dfsStepText");
+
+      // DFS tree same as BFS for consistency
+      const dfsNodes = bfsNodes;
+
+      function drawDFSTree() {
+        dfsSvg.innerHTML = "";
+        dfsNodes.forEach((n) => {
+          if (n.left !== null) {
+            const left = dfsNodes.find((x) => x.id === n.left);
+            const line = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+            );
+            line.setAttribute("x1", n.x);
+            line.setAttribute("y1", n.y);
+            line.setAttribute("x2", left.x);
+            line.setAttribute("y2", left.y);
+            dfsSvg.appendChild(line);
+          }
+          if (n.right !== null) {
+            const right = dfsNodes.find((x) => x.id === n.right);
+            const line = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+            );
+            line.setAttribute("x1", n.x);
+            line.setAttribute("y1", n.y);
+            line.setAttribute("x2", right.x);
+            line.setAttribute("y2", right.y);
+            dfsSvg.appendChild(line);
+          }
+        });
+        dfsNodes.forEach((n) => {
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          g.setAttribute("class", "node");
+          g.setAttribute("transform", `translate(${n.x},${n.y})`);
+          g.setAttribute("data-id", n.id);
+          const circle = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle"
+          );
+          circle.setAttribute("r", 20);
+          g.appendChild(circle);
+          const text = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text"
+          );
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("dy", "7");
+          text.setAttribute("font-size", "18");
+          text.textContent = n.val;
+          g.appendChild(text);
+          dfsSvg.appendChild(g);
+        });
+      }
+      drawDFSTree();
+
+      let dfsSteps = [];
+      let dfsStepIndex = -1;
+
+      function buildDFSSteps() {
+        dfsSteps = [];
+        function dfs(id) {
+          if (id === null) return;
+          dfsSteps.push(id);
+          const node = dfsNodes.find((n) => n.id === id);
+          dfs(node.left);
+          dfs(node.right);
+        }
+        dfs(0);
+      }
+      buildDFSSteps();
+
+      function clearDFSHighlights() {
+        dfsSvg.querySelectorAll(".node").forEach((n) => {
+          n.querySelector("circle").classList.remove("highlight");
+        });
+      }
+
+      function showDFSStep(index) {
+        clearDFSHighlights();
+        if (index < 0 || index >= dfsSteps.length) return;
+        const currentNodeId = dfsSteps[index];
+        dfsStepText.textContent = `Visited node with value ${
+          dfsNodes.find((n) => n.id === currentNodeId).val
+        }`;
+        const node = dfsSvg.querySelector(`.node[data-id="${currentNodeId}"]`);
+        if (node) {
+          node.querySelector("circle").classList.add("highlight");
+        }
+      }
+
+      dfsStartBtn.addEventListener("click", () => {
+        dfsStepIndex = 0;
+        showDFSStep(dfsStepIndex);
+        dfsStartBtn.disabled = true;
+        dfsNextStepBtn.disabled = false;
+        dfsResetBtn.disabled = false;
+      });
+      dfsNextStepBtn.addEventListener("click", () => {
+        dfsStepIndex++;
+        if (dfsStepIndex >= dfsSteps.length) {
+          dfsStepIndex = dfsSteps.length - 1;
+          dfsNextStepBtn.disabled = true;
+        }
+        showDFSStep(dfsStepIndex);
+      });
+      dfsResetBtn.addEventListener("click", () => {
+        dfsStepIndex = -1;
+        dfsStepText.textContent = "";
+        clearDFSHighlights();
+        dfsStartBtn.disabled = false;
+        dfsNextStepBtn.disabled = true;
+        dfsResetBtn.disabled = true;
+      });
+
+      // ------------------------
+      // Traversal Types Animation (Inorder, Preorder, Postorder)
+      // ------------------------
+      const traversalSvg = document.getElementById("traversalTree");
+      const traversalStartBtn = document.getElementById("traversalStartBtn");
+      const traversalNextStepBtn = document.getElementById(
+        "traversalNextStepBtn"
+      );
+      const traversalResetBtn = document.getElementById("traversalResetBtn");
+      const traversalStepText = document.getElementById("traversalStepText");
+      const traversalTypeSelect = document.getElementById("traversalType");
+
+      // Use the same tree nodes for traversal
+      const traversalNodes = bfsNodes;
+
+      function drawTraversalTree() {
+        traversalSvg.innerHTML = "";
+        traversalNodes.forEach((n) => {
+          if (n.left !== null) {
+            const left = traversalNodes.find((x) => x.id === n.left);
+            const line = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+            );
+            line.setAttribute("x1", n.x);
+            line.setAttribute("y1", n.y);
+            line.setAttribute("x2", left.x);
+            line.setAttribute("y2", left.y);
+            traversalSvg.appendChild(line);
+          }
+          if (n.right !== null) {
+            const right = traversalNodes.find((x) => x.id === n.right);
+            const line = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+            );
+            line.setAttribute("x1", n.x);
+            line.setAttribute("y1", n.y);
+            line.setAttribute("x2", right.x);
+            line.setAttribute("y2", right.y);
+            traversalSvg.appendChild(line);
+          }
+        });
+        traversalNodes.forEach((n) => {
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          g.setAttribute("class", "node");
+          g.setAttribute("transform", `translate(${n.x},${n.y})`);
+          g.setAttribute("data-id", n.id);
+          const circle = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle"
+          );
+          circle.setAttribute("r", 20);
+          g.appendChild(circle);
+          const text = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text"
+          );
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("dy", "7");
+          text.setAttribute("font-size", "18");
+          text.textContent = n.val;
+          g.appendChild(text);
+          traversalSvg.appendChild(g);
+        });
+      }
+      drawTraversalTree();
+
+      let traversalSteps = [];
+      let traversalStepIndex = -1;
+
+      function clearTraversalHighlights() {
+        traversalSvg.querySelectorAll(".node").forEach((n) => {
+          n.querySelector("circle").classList.remove("highlight");
+        });
+      }
+
+      function showTraversalStep(index) {
+        clearTraversalHighlights();
+        if (index < 0 || index >= traversalSteps.length) return;
+        const currentNodeId = traversalSteps[index];
+        traversalStepText.textContent = `Visited node with value ${
+          traversalNodes.find((n) => n.id === currentNodeId).val
+        }`;
+        const node = traversalSvg.querySelector(
+          `.node[data-id="${currentNodeId}"]`
+        );
+        if (node) {
+          node.querySelector("circle").classList.add("highlight");
+        }
+      }
+
+      function buildTraversalSteps(type) {
+        traversalSteps = [];
+        function inorder(id) {
+          if (id === null) return;
+          const node = traversalNodes.find((n) => n.id === id);
+          inorder(node.left);
+          traversalSteps.push(id);
+          inorder(node.right);
+        }
+        function preorder(id) {
+          if (id === null) return;
+          traversalSteps.push(id);
+          const node = traversalNodes.find((n) => n.id === id);
+          preorder(node.left);
+          preorder(node.right);
+        }
+        function postorder(id) {
+          if (id === null) return;
+          const node = traversalNodes.find((n) => n.id === id);
+          postorder(node.left);
+          postorder(node.right);
+          traversalSteps.push(id);
+        }
+        if (type === "inorder") inorder(0);
+        else if (type === "preorder") preorder(0);
+        else if (type === "postorder") postorder(0);
+      }
+
+      traversalStartBtn.addEventListener("click", () => {
+        const type = traversalTypeSelect.value;
+        buildTraversalSteps(type);
+        traversalStepIndex = 0;
+        showTraversalStep(traversalStepIndex);
+        traversalStartBtn.disabled = true;
+        traversalNextStepBtn.disabled = false;
+        traversalResetBtn.disabled = false;
+      });
+      traversalNextStepBtn.addEventListener("click", () => {
+        traversalStepIndex++;
+        if (traversalStepIndex >= traversalSteps.length) {
+          traversalStepIndex = traversalSteps.length - 1;
+          traversalNextStepBtn.disabled = true;
+        }
+        showTraversalStep(traversalStepIndex);
+      });
+      traversalResetBtn.addEventListener("click", () => {
+        traversalStepIndex = -1;
+        traversalStepText.textContent = "";
+        clearTraversalHighlights();
+        traversalStartBtn.disabled = false;
+        traversalNextStepBtn.disabled = true;
+        traversalResetBtn.disabled = true;
+      });
+    </script>
+  </body>
+</html>

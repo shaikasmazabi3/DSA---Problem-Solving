@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JavaScript Memory & Garbage Collection for Beginners ♻️</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #e8f9fd;
+        color: #333;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #app {
+        max-width: 650px;
+        width: 90vw;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        background: linear-gradient(90deg, #00c6ff, #0072ff);
+        color: white;
+        padding: 1rem;
+        font-size: 1.6rem;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      main {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      section {
+        display: none;
+        flex-direction: column;
+        gap: 1rem;
+        animation: fadeIn 0.8s ease forwards;
+      }
+
+      section.active {
+        display: flex;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #005b9f;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .emoji {
+        font-size: 1.8rem;
+      }
+
+      p {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      pre {
+        background: #d0e7ff;
+        border-radius: 8px;
+        padding: 1rem;
+        font-size: 1rem;
+        overflow-x: auto;
+        font-family: "Courier New", Courier, monospace;
+        user-select: all;
+      }
+
+      code {
+        color: #0072ff;
+        font-weight: 600;
+      }
+
+      button {
+        background: #0072ff;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover,
+      button:focus {
+        background: #005b9f;
+        outline: none;
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #e6f0ff;
+      }
+
+      .quiz {
+        background: #cce4ff;
+        border: 2px solid #0072ff;
+        border-radius: 8px;
+        padding: 1rem;
+      }
+
+      .quiz h3 {
+        margin-top: 0;
+      }
+
+      .quiz button {
+        margin-top: 0.6rem;
+        background: #005b9f;
+      }
+
+      .quiz button:hover,
+      .quiz button:focus {
+        background: #004080;
+      }
+
+      .feedback {
+        margin-top: 0.5rem;
+        font-weight: 700;
+      }
+
+      .correct {
+        color: green;
+      }
+
+      .wrong {
+        color: red;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Interactive Diagram styles */
+      .box {
+        border: 2px solid #0072ff;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        position: relative;
+        cursor: pointer;
+        background: #d0e7ff;
+        transition: background-color 0.3s ease;
+      }
+      .box:hover,
+      .box:focus {
+        background: #a6caff;
+        outline: none;
+      }
+      .arrow {
+        width: 40px;
+        height: 40px;
+        border-left: 4px solid #0072ff;
+        border-bottom: 4px solid #0072ff;
+        transform: rotate(-45deg);
+        margin: 0 auto;
+      }
+      .hidden-text {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+      }
+      .hidden-text.show {
+        max-height: 300px;
+      }
+
+      /* Accessibility focus */
+      button:focus-visible,
+      .box:focus-visible {
+        outline: 3px solid #0072ff;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="app"
+      role="main"
+      aria-label="JavaScript Memory and Garbage Collection Lesson"
+    >
+      <header>♻️ JavaScript Memory & Garbage Collection</header>
+
+      <main>
+        <!-- Slide 1 -->
+        <section
+          class="active"
+          aria-live="polite"
+          aria-label="What is Memory Management?"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">🧠</span> What is Memory
+            Management?
+          </h2>
+          <p>
+            When JavaScript runs, it uses memory — like a toy box where it keeps
+            all your toys (variables, objects, functions).
+          </p>
+          <p>
+            Memory management means
+            <strong>keeping track of what’s being used</strong> and
+            <strong>cleaning up what’s not needed</strong>, so your toy box
+            doesn’t overflow!
+          </p>
+          <p>This helps your computer stay fast and happy.</p>
+          <button aria-label="Go to next slide" onclick="nextSlide()">
+            Next ➡️
+          </button>
+        </section>
+
+        <!-- Slide 2 -->
+        <section aria-live="polite" aria-label="What is Garbage Collection?">
+          <h2>
+            <span class="emoji" aria-hidden="true">🗑️</span> What is Garbage
+            Collection?
+          </h2>
+          <p>
+            Garbage Collection (GC) is JavaScript’s way of
+            <strong>cleaning up memory</strong> by removing boxes
+            (variables/objects) that are no longer needed.
+          </p>
+          <p>
+            Imagine you have old toys you don’t play with anymore — GC helps
+            throw them away automatically to free up space!
+          </p>
+          <button
+            aria-label="Show quiz for this slide"
+            onclick="toggleQuiz('quiz6')"
+          >
+            Take Quiz 📝
+          </button>
+          <div id="quiz6" class="quiz" hidden>
+            <h3>Quiz: What does Garbage Collection do?</h3>
+            <button onclick="checkAnswer(this, 'cleans')">
+              Cleans up unused memory
+            </button>
+            <button onclick="checkAnswer(this, 'creates')">
+              Creates new variables
+            </button>
+            <button onclick="checkAnswer(this, 'runs')">
+              Runs your code faster
+            </button>
+            <p class="feedback" aria-live="polite"></p>
+          </div>
+          <button aria-label="Go to next slide" onclick="nextSlide()">
+            Next ➡️
+          </button>
+        </section>
+
+        <!-- Slide 3 -->
+        <section
+          aria-live="polite"
+          aria-label="How Does Garbage Collection Work?"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">🔍</span> How Does Garbage
+            Collection Work?
+          </h2>
+          <p>
+            JavaScript uses a method called
+            <strong>Reference Counting</strong> and
+            <strong>Mark-and-Sweep</strong>.
+          </p>
+          <ul>
+            <li>
+              <strong>Reference Counting:</strong> Counts how many places use a
+              box. If no one uses it, it’s garbage.
+            </li>
+            <li>
+              <strong>Mark-and-Sweep:</strong> JavaScript marks variables it can
+              reach, and sweeps away the unreachable ones.
+            </li>
+          </ul>
+          <p>
+            Only boxes that are <strong>reachable</strong> (still in use) stay
+            in memory.
+          </p>
+          <pre><code>let toy = {name: "Car"};
+toy = null; // The car toy can be cleaned up now</code></pre>
+          <button
+            aria-label="Show quiz for this slide"
+            onclick="toggleQuiz('quiz7')"
+          >
+            Take Quiz 📝
+          </button>
+          <div id="quiz7" class="quiz" hidden>
+            <h3>Quiz: When can a variable be removed by Garbage Collection?</h3>
+            <button onclick="checkAnswer(this, 'unreachable')">
+              When it is unreachable
+            </button>
+            <button onclick="checkAnswer(this, 'used')">When it is used</button>
+            <button onclick="checkAnswer(this, 'null')">When it is null</button>
+            <p class="feedback" aria-live="polite"></p>
+          </div>
+          <button aria-label="Go to next slide" onclick="nextSlide()">
+            Next ➡️
+          </button>
+        </section>
+
+        <!-- Slide 4 -->
+        <section
+          aria-live="polite"
+          aria-label="Memory Leaks and How to Avoid Them"
+        >
+          <h2>
+            <span class="emoji" aria-hidden="true">🚰</span> Memory Leaks & How
+            to Avoid Them
+          </h2>
+          <p>
+            A <strong>memory leak</strong> happens when memory is not cleaned up
+            because the code still holds references to unused boxes.
+          </p>
+          <p>
+            This is like leaving broken toys in your box forever — it makes your
+            memory full and slow.
+          </p>
+          <p><strong>Tips to avoid leaks:</strong></p>
+          <ul>
+            <li>
+              Set variables to <code>null</code> when you don’t need them.
+            </li>
+            <li>Remove event listeners when finished.</li>
+            <li>Avoid global variables that stick around forever.</li>
+          </ul>
+          <button
+            aria-label="Show quiz for this slide"
+            onclick="toggleQuiz('quiz8')"
+          >
+            Take Quiz 📝
+          </button>
+          <div id="quiz8" class="quiz" hidden>
+            <h3>Quiz: What is a memory leak?</h3>
+            <button onclick="checkAnswer(this, 'memory')">
+              Memory that is not freed
+            </button>
+            <button onclick="checkAnswer(this, 'fast')">
+              Memory that is cleaned fast
+            </button>
+            <button onclick="checkAnswer(this, 'new')">
+              New memory created
+            </button>
+            <p class="feedback" aria-live="polite"></p>
+          </div>
+          <button aria-label="Go to next slide" onclick="nextSlide()">
+            Next ➡️
+          </button>
+        </section>
+
+        <!-- Slide 5 -->
+        <section aria-live="polite" aria-label="Summary and Best Practices">
+          <h2>
+            <span class="emoji" aria-hidden="true">🏁</span> Summary & Best
+            Practices
+          </h2>
+          <ul>
+            <li>
+              JavaScript automatically manages memory and cleans unused
+              variables with Garbage Collection.
+            </li>
+            <li>
+              Garbage Collection uses reference counting and mark-and-sweep to
+              find what’s still needed.
+            </li>
+            <li>
+              Memory leaks happen when old variables are still referenced but
+              not needed.
+            </li>
+            <li>
+              Always clean up after yourself: remove references, listeners, and
+              avoid globals.
+            </li>
+            <li>Good memory management keeps your app fast and smooth!</li>
+          </ul>
+          <p>
+            Think of your code like a tidy toy box — keep it organized and
+            clean! 🧹🧸
+          </p>
+          <button aria-label="Restart the lesson" onclick="restartLesson()">
+            Restart 🔄
+          </button>
+        </section>
+      </main>
+
+      <nav aria-label="Slide navigation">
+        <button aria-label="Previous slide" onclick="prevSlide()">
+          ⬅️ Previous
+        </button>
+        <button aria-label="Next slide" onclick="nextSlide()">Next ➡️</button>
+      </nav>
+    </div>
+
+    <script>
+      let currentSlide = 0;
+      const sections = document.querySelectorAll("main section");
+
+      function showSlide(index) {
+        if (index < 0) index = sections.length - 1;
+        if (index >= sections.length) index = 0;
+        sections.forEach((sec, i) => {
+          sec.classList.toggle("active", i === index);
+          // Hide quizzes when changing slides
+          const quizzes = sec.querySelectorAll(".quiz");
+          quizzes.forEach((q) => (q.hidden = true));
+          const feedbacks = sec.querySelectorAll(".feedback");
+          feedbacks.forEach((f) => (f.textContent = ""));
+        });
+        currentSlide = index;
+      }
+
+      function nextSlide() {
+        showSlide(currentSlide + 1);
+      }
+
+      function prevSlide() {
+        showSlide(currentSlide - 1);
+      }
+
+      function restartLesson() {
+        showSlide(0);
+      }
+
+      function toggleQuiz(id) {
+        const quiz = document.getElementById(id);
+        if (quiz) {
+          quiz.hidden = !quiz.hidden;
+          if (!quiz.hidden) {
+            // Focus first button in quiz for accessibility
+            const btn = quiz.querySelector("button");
+            if (btn) btn.focus();
+          }
+        }
+      }
+
+      function checkAnswer(button, correctAnswer) {
+        const quiz = button.closest(".quiz");
+        const feedback = quiz.querySelector(".feedback");
+        const userAnswer = button.textContent.toLowerCase();
+        const isCorrect = userAnswer.includes(correctAnswer);
+        if (isCorrect) {
+          feedback.textContent = "Correct! 🎉";
+          feedback.className = "feedback correct";
+        } else {
+          feedback.textContent = "Try again! ❌";
+          feedback.className = "feedback wrong";
+        }
+      }
+    </script>
+  </body>
+</html>

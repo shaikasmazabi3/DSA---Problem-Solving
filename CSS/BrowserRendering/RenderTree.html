@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Render Tree Construction Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f4ff;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      header {
+        background: #2563eb;
+        color: white;
+        padding: 1rem 2rem;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      #main {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+      #leftPanel,
+      #middlePanel,
+      #rightPanel {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      #leftPanel {
+        background: white;
+        border-right: 2px solid #e0e7ff;
+      }
+      #middlePanel {
+        background: white;
+        border-right: 2px solid #e0e7ff;
+      }
+      #rightPanel {
+        background: white;
+      }
+      h2 {
+        color: #2563eb;
+        margin-bottom: 10px;
+      }
+      ul.tree {
+        list-style: none;
+        padding-left: 20px;
+      }
+      ul.tree li {
+        position: relative;
+        margin: 5px 0;
+        cursor: default;
+        padding-left: 18px;
+        user-select: none;
+      }
+      ul.tree li::before {
+        content: "";
+        position: absolute;
+        left: 5px;
+        top: 10px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #60a5fa;
+        opacity: 0.3;
+        transition: opacity 0.3s ease;
+      }
+      ul.tree li.highlight {
+        background-color: #bfdbfe;
+        border-radius: 6px;
+      }
+      .attribute {
+        color: #d97706;
+        font-style: italic;
+        margin-left: 8px;
+      }
+      .style {
+        color: #059669;
+        font-style: italic;
+        margin-left: 8px;
+      }
+      #descriptions {
+        font-size: 1rem;
+        line-height: 1.4;
+        background: #dbeafe;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+      }
+      #controls {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+      }
+      button {
+        background: #2563eb;
+        border: none;
+        color: white;
+        padding: 10px 16px;
+        font-size: 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      button:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+      }
+      /* Scrollbars */
+      #leftPanel::-webkit-scrollbar,
+      #middlePanel::-webkit-scrollbar,
+      #rightPanel::-webkit-scrollbar {
+        width: 8px;
+      }
+      #leftPanel::-webkit-scrollbar-thumb,
+      #middlePanel::-webkit-scrollbar-thumb,
+      #rightPanel::-webkit-scrollbar-thumb {
+        background-color: #93c5fd;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>Render Tree Construction Visualization</header>
+
+    <div id="main">
+      <div id="leftPanel">
+        <h2>DOM Tree</h2>
+        <ul id="domTree" class="tree"></ul>
+      </div>
+      <div id="middlePanel">
+        <h2>CSSOM Tree</h2>
+        <ul id="cssomTree" class="tree"></ul>
+      </div>
+      <div id="rightPanel">
+        <h2>Render Tree</h2>
+        <ul id="renderTree" class="tree"></ul>
+        <div id="descriptions">
+          Use the buttons below to step through how the render tree is
+          constructed.
+        </div>
+        <div id="controls">
+          <button id="prevBtn" disabled>Previous</button>
+          <button id="nextBtn">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Sample DOM tree data with attributes and display styles
+      const domTreeData = [
+        {
+          name: "html",
+          attrs: {},
+          children: [
+            {
+              name: "body",
+              attrs: {},
+              children: [
+                {
+                  name: "h1",
+                  attrs: { style: "display: block" },
+                  children: [],
+                },
+                {
+                  name: "p",
+                  attrs: { style: "display: none" },
+                  children: [{ name: "#text", content: "Hidden paragraph" }],
+                },
+                {
+                  name: "div",
+                  attrs: { style: "display: block" },
+                  children: [
+                    {
+                      name: "span",
+                      attrs: { style: "display: inline" },
+                      children: [{ name: "#text", content: "Visible text" }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      // Sample CSSOM tree data (simplified)
+      const cssomTreeData = [
+        {
+          selector: "body",
+          declarations: [{ property: "color", value: "black" }],
+        },
+        {
+          selector: "h1",
+          declarations: [{ property: "font-size", value: "2em" }],
+        },
+        {
+          selector: "p",
+          declarations: [{ property: "display", value: "none" }],
+        },
+        {
+          selector: "div",
+          declarations: [{ property: "display", value: "block" }],
+        },
+        {
+          selector: "span",
+          declarations: [{ property: "display", value: "inline" }],
+        },
+      ];
+
+      // Render tree will be constructed stepwise by filtering and styling
+      const steps = [
+        {
+          desc: "Step 1: Starting with the full DOM tree and CSSOM tree.",
+          renderTree: [],
+        },
+        {
+          desc: "Step 2: Filter out nodes with 'display: none' style (like the <p> element).",
+          renderTree: [
+            {
+              name: "html",
+              style: {},
+              children: [
+                {
+                  name: "body",
+                  style: {},
+                  children: [
+                    { name: "h1", style: { display: "block" }, children: [] },
+                    // <p> is removed because display:none
+                    {
+                      name: "div",
+                      style: { display: "block" },
+                      children: [
+                        {
+                          name: "span",
+                          style: { display: "inline" },
+                          children: [
+                            {
+                              name: "#text",
+                              content: "Visible text",
+                              style: {},
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          desc: "Step 3: The render tree contains only visible nodes styled according to CSSOM.",
+          renderTree: [
+            {
+              name: "html",
+              style: {},
+              children: [
+                {
+                  name: "body",
+                  style: { color: "black" },
+                  children: [
+                    {
+                      name: "h1",
+                      style: { display: "block", fontSize: "2em" },
+                      children: [],
+                    },
+                    {
+                      name: "div",
+                      style: { display: "block" },
+                      children: [
+                        {
+                          name: "span",
+                          style: { display: "inline" },
+                          children: [
+                            {
+                              name: "#text",
+                              content: "Visible text",
+                              style: {},
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      let currentStep = 0;
+
+      const domTreeEl = document.getElementById("domTree");
+      const cssomTreeEl = document.getElementById("cssomTree");
+      const renderTreeEl = document.getElementById("renderTree");
+      const descriptionsEl = document.getElementById("descriptions");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      // Helper to render tree nodes recursively with attributes and styles
+      function renderTree(nodes, container, type) {
+        container.innerHTML = "";
+        function createNodeEl(node) {
+          const li = document.createElement("li");
+          if (node.name === "#text") {
+            li.textContent = `"${node.content}" (text node)`;
+            li.style.fontStyle = "italic";
+            li.style.color = "#374151";
+          } else {
+            li.textContent = `<${node.name}>`;
+            if (
+              type === "dom" &&
+              node.attrs &&
+              Object.keys(node.attrs).length
+            ) {
+              const attrSpan = document.createElement("span");
+              attrSpan.className = "attribute";
+              attrSpan.textContent =
+                " " +
+                Object.entries(node.attrs)
+                  .map(([k, v]) => `${k}="${v}"`)
+                  .join(" ");
+              li.appendChild(attrSpan);
+            }
+            if (
+              type === "render" &&
+              node.style &&
+              Object.keys(node.style).length
+            ) {
+              const styleSpan = document.createElement("span");
+              styleSpan.className = "style";
+              styleSpan.textContent =
+                " " +
+                Object.entries(node.style)
+                  .map(([k, v]) => `${k}: ${v}`)
+                  .join("; ");
+              li.appendChild(styleSpan);
+            }
+          }
+          if (node.children && node.children.length) {
+            const ul = document.createElement("ul");
+            ul.className = "tree";
+            node.children.forEach((child) =>
+              ul.appendChild(createNodeEl(child)),
+            );
+            li.appendChild(ul);
+          }
+          return li;
+        }
+        nodes.forEach((node) => container.appendChild(createNodeEl(node)));
+      }
+
+      // Render CSSOM tree
+      function renderCSSOM(cssom, container) {
+        container.innerHTML = "";
+        cssom.forEach((rule) => {
+          const li = document.createElement("li");
+          li.textContent = rule.selector;
+          if (rule.declarations && rule.declarations.length) {
+            const ul = document.createElement("ul");
+            ul.className = "tree";
+            rule.declarations.forEach((decl) => {
+              const declLi = document.createElement("li");
+              declLi.textContent = `${decl.property}: ${decl.value}`;
+              ul.appendChild(declLi);
+            });
+            li.appendChild(ul);
+          }
+          container.appendChild(li);
+        });
+      }
+
+      function updateUI() {
+        const step = steps[currentStep];
+        descriptionsEl.textContent = step.desc;
+
+        renderTree(domTreeData, domTreeEl, "dom");
+        renderCSSOM(cssomTreeData, cssomTreeEl);
+        renderTree(step.renderTree, renderTreeEl, "render");
+
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep === steps.length - 1;
+      }
+
+      prevBtn.addEventListener("click", () => {
+        if (currentStep > 0) {
+          currentStep--;
+          updateUI();
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (currentStep < steps.length - 1) {
+          currentStep++;
+          updateUI();
+        }
+      });
+
+      // Initialize
+      updateUI();
+    </script>
+  </body>
+</html>

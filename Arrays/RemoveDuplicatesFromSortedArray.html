@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Remove Duplicates from Sorted Array Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f7fa;
+        color: #333;
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      h2 {
+        margin-bottom: 20px;
+        font-weight: 700;
+        font-size: 2rem;
+        color: #222;
+      }
+      #array {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        position: relative;
+      }
+      .box {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        position: relative;
+        transition: background-color 0.3s ease, opacity 0.3s ease;
+        user-select: none;
+      }
+      .box.removed {
+        opacity: 0.3;
+        text-decoration: line-through;
+        box-shadow: none;
+      }
+      .pointer-label {
+        position: absolute;
+        top: -28px;
+        width: 50px;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 4px;
+        padding: 2px 4px;
+        user-select: none;
+      }
+      .pointer-i-label {
+        background-color: #ffcc00;
+        color: #5a4b00;
+        left: 0;
+      }
+      .pointer-j-label {
+        background-color: #00ccff;
+        color: #004a66;
+        left: 0;
+      }
+      .pointer-i {
+        background-color: #fff4b8;
+        box-shadow: 0 0 8px 2px #ffcc00aa;
+      }
+      .pointer-j {
+        background-color: #b8f0ff;
+        box-shadow: 0 0 8px 2px #00ccffaa;
+      }
+      #info {
+        margin-bottom: 20px;
+        max-width: 600px;
+        text-align: center;
+        font-size: 1rem;
+      }
+      #controls {
+        background: white;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px 20px;
+        justify-content: center;
+        max-width: 700px;
+        width: 100%;
+        margin-bottom: 30px;
+      }
+      #controls label {
+        flex: 1 0 140px;
+        align-self: center;
+        font-weight: 600;
+        color: #444;
+      }
+      #controls input[type="text"],
+      #controls select {
+        flex: 2 1 200px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1.5px solid #ccc;
+        font-size: 1rem;
+        transition: border-color 0.25s ease;
+      }
+      #controls input[type="text"]:focus,
+      #controls select:focus {
+        outline: none;
+        border-color: #0078d4;
+        box-shadow: 0 0 5px #0078d4aa;
+      }
+      #btnStep,
+      #btnReset,
+      #btnAuto {
+        flex: 1 0 120px;
+        background-color: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      #btnStep:disabled,
+      #btnReset:disabled,
+      #btnAuto:disabled {
+        background-color: #a0c4ff;
+        cursor: not-allowed;
+      }
+      #btnStep:hover:not(:disabled),
+      #btnReset:hover:not(:disabled),
+      #btnAuto:hover:not(:disabled) {
+        background-color: #005ea2;
+      }
+      @media (max-width: 480px) {
+        #controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        #controls label,
+        #controls input,
+        #controls select,
+        #btnStep,
+        #btnReset,
+        #btnAuto {
+          flex: none;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Remove Duplicates from Sorted Array Visualization</h2>
+
+    <div id="array" style="position: relative"></div>
+
+    <div id="info">
+      <p>
+        <span
+          style="
+            background: #ffcc00;
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            margin-right: 6px;
+          "
+        ></span
+        ><strong>i pointer</strong> (yellow)
+      </p>
+      <p>
+        <span
+          style="
+            background: #00ccff;
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            margin-right: 6px;
+          "
+        ></span
+        ><strong>j pointer</strong> (blue)
+      </p>
+    </div>
+
+    <div id="controls">
+      <label for="inputArray">Sorted Array (comma separated):</label>
+      <input
+        type="text"
+        id="inputArray"
+        value="0,0,1,1,1,2,2,3,3,4"
+        autocomplete="off"
+      />
+
+      <label for="selectMethod">Select Approach:</label>
+      <select id="selectMethod">
+        <option value="brute">Brute Force (O(n²))</option>
+        <option value="better">Better Two-Pointer (O(n))</option>
+        <option value="optimal">Optimal Two-Pointer (O(n))</option>
+      </select>
+
+      <button id="btnStep">Step</button>
+      <button id="btnAuto">Auto Play</button>
+      <button id="btnReset">Reset</button>
+    </div>
+
+    <script>
+      const arrayContainer = document.getElementById("array");
+      const inputArray = document.getElementById("inputArray");
+      const selectMethod = document.getElementById("selectMethod");
+      const btnStep = document.getElementById("btnStep");
+      const btnReset = document.getElementById("btnReset");
+      const btnAuto = document.getElementById("btnAuto");
+
+      let nums = [];
+      let length = 0;
+      let i = 0,
+        j = 0;
+      let stepInterval = null;
+      let method = "brute";
+
+      function renderArray(
+        nums,
+        i = -1,
+        j = -1,
+        length = nums.length,
+        removedFrom = null
+      ) {
+        arrayContainer.innerHTML = "";
+        for (let k = 0; k < nums.length; k++) {
+          const box = document.createElement("div");
+          box.classList.add("box");
+          box.textContent = nums[k];
+          if (removedFrom !== null && k >= removedFrom) {
+            box.classList.add("removed");
+          }
+          if (k === i) box.classList.add("pointer-i");
+          if (k === j) box.classList.add("pointer-j");
+
+          if (k === i) {
+            const labelI = document.createElement("div");
+            labelI.textContent = "i";
+            labelI.classList.add("pointer-label", "pointer-i-label");
+            labelI.style.left = box.offsetLeft + "px";
+            box.appendChild(labelI);
+          }
+          if (k === j) {
+            const labelJ = document.createElement("div");
+            labelJ.textContent = "j";
+            labelJ.classList.add("pointer-label", "pointer-j-label");
+            labelJ.style.left = box.offsetLeft + "px";
+            box.appendChild(labelJ);
+          }
+          arrayContainer.appendChild(box);
+        }
+      }
+
+      // Brute Force: O(n²)
+      // For each element i, check next elements j for duplicates and shift left to remove
+      function* bruteForceGenerator(numsInput) {
+        let nums = [...numsInput];
+        let length = nums.length;
+        for (let i = 0; i < length; i++) {
+          for (let j = i + 1; j < length; ) {
+            yield { nums: [...nums], i, j, length };
+            if (nums[i] === nums[j]) {
+              // Shift left from j
+              for (let k = j; k < length - 1; k++) {
+                nums[k] = nums[k + 1];
+              }
+              length--;
+              yield { nums: [...nums], i, j, length };
+            } else {
+              j++;
+            }
+          }
+        }
+        return { nums, length };
+      }
+
+      // Better approach: Two pointers
+      // i tracks last unique element index, j scans array
+      function* betterGenerator(numsInput) {
+        let nums = [...numsInput];
+        let length = nums.length;
+        if (length === 0) return { nums, length };
+        let i = 0;
+        for (let j = 1; j < length; j++) {
+          yield { nums: [...nums], i, j, length };
+          if (nums[j] !== nums[i]) {
+            i++;
+            nums[i] = nums[j];
+            yield { nums: [...nums], i, j, length };
+          }
+        }
+        length = i + 1;
+        yield { nums: [...nums], i, j: -1, length };
+        return { nums, length };
+      }
+
+      // Optimal approach: Similar to better but slightly different style
+      function* optimalGenerator(numsInput) {
+        let nums = [...numsInput];
+        let length = nums.length;
+        if (length === 0) return { nums, length };
+        let i = 0;
+        for (let j = 1; j < length; j++) {
+          yield { nums: [...nums], i, j, length };
+          if (nums[j] !== nums[i]) {
+            i++;
+            nums[i] = nums[j];
+            yield { nums: [...nums], i, j, length };
+          }
+        }
+        length = i + 1;
+        yield { nums: [...nums], i, j: -1, length };
+        return { nums, length };
+      }
+
+      let gen = null;
+      let done = false;
+
+      function reset() {
+        nums = inputArray.value
+          .split(",")
+          .map((x) => parseInt(x.trim()))
+          .filter((x) => !isNaN(x));
+        length = nums.length;
+        i = 0;
+        j = 0;
+        done = false;
+        method = selectMethod.value;
+        if (method === "brute") gen = bruteForceGenerator(nums);
+        else if (method === "better") gen = betterGenerator(nums);
+        else gen = optimalGenerator(nums);
+        renderArray(nums);
+        btnStep.disabled = false;
+        btnAuto.disabled = false;
+      }
+
+      async function step() {
+        if (done) return;
+        const { value, done: genDone } = gen.next();
+        if (value) {
+          renderArray(value.nums, value.i, value.j, value.length, value.length);
+          if (genDone) {
+            done = true;
+            btnStep.disabled = true;
+            btnAuto.disabled = true;
+            alert(`Finished! New length: ${value.length}`);
+          }
+        } else if (genDone) {
+          done = true;
+          btnStep.disabled = true;
+          btnAuto.disabled = true;
+        }
+      }
+
+      let autoPlaying = false;
+      async function autoPlay() {
+        if (autoPlaying) {
+          autoPlaying = false;
+          btnAuto.textContent = "Auto Play";
+          btnStep.disabled = false;
+          return;
+        }
+        autoPlaying = true;
+        btnAuto.textContent = "Pause";
+        btnStep.disabled = true;
+        while (autoPlaying && !done) {
+          await step();
+          await new Promise((r) => setTimeout(r, 800));
+        }
+        if (done) {
+          autoPlaying = false;
+          btnAuto.textContent = "Auto Play";
+          btnStep.disabled = true;
+        }
+      }
+
+      btnStep.addEventListener("click", step);
+      btnReset.addEventListener("click", reset);
+      btnAuto.addEventListener("click", autoPlay);
+      selectMethod.addEventListener("change", reset);
+
+      reset();
+    </script>
+  </body>
+</html>

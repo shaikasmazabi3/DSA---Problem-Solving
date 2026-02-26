@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>React Fiber Advanced Visualization</title>
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f9f9f9;
+    margin: 0;
+    padding: 20px;
+    color: #222;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  #fiberContainer {
+    max-width: 900px;
+    margin: 0 auto 30px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    background: white;
+    padding: 20px;
+  }
+  .fiber-node {
+    border: 1px solid #0078d4;
+    background: #e3f2fd;
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin: 10px 0;
+    position: relative;
+    transition: background-color 0.6s ease;
+  }
+  .fiber-node.current {
+    background-color: #bbdefb;
+  }
+  .fiber-node.completed {
+    background-color: #a5d6a7;
+  }
+  .fiber-node.paused {
+    background-color: #ffe082;
+  }
+  .fiber-children {
+    margin-left: 40px;
+    border-left: 2px solid #90caf9;
+    padding-left: 20px;
+  }
+  #status {
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #0078d4;
+  }
+  #controls {
+    text-align: center;
+  }
+  button {
+    background: #0078d4;
+    border: none;
+    color: white;
+    padding: 10px 22px;
+    margin: 0 15px 15px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgb(0 120 212 / 0.5);
+    transition: background-color 0.3s ease;
+  }
+  button:hover:not(:disabled) {
+    background: #005ea2;
+  }
+  button:disabled {
+    background: #a0c4ff;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  label {
+    font-weight: 600;
+    margin-right: 10px;
+  }
+  select {
+    font-size: 1rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1.5px solid #ccc;
+    margin-bottom: 15px;
+  }
+</style>
+</head>
+<body>
+
+<h1>React Fiber Advanced Visualization with Prioritization & Interruptions</h1>
+
+<div id="status">Click "Start Work" to begin processing fibers.</div>
+
+<div id="fiberContainer"></div>
+
+<div id="controls">
+  <label for="prioritySelect">Set Priority:</label>
+  <select id="prioritySelect" aria-label="Select work priority">
+    <option value="high">High Priority</option>
+    <option value="normal" selected>Normal Priority</option>
+    <option value="low">Low Priority</option>
+  </select>
+  <br/>
+  <button id="btnStartWork">Start Work</button>
+  <button id="btnPause" disabled>Pause</button>
+  <button id="btnResume" disabled>Resume</button>
+  <button id="btnReset" disabled>Reset</button>
+</div>
+
+<script>
+  // Fiber node structure example (simple component tree)
+  const fiberTree = {
+    id: 'root',
+    name: 'App',
+    priority: 'normal',
+    child: {
+      id: 'header',
+      name: 'Header',
+      priority: 'normal',
+      child: null,
+      sibling: {
+        id: 'main',
+        name: 'Main',
+        priority: 'normal',
+        child: {
+          id: 'article',
+          name: 'Article',
+          priority: 'normal',
+          child: null,
+          sibling: {
+            id: 'sidebar',
+            name: 'Sidebar',
+            priority: 'normal',
+            child: null,
+            sibling: null,
+            parent: null,
+          }
+        },
+        sibling: null,
+        parent: null,
+      },
+      parent: null,
+    },
+    sibling: null,
+    parent: null,
+  };
+
+  // Set parents recursively
+  function setParents(node, parent = null) {
+    if (!node) return;
+    node.parent = parent;
+    setParents(node.child, node);
+    setParents(node.sibling, parent);
+  }
+  setParents(fiberTree);
+
+  // Flatten fiber nodes for work queue (depth-first)
+  function flattenFibers(node) {
+    if (!node) return [];
+    let result = [node];
+    result = result.concat(flattenFibers(node.child));
+    result = result.concat(flattenFibers(node.sibling));
+    return result;
+  }
+
+  // Priority weights for simulation (lower is higher priority)
+  const priorityWeights = { high: 1, normal: 5, low: 10 };
+
+  // DOM references
+  const fiberContainer = document.getElementById('fiberContainer');
+  const status = document.getElementById('status');
+  const btnStartWork = document.getElementById('btnStartWork');
+  const btnPause = document.getElementById('btnPause');
+  const btnResume = document.getElementById('btnResume');
+  const btnReset = document.getElementById('btnReset');
+  const prioritySelect = document.getElementById('prioritySelect');
+
+  // Work queue and state
+  let workQueue = [];
+  let currentWorkIndex = 0;
+  let completedWork = new Set();
+  let isPaused = false;
+  let workTimeout = null;
+
+  // Render fiber tree with highlights
+  function renderFiberTree(currentIndex, completedIndices, pausedIndices = new Set()) {
+    fiberContainer.innerHTML = '';
+    function createNode(node) {
+      if (!node) return null;
+      const div = document.createElement('div');
+      div.className = 'fiber-node';
+      const idx = workQueue.indexOf(node);
+      if (idx === currentIndex) div.classList.add('current');
+      if (completedIndices.has(idx)) div.classList.add('completed');
+      if (pausedIndices.has(idx)) div.classList.add('paused');
+      div.textContent = `${node.name} [Priority: ${node.priority}]`;
+      if (node.child) {
+        const childrenDiv = document.createElement('div');
+        childrenDiv.className = 'fiber-children';
+        let childNode = node.child;
+        while (childNode) {
+          const childDiv = createNode(childNode);
+          if (childDiv) childrenDiv.appendChild(childDiv);
+          childNode = childNode.sibling;
+        }
+        div.appendChild(childrenDiv);
+      }
+      return div;
+    }
+    fiberContainer.appendChild(createNode(fiberTree));
+  }
+
+  // Prepare work queue with priority sorting
+  function prepareWorkQueue() {
+    const allFibers = flattenFibers(fiberTree);
+    // Sort by priority weight ascending (high priority first)
+    allFibers.sort((a, b) => priorityWeights[a.priority] - priorityWeights[b.priority]);
+    return allFibers;
+  }
+
+  // Simulate work on current fiber with ability to pause
+  function processWorkUnit() {
+    if (isPaused) {
+      status.textContent = 'Work paused.';
+      return;
+    }
+    if (currentWorkIndex >= workQueue.length) {
+      status.textContent = 'All units of work processed. Ready to commit changes.';
+      btnStartWork.disabled = true;
+      btnPause.disabled = true;
+      btnResume.disabled = true;
+      btnReset.disabled = false;
+      return;
+    }
+    const currentFiber = workQueue[currentWorkIndex];
+    status.textContent = `Processing fiber: ${currentFiber.name} [Priority: ${currentFiber.priority}]`;
+    completedWork.add(currentWorkIndex);
+    renderFiberTree(currentWorkIndex, completedWork);
+    currentWorkIndex++;
+
+    // Schedule next unit with delay simulating time slice
+    workTimeout = setTimeout(processWorkUnit, 800);
+  }
+
+  // Commit phase simulation
+  function commitChanges() {
+    status.textContent = 'Committing changes to the DOM...';
+    btnStartWork.disabled = true;
+    btnPause.disabled = true;
+    btnResume.disabled = true;
+    btnReset.disabled = false;
+
+    let i = 0;
+    function commitStep() {
+      if (i >= workQueue.length) {
+        status.textContent = 'Commit phase complete! DOM updated.';
+        return;
+      }
+      const fiberNode = workQueue[i];
+      // Highlight committed fiber node
+      const fiberDivs = fiberContainer.querySelectorAll('.fiber-node');
+      fiberDivs.forEach(div => {
+        if (div.textContent.startsWith(fiberNode.name)) {
+          div.style.backgroundColor = '#a5d6a7'; // green highlight
+          setTimeout(() => {
+            div.style.backgroundColor = '';
+          }, 700);
+        }
+      });
+      i++;
+      setTimeout(commitStep, 400);
+    }
+    commitStep();
+  }
+
+  function startWork() {
+    btnStartWork.disabled = true;
+    btnPause.disabled = false;
+    btnResume.disabled = true;
+    btnReset.disabled = true;
+    isPaused = false;
+
+    // Assign selected priority to all fibers for demo purposes
+    const selectedPriority = prioritySelect.value;
+    function assignPriority(node) {
+      if (!node) return;
+      node.priority = selectedPriority;
+      assignPriority(node.child);
+      assignPriority(node.sibling);
+    }
+    assignPriority(fiberTree);
+
+    workQueue = prepareWorkQueue();
+    currentWorkIndex = 0;
+    completedWork.clear();
+    renderFiberTree(-1, completedWork);
+    processWorkUnit();
+  }
+
+  function pauseWork() {
+    isPaused = true;
+    btnPause.disabled = true;
+    btnResume.disabled = false;
+    clearTimeout(workTimeout);
+    status.textContent = 'Work paused.';
+    renderFiberTree(currentWorkIndex, completedWork, new Set([currentWorkIndex]));
+  }
+
+  function resumeWork() {
+    if (!isPaused) return;
+    isPaused = false;
+    btnPause.disabled = false;
+    btnResume.disabled = true;
+    status.textContent = 'Resuming work...';
+    renderFiberTree(currentWorkIndex, completedWork);
+    processWorkUnit();
+  }
+
+  function reset() {
+    clearTimeout(workTimeout);
+    currentWorkIndex = 0;
+    completedWork.clear();
+    isPaused = false;
+    btnStartWork.disabled = false;
+    btnPause.disabled = true;
+    btnResume.disabled = true;
+    btnReset.disabled = true;
+    status.textContent = 'Click "Start Work" to begin processing fibers.';
+    // Reset priorities to normal
+    function resetPriority(node) {
+      if (!node) return;
+      node.priority = 'normal';
+      resetPriority(node.child);
+      resetPriority(node.sibling);
+    }
+    resetPriority(fiberTree);
+    renderFiberTree(-1, completedWork);
+  }
+
+  btnStartWork.addEventListener('click', startWork);
+  btnPause.addEventListener('click', pauseWork);
+  btnResume.addEventListener('click', resumeWork);
+  btnReset.addEventListener('click', reset);
+
+  // Initial render
+  reset();
+</script>
+
+</body>
+</html>

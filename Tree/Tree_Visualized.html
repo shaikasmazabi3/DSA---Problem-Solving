@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tree Data Structures Visualization</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 20px auto;
+        max-width: 900px;
+        background: #f0f8ff;
+        color: #333;
+      }
+      h1,
+      h2 {
+        color: #2c3e50;
+      }
+      p {
+        font-size: 1.1rem;
+        line-height: 1.5;
+      }
+      .slide {
+        display: none;
+        min-height: 400px;
+      }
+      .slide.active {
+        display: block;
+      }
+      .controls {
+        margin-top: 20px;
+        text-align: center;
+      }
+      button {
+        background: #2980b9;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        margin: 0 10px;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.3s ease;
+      }
+      button:disabled {
+        background: #95a5a6;
+        cursor: default;
+      }
+      button:hover:not(:disabled) {
+        background: #3498db;
+      }
+      .tree-container {
+        margin-top: 20px;
+        text-align: center;
+        user-select: none;
+      }
+      svg {
+        max-width: 100%;
+        height: 300px;
+      }
+      .node circle {
+        fill: #3498db;
+        stroke: #2980b9;
+        stroke-width: 2px;
+        transition: fill 0.3s ease, stroke 0.3s ease;
+      }
+      .node text {
+        fill: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+        pointer-events: none;
+      }
+      /* Highlight styles */
+      .node.highlight circle {
+        fill: #e74c3c !important;
+        stroke: #c0392b !important;
+      }
+      .node.next circle {
+        fill: #f39c12 !important;
+        stroke: #d35400 !important;
+      }
+      .node.found circle {
+        fill: #27ae60 !important;
+        stroke: #1e8449 !important;
+      }
+      line {
+        stroke: #2980b9;
+        stroke-width: 2px;
+      }
+      .steps {
+        margin-top: 15px;
+        font-size: 1.1rem;
+        min-height: 50px;
+        font-weight: 600;
+        color: #34495e;
+      }
+      .problem {
+        background: #ecf0f1;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 1rem;
+        margin-top: 20px;
+        text-align: left;
+      }
+      .code {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 10px;
+        border-radius: 6px;
+        font-family: "Courier New", Courier, monospace;
+        overflow-x: auto;
+        margin-top: 10px;
+      }
+      /* Slide navigation */
+      #slideNav {
+        margin-top: 30px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Learn Tree Data Structures Step-by-Step</h1>
+
+      <div id="slides">
+        <!-- Slide 1: What is a Tree -->
+        <section class="slide active" id="slide1">
+          <h2>What is a Tree?</h2>
+          <p>
+            A tree is a special kind of data structure that looks like a family
+            tree or a real tree with branches. It has nodes connected by edges.
+            It starts from a <b>root</b> node and branches out to child nodes.
+          </p>
+          <div class="tree-container" aria-label="Simple Tree Diagram">
+            <svg viewBox="0 0 300 180" role="img" aria-labelledby="treeTitle1">
+              <title id="treeTitle1">
+                Simple tree with root and child nodes
+              </title>
+              <!-- Root -->
+              <g class="node" transform="translate(150, 30)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">Root</text>
+              </g>
+              <!-- Children -->
+              <g class="node" transform="translate(90, 90)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">A</text>
+              </g>
+              <g class="node" transform="translate(210, 90)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">B</text>
+              </g>
+              <!-- Edges -->
+              <line x1="150" y1="30" x2="90" y2="90"></line>
+              <line x1="150" y1="30" x2="210" y2="90"></line>
+            </svg>
+          </div>
+        </section>
+
+        <!-- Slide 2: Types of Trees -->
+        <section class="slide" id="slide2">
+          <h2>Types of Trees</h2>
+          <p>
+            There are many types of trees in computer science. Here are some
+            common ones:
+          </p>
+          <ul>
+            <li><b>Binary Tree</b> - Each node has at most 2 children.</li>
+            <li>
+              <b>Binary Search Tree (BST)</b> - A binary tree with ordered
+              nodes.
+            </li>
+            <li><b>AVL Tree</b> - A self-balancing binary search tree.</li>
+            <li><b>Heap</b> - A special tree for priority queues.</li>
+            <li><b>Trie</b> - A tree for storing words or prefixes.</li>
+          </ul>
+          <p>Let's focus on Binary Trees and BSTs first.</p>
+        </section>
+
+        <!-- Slide 3: Binary Tree -->
+        <section class="slide" id="slide3">
+          <h2>What is a Binary Tree?</h2>
+          <p>
+            A binary tree is a tree where each node has at most two children:
+            <b>left</b> and <b>right</b>.
+          </p>
+          <div class="tree-container" aria-label="Binary Tree Diagram">
+            <svg viewBox="0 0 300 180" role="img" aria-labelledby="treeTitle2">
+              <title id="treeTitle2">
+                Binary tree with root and two children
+              </title>
+              <!-- Root -->
+              <g class="node" transform="translate(150, 30)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">10</text>
+              </g>
+              <!-- Children -->
+              <g class="node" transform="translate(90, 90)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">5</text>
+              </g>
+              <g class="node" transform="translate(210, 90)">
+                <circle r="20"></circle>
+                <text text-anchor="middle" dy="7" font-size="18">15</text>
+              </g>
+              <!-- Edges -->
+              <line x1="150" y1="30" x2="90" y2="90"></line>
+              <line x1="150" y1="30" x2="210" y2="90"></line>
+            </svg>
+          </div>
+        </section>
+
+        <!-- Slide 4: Binary Search Tree -->
+        <section class="slide" id="slide4">
+          <h2>What is a Binary Search Tree (BST)?</h2>
+          <p>A BST is a binary tree where for each node:</p>
+          <ul>
+            <li>All nodes in the left subtree have smaller values.</li>
+            <li>All nodes in the right subtree have larger values.</li>
+          </ul>
+          <p>This helps us search for values quickly!</p>
+          <div class="tree-container" aria-label="Binary Search Tree Diagram">
+            <svg
+              id="bst"
+              viewBox="0 0 400 220"
+              role="img"
+              aria-labelledby="bstTitle"
+            >
+              <title id="bstTitle">Binary Search Tree example</title>
+              <!-- Nodes and edges generated by JS -->
+            </svg>
+          </div>
+          <div style="margin-top: 15px; text-align: center">
+            <button id="bstStartBtn">Start Search for 13</button>
+            <button id="bstNextStepBtn" disabled>Next Step</button>
+            <button id="bstResetBtn" disabled>Reset</button>
+          </div>
+          <div class="steps" id="bstStepText" aria-live="polite"></div>
+        </section>
+
+        <!-- Slide 5: BFS Traversal -->
+        <section class="slide" id="slide5">
+          <h2>Breadth-First Search (BFS)</h2>
+          <p>
+            BFS visits nodes level by level from top to bottom and left to
+            right.
+          </p>
+          <div class="tree-container" aria-label="BFS Traversal">
+            <svg
+              id="bfsTree"
+              viewBox="0 0 400 220"
+              role="img"
+              aria-labelledby="bfsTitle"
+            >
+              <title id="bfsTitle">Binary Tree for BFS traversal</title>
+              <!-- Nodes and edges generated by JS -->
+            </svg>
+          </div>
+          <div style="margin-top: 15px; text-align: center">
+            <button id="bfsStartBtn">Start BFS</button>
+            <button id="bfsNextStepBtn" disabled>Next Step</button>
+            <button id="bfsResetBtn" disabled>Reset</button>
+          </div>
+          <div class="steps" id="bfsStepText" aria-live="polite"></div>
+        </section>
+
+        <!-- Slide 6: Depth-First Search (DFS) -->
+        <section class="slide" id="slide6">
+          <h2>Depth-First Search (DFS)</h2>
+          <p>
+            DFS visits nodes by going deep into one branch before backtracking.
+          </p>
+          <div class="tree-container" aria-label="DFS Traversal">
+            <svg
+              id="dfsTree"
+              viewBox="0 0 400 220"
+              role="img"
+              aria-labelledby="dfsTitle"
+            >
+              <title id="dfsTitle">Binary Tree for DFS traversal</title>
+              <!-- Nodes and edges generated by JS -->
+            </svg>
+          </div>
+          <div style="margin-top: 15px; text-align: center">
+            <button id="dfsStartBtn">Start DFS</button>
+            <button id="dfsNextStepBtn" disabled>Next Step</button>
+            <button id="dfsResetBtn" disabled>Reset</button>
+          </div>
+          <div class="steps" id="dfsStepText" aria-live="polite"></div>
+        </section>
+
+        <!-- Slide 7: Traversals - Inorder, Preorder, Postorder -->
+        <section class="slide" id="slide7">
+          <h2>Tree Traversal Types</h2>
+          <p>We visit nodes in different orders:</p>
+          <ul>
+            <li><b>Inorder</b> (Left, Root, Right) - Sorted order in BST</li>
+            <li><b>Preorder</b> (Root, Left, Right)</li>
+            <li><b>Postorder</b> (Left, Right, Root)</li>
+          </ul>
+          <div class="tree-container" aria-label="Traversal Animation">
+            <svg
+              id="traversalTree"
+              viewBox="0 0 400 220"
+              role="img"
+              aria-labelledby="traversalTitle"
+            >
+              <title id="traversalTitle">
+                Binary Tree for traversal animations
+              </title>
+              <!-- Nodes and edges generated by JS -->
+            </svg>
+          </div>
+          <div style="margin-top: 15px; text-align: center">
+            <select id="traversalType" aria-label="Select traversal type">
+              <option value="inorder">Inorder</option>
+              <option value="preorder">Preorder</option>
+              <option value="postorder">Postorder</option>
+            </select>
+            <button id="traversalStartBtn">Start Traversal</button>
+            <button id="traversalNextStepBtn" disabled>Next Step</button>
+            <button id="traversalResetBtn" disabled>Reset</button>
+          </div>
+          <div class="steps" id="traversalStepText" aria-live="polite"></div>
+        </section>
+
+        <!-- Slide 8: LeetCode Medium Problem - Validate BST -->
+        <section class="slide" id="slide8">
+          <h2>LeetCode Medium: Validate Binary Search Tree</h2>
+          <div class="problem" aria-label="Problem statement and explanation">
+            <p>
+              <b>Problem Statement:</b> Given a binary tree, determine if it is
+              a valid binary search tree (BST).
+            </p>
+            <p>
+              The BST must satisfy: for every node, all nodes in the left
+              subtree are less, and all nodes in the right subtree are greater.
+            </p>
+            <p>
+              <b>Approach:</b> We recursively check each node, ensuring its
+              value lies within valid min and max bounds, updated as we
+              traverse.
+            </p>
+            <div class="code">
+              <pre>
+function isValidBST(root) {
+  return validate(root, -Infinity, Infinity);
+}
+function validate(node, min, max) {
+  if (!node) return true;
+  if (node.val <= min || node.val >= max) return false;
+  return validate(node.left, min, node.val) && validate(node.right, node.val, max);
+}
+</pre
+              >
+            </div>
+          </div>
+          <div
+            class="tree-container"
+            aria-label="Example tree for Validate BST problem"
+          >
+            <svg
+              id="validateBSTTree"
+              viewBox="0 0 400 220"
+              role="img"
+              aria-labelledby="validateBSTTitle"
+            >
+              <title id="validateBSTTitle">Example tree for Validate BST</title>
+              <!-- Nodes and edges generated by JS -->
+            </svg>
+          </div>
+          <div style="margin-top: 15px; text-align: center">
+            <button id="validateBSTStartBtn">Start Validation</button>
+            <button id="validateBSTNextStepBtn" disabled>Next Step</button>
+            <button id="validateBSTResetBtn" disabled>Reset</button>
+          </div>
+          <div class="steps" id="validateBSTStepText" aria-live="polite"></div>
+        </section>
+
+        <!-- Slide 9: LeetCode Hard Problem - Serialize and Deserialize BST -->
+        <section class="slide" id="slide9">
+          <h2>LeetCode Hard: Serialize and Deserialize BST</h2>
+          <div class="problem" aria-label="Problem statement and explanation">
+            <p>
+              <b>Problem Statement:</b> Design algorithms to serialize (convert
+              to string) and deserialize (rebuild) a BST.
+            </p>
+            <p>
+              <b>Approach:</b> Use preorder traversal to serialize as a string
+              of node values. Deserialize by reconstructing the BST using
+              min/max constraints.
+            </p>
+            <div class="code">
+              <pre>
+function serialize(root) {
+  let res = [];
+  function preorder(node) {
+    if (!node) return;
+    res.push(node.val);
+    preorder(node.left);
+    preorder(node.right);
+  }
+  preorder(root);
+  return res.join(',');
+}
+
+function deserialize(data) {
+  if (!data) return null;
+  let arr = data.split(',').map(Number);
+  function build(min, max) {
+    if (!arr.length) return null;
+    if (arr[0] < min || arr[0] > max) return null;
+    let val = arr.shift();
+    let node = { val: val, left: null, right: null };
+    node.left = build(min, val);
+    node.right = build(val, max);
+    return node;
+  }
+  return build(-Infinity, Infinity);
+}
+</pre
+              >
+            </div>
+          </div>
+          <div
+            class="tree-container"
+            aria-label="Example tree for Serialize and Deserialize BST"
+          >
+            <svg
+              id="serializeBSTTree"
+              viewBox="0 0 400 220"
+              role="img"
+              aria-labelledby="serializeBSTTitle"
+            >
+              <title id="serializeBSTTitle">
+                Example tree for Serialize and Deserialize BST
+              </title>
+              <!-- Nodes and edges generated by JS -->
+            </svg>
+          </div>
+          <div style="margin-top: 15px; text-align: center">
+            <button id="serializeBSTStartBtn">Start Serialization</button>
+            <button id="serializeBSTNextStepBtn" disabled>Next Step</button>
+            <button id="serializeBSTResetBtn" disabled>Reset</button>
+          </div>
+          <div class="steps" id="serializeBSTStepText" aria-live="polite"></div>
+        </section>
+      </div>
+
+      <!-- Slide navigation -->
+      <div id="slideNav" role="navigation" aria-label="Slide navigation">
+        <button id="prevBtn" aria-label="Previous slide" disabled>
+          Previous
+        </button>
+        <button id="nextBtn" aria-label="Next slide">Next</button>
+      </div>
+    </div>
+
+    <script>
+      // Slide navigation
+      const slides = document.querySelectorAll(".slide");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      let currentSlide = 0;
+
+      function showSlide(idx) {
+        slides.forEach((slide, i) =>
+          slide.classList.toggle("active", i === idx)
+        );
+        prevBtn.disabled = idx === 0;
+        nextBtn.disabled = idx === slides.length - 1;
+        currentSlide = idx;
+      }
+      prevBtn.onclick = () => showSlide(currentSlide - 1);
+      nextBtn.onclick = () => showSlide(currentSlide + 1);
+      showSlide(0);
+
+      // Utility delay
+      function delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      // --- Common tree drawing function ---
+      function drawTree(svg, nodes) {
+        svg.innerHTML = "";
+        // Draw edges
+        nodes.forEach((node) => {
+          if (node.left !== null) {
+            const left = nodes.find((n) => n.id === node.left);
+            const line = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+            );
+            line.setAttribute("x1", node.x);
+            line.setAttribute("y1", node.y);
+            line.setAttribute("x2", left.x);
+            line.setAttribute("y2", left.y);
+            svg.appendChild(line);
+          }
+          if (node.right !== null) {
+            const right = nodes.find((n) => n.id === node.right);
+            const line = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+            );
+            line.setAttribute("x1", node.x);
+            line.setAttribute("y1", node.y);
+            line.setAttribute("x2", right.x);
+            line.setAttribute("y2", right.y);
+            svg.appendChild(line);
+          }
+        });
+        // Draw nodes
+        nodes.forEach((node) => {
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          g.setAttribute("class", "node");
+          g.setAttribute("transform", `translate(${node.x},${node.y})`);
+          g.dataset.id = node.id;
+          const circle = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle"
+          );
+          circle.setAttribute("r", 20);
+          g.appendChild(circle);
+          const text = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text"
+          );
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("dy", "7");
+          text.setAttribute("font-size", "18");
+          text.textContent = node.val;
+          g.appendChild(text);
+          svg.appendChild(g);
+        });
+      }
+
+      // --- Highlight helpers ---
+      function clearHighlights(svg) {
+        svg.querySelectorAll(".node").forEach((n) => {
+          n.classList.remove("highlight", "next", "found");
+        });
+      }
+      function highlightNode(svg, id, cls) {
+        clearHighlights(svg);
+        const node = svg.querySelector(`.node[data-id="${id}"]`);
+        if (node) node.classList.add(cls);
+      }
+
+      // --- Binary Search Tree Search Animation ---
+      const bstSvg = document.getElementById("bst");
+      const bstStartBtn = document.getElementById("bstStartBtn");
+      const bstNextStepBtn = document.getElementById("bstNextStepBtn");
+      const bstResetBtn = document.getElementById("bstResetBtn");
+      const bstStepText = document.getElementById("bstStepText");
+
+      const bstNodes = [
+        { id: 0, val: 10, x: 200, y: 40, left: 1, right: 2 },
+        { id: 1, val: 5, x: 120, y: 110, left: 3, right: 4 },
+        { id: 2, val: 15, x: 280, y: 110, left: null, right: 5 },
+        { id: 3, val: 3, x: 80, y: 180, left: null, right: null },
+        { id: 4, val: 7, x: 160, y: 180, left: null, right: null },
+        { id: 5, val: 20, x: 320, y: 180, left: null, right: null },
+      ];
+
+      drawTree(bstSvg, bstNodes);
+
+      const searchVal = 13;
+      let bstSteps = [];
+      let bstStepIndex = -1;
+
+      function buildBstSteps() {
+        bstSteps = [];
+        function search(id) {
+          if (id === null) return;
+          const node = bstNodes.find((n) => n.id === id);
+          bstSteps.push({
+            current: id,
+            message: `Checking node with value ${node.val}`,
+          });
+          if (node.val === searchVal) {
+            bstSteps.push({
+              current: id,
+              message: `Found value ${searchVal}!`,
+            });
+            return;
+          }
+          if (searchVal < node.val) {
+            bstSteps.push({
+              current: id,
+              message: `${searchVal} < ${node.val}, go left`,
+            });
+            search(node.left);
+          } else {
+            bstSteps.push({
+              current: id,
+              message: `${searchVal} > ${node.val}, go right`,
+            });
+            search(node.right);
+          }
+        }
+        search(0);
+      }
+
+      function showBstStep(index) {
+        if (index < 0 || index >= bstSteps.length) return;
+        const step = bstSteps[index];
+        bstStepText.textContent = step.message;
+        clearHighlights(bstSvg);
+        highlightNode(
+          bstSvg,
+          step.current,
+          index === bstSteps.length - 1 ? "found" : "highlight"
+        );
+        // Highlight next node if applicable
+        if (index + 1 < bstSteps.length) {
+          const nextStep = bstSteps[index + 1];
+          if (nextStep.current !== step.current) {
+            highlightNode(bstSvg, nextStep.current, "next");
+          }
+        }
+      }
+
+      bstStartBtn.onclick = () => {
+        buildBstSteps();
+        bstStepIndex = 0;
+        showBstStep(bstStepIndex);
+        bstStartBtn.disabled = true;
+        bstNextStepBtn.disabled = false;
+        bstResetBtn.disabled = false;
+      };
+      bstNextStepBtn.onclick = () => {
+        bstStepIndex++;
+        if (bstStepIndex >= bstSteps.length - 1) {
+          bstStepIndex = bstSteps.length - 1;
+          bstNextStepBtn.disabled = true;
+        }
+        showBstStep(bstStepIndex);
+      };
+      bstResetBtn.onclick = () => {
+        bstStepIndex = -1;
+        bstStepText.textContent = "";
+        clearHighlights(bstSvg);
+        bstStartBtn.disabled = false;
+        bstNextStepBtn.disabled = true;
+        bstResetBtn.disabled = true;
+      };
+
+      // --- BFS Animation ---
+      const bfsSvg = document.getElementById("bfsTree");
+      const bfsStartBtn = document.getElementById("bfsStartBtn");
+      const bfsNextStepBtn = document.getElementById("bfsNextStepBtn");
+      const bfsResetBtn = document.getElementById("bfsResetBtn");
+      const bfsStepText = document.getElementById("bfsStepText");
+
+      const bfsNodes = bstNodes; // reuse same structure for demo
+
+      drawTree(bfsSvg, bfsNodes);
+
+      let bfsSteps = [];
+      let bfsStepIndex = -1;
+
+      function buildBfsSteps() {
+        bfsSteps = [];
+        const queue = [0];
+        while (queue.length > 0) {
+          const current = queue.shift();
+          bfsSteps.push(current);
+          const node = bfsNodes.find((n) => n.id === current);
+          if (node.left !== null) queue.push(node.left);
+          if (node.right !== null) queue.push(node.right);
+        }
+      }
+
+      function showBfsStep(index) {
+        if (index < 0 || index >= bfsSteps.length) return;
+        const currentId = bfsSteps[index];
+        bfsStepText.textContent = `Visited node with value ${
+          bfsNodes.find((n) => n.id === currentId).val
+        }`;
+        clearHighlights(bfsSvg);
+        highlightNode(bfsSvg, currentId, "highlight");
+      }
+
+      bfsStartBtn.onclick = () => {
+        buildBfsSteps();
+        bfsStepIndex = 0;
+        showBfsStep(bfsStepIndex);
+        bfsStartBtn.disabled = true;
+        bfsNextStepBtn.disabled = false;
+        bfsResetBtn.disabled = false;
+      };
+      bfsNextStepBtn.onclick = () => {
+        bfsStepIndex++;
+        if (bfsStepIndex >= bfsSteps.length - 1) {
+          bfsStepIndex = bfsSteps.length - 1;
+          bfsNextStepBtn.disabled = true;
+        }
+        showBfsStep(bfsStepIndex);
+      };
+      bfsResetBtn.onclick = () => {
+        bfsStepIndex = -1;
+        bfsStepText.textContent = "";
+        clearHighlights(bfsSvg);
+        bfsStartBtn.disabled = false;
+        bfsNextStepBtn.disabled = true;
+        bfsResetBtn.disabled = true;
+      };
+
+      // --- DFS Animation ---
+      const dfsSvg = document.getElementById("dfsTree");
+      const dfsStartBtn = document.getElementById("dfsStartBtn");
+      const dfsNextStepBtn = document.getElementById("dfsNextStepBtn");
+      const dfsResetBtn = document.getElementById("dfsResetBtn");
+      const dfsStepText = document.getElementById("dfsStepText");
+
+      const dfsNodes = bstNodes;
+
+      drawTree(dfsSvg, dfsNodes);
+
+      let dfsSteps = [];
+      let dfsStepIndex = -1;
+
+      function buildDfsSteps() {
+        dfsSteps = [];
+        function dfs(id) {
+          if (id === null) return;
+          dfsSteps.push(id);
+          const node = dfsNodes.find((n) => n.id === id);
+          dfs(node.left);
+          dfs(node.right);
+        }
+        dfs(0);
+      }
+
+      function showDfsStep(index) {
+        if (index < 0 || index >= dfsSteps.length) return;
+        const currentId = dfsSteps[index];
+        dfsStepText.textContent = `Visited node with value ${
+          dfsNodes.find((n) => n.id === currentId).val
+        }`;
+        clearHighlights(dfsSvg);
+        highlightNode(dfsSvg, currentId, "highlight");
+      }
+
+      dfsStartBtn.onclick = () => {
+        buildDfsSteps();
+        dfsStepIndex = 0;
+        showDfsStep(dfsStepIndex);
+        dfsStartBtn.disabled = true;
+        dfsNextStepBtn.disabled = false;
+        dfsResetBtn.disabled = false;
+      };
+      dfsNextStepBtn.onclick = () => {
+        dfsStepIndex++;
+        if (dfsStepIndex >= dfsSteps.length - 1) {
+          dfsStepIndex = dfsSteps.length - 1;
+          dfsNextStepBtn.disabled = true;
+        }
+        showDfsStep(dfsStepIndex);
+      };
+      dfsResetBtn.onclick = () => {
+        dfsStepIndex = -1;
+        dfsStepText.textContent = "";
+        clearHighlights(dfsSvg);
+        dfsStartBtn.disabled = false;
+        dfsNextStepBtn.disabled = true;
+        dfsResetBtn.disabled = true;
+      };
+
+      // --- Traversal Types (Inorder, Preorder, Postorder) ---
+      const traversalSvg = document.getElementById("traversalTree");
+      const traversalStartBtn = document.getElementById("traversalStartBtn");
+      const traversalNextStepBtn = document.getElementById(
+        "traversalNextStepBtn"
+      );
+      const traversalResetBtn = document.getElementById("traversalResetBtn");
+      const traversalStepText = document.getElementById("traversalStepText");
+      const traversalTypeSelect = document.getElementById("traversalType");
+
+      const traversalNodes = bstNodes;
+
+      drawTree(traversalSvg, traversalNodes);
+
+      let traversalSteps = [];
+      let traversalStepIndex = -1;
+
+      function clearTraversalHighlights() {
+        clearHighlights(traversalSvg);
+      }
+
+      function showTraversalStep(index) {
+        if (index < 0 || index >= traversalSteps.length) return;
+        const currentId = traversalSteps[index];
+        traversalStepText.textContent = `Visited node with value ${
+          traversalNodes.find((n) => n.id === currentId).val
+        }`;
+        clearTraversalHighlights();
+        highlightNode(traversalSvg, currentId, "highlight");
+      }
+
+      function buildTraversalSteps(type) {
+        traversalSteps = [];
+        function inorder(id) {
+          if (id === null) return;
+          const node = traversalNodes.find((n) => n.id === id);
+          inorder(node.left);
+          traversalSteps.push(id);
+          inorder(node.right);
+        }
+        function preorder(id) {
+          if (id === null) return;
+          traversalSteps.push(id);
+          const node = traversalNodes.find((n) => n.id === id);
+          preorder(node.left);
+          preorder(node.right);
+        }
+        function postorder(id) {
+          if (id === null) return;
+          const node = traversalNodes.find((n) => n.id === id);
+          postorder(node.left);
+          postorder(node.right);
+          traversalSteps.push(id);
+        }
+        if (type === "inorder") inorder(0);
+        else if (type === "preorder") preorder(0);
+        else if (type === "postorder") postorder(0);
+      }
+
+      traversalStartBtn.onclick = () => {
+        buildTraversalSteps(traversalTypeSelect.value);
+        traversalStepIndex = 0;
+        showTraversalStep(traversalStepIndex);
+        traversalStartBtn.disabled = true;
+        traversalNextStepBtn.disabled = false;
+        traversalResetBtn.disabled = false;
+      };
+      traversalNextStepBtn.onclick = () => {
+        traversalStepIndex++;
+        if (traversalStepIndex >= traversalSteps.length - 1) {
+          traversalStepIndex = traversalSteps.length - 1;
+          traversalNextStepBtn.disabled = true;
+        }
+        showTraversalStep(traversalStepIndex);
+      };
+      traversalResetBtn.onclick = () => {
+        traversalStepIndex = -1;
+        traversalStepText.textContent = "";
+        clearTraversalHighlights();
+        traversalStartBtn.disabled = false;
+        traversalNextStepBtn.disabled = true;
+        traversalResetBtn.disabled = true;
+      };
+
+      // --- Validate BST Problem Animation ---
+      const validateBSTSvg = document.getElementById("validateBSTTree");
+      const validateBSTStartBtn = document.getElementById(
+        "validateBSTStartBtn"
+      );
+      const validateBSTNextStepBtn = document.getElementById(
+        "validateBSTNextStepBtn"
+      );
+      const validateBSTResetBtn = document.getElementById(
+        "validateBSTResetBtn"
+      );
+      const validateBSTStepText = document.getElementById(
+        "validateBSTStepText"
+      );
+
+      // Example tree for validation:
+      //       5
+      //      / \
+      //     1   6
+      //        / \
+      //       4   7
+      // This tree is invalid because 4 is in the right subtree of 5 but less than 5.
+
+      const validateBSTNodes = [
+        { id: 0, val: 5, x: 200, y: 40, left: 1, right: 2 },
+        { id: 1, val: 1, x: 120, y: 110, left: null, right: null },
+        { id: 2, val: 6, x: 280, y: 110, left: 3, right: 4 },
+        { id: 3, val: 4, x: 240, y: 180, left: null, right: null },
+        { id: 4, val: 7, x: 320, y: 180, left: null, right: null },
+      ];
+
+      drawTree(validateBSTSvg, validateBSTNodes);
+
+      let validateBSTSteps = [];
+      let validateBSTStepIndex = -1;
+
+      function buildValidateBSTSteps() {
+        validateBSTSteps = [];
+        // We'll simulate the recursive calls with stack frames showing current node and min/max bounds
+        function validate(nodeId, min, max) {
+          if (nodeId === null) {
+            validateBSTSteps.push({
+              nodeId: null,
+              min,
+              max,
+              result: true,
+              message: "Reached leaf (null), returning true",
+            });
+            return true;
+          }
+          const node = validateBSTNodes.find((n) => n.id === nodeId);
+          validateBSTSteps.push({
+            nodeId,
+            min,
+            max,
+            result: null,
+            message: `Checking node ${node.val} with bounds (${min}, ${max})`,
+          });
+          if (node.val <= min || node.val >= max) {
+            validateBSTSteps.push({
+              nodeId,
+              min,
+              max,
+              result: false,
+              message: `Node ${node.val} violates BST properties!`,
+            });
+            return false;
+          }
+          const leftResult = validate(node.left, min, node.val);
+          const rightResult = validate(node.right, node.val, max);
+          const result = leftResult && rightResult;
+          validateBSTSteps.push({
+            nodeId,
+            min,
+            max,
+            result,
+            message: `Node ${node.val} is ${result ? "valid" : "invalid"}`,
+          });
+          return result;
+        }
+        validate(0, -Infinity, Infinity);
+      }
+
+      function showValidateBSTStep(index) {
+        if (index < 0 || index >= validateBSTSteps.length) return;
+        const step = validateBSTSteps[index];
+        validateBSTStepText.textContent = step.message;
+        clearHighlights(validateBSTSvg);
+        if (step.nodeId !== null) {
+          if (step.result === true)
+            highlightNode(validateBSTSvg, step.nodeId, "found");
+          else if (step.result === false)
+            highlightNode(validateBSTSvg, step.nodeId, "highlight");
+          else highlightNode(validateBSTSvg, step.nodeId, "highlight");
+        }
+      }
+
+      validateBSTStartBtn.onclick = () => {
+        buildValidateBSTSteps();
+        validateBSTStepIndex = 0;
+        showValidateBSTStep(validateBSTStepIndex);
+        validateBSTStartBtn.disabled = true;
+        validateBSTNextStepBtn.disabled = false;
+        validateBSTResetBtn.disabled = false;
+      };
+      validateBSTNextStepBtn.onclick = () => {
+        validateBSTStepIndex++;
+        if (validateBSTStepIndex >= validateBSTSteps.length - 1) {
+          validateBSTStepIndex = validateBSTSteps.length - 1;
+          validateBSTNextStepBtn.disabled = true;
+        }
+        showValidateBSTStep(validateBSTStepIndex);
+      };
+      validateBSTResetBtn.onclick = () => {
+        validateBSTStepIndex = -1;
+        validateBSTStepText.textContent = "";
+        clearHighlights(validateBSTSvg);
+        validateBSTStartBtn.disabled = false;
+        validateBSTNextStepBtn.disabled = true;
+        validateBSTResetBtn.disabled = true;
+      };
+
+      // --- Serialize and Deserialize BST Problem Animation ---
+      const serializeBSTSvg = document.getElementById("serializeBSTTree");
+      const serializeBSTStartBtn = document.getElementById(
+        "serializeBSTStartBtn"
+      );
+      const serializeBSTNextStepBtn = document.getElementById(
+        "serializeBSTNextStepBtn"
+      );
+      const serializeBSTResetBtn = document.getElementById(
+        "serializeBSTResetBtn"
+      );
+      const serializeBSTStepText = document.getElementById(
+        "serializeBSTStepText"
+      );
+
+      // Using the same tree as bstNodes for serialization demo
+      drawTree(serializeBSTSvg, bstNodes);
+
+      let serializeBSTSteps = [];
+      let serializeBSTStepIndex = -1;
+
+      function buildSerializeBSTSteps() {
+        serializeBSTSteps = [];
+        // Preorder traversal for serialization
+        function preorder(id) {
+          if (id === null) {
+            serializeBSTSteps.push({
+              action: "visit-null",
+              nodeId: null,
+              message: "Reached null node",
+            });
+            return;
+          }
+          const node = bstNodes.find((n) => n.id === id);
+          serializeBSTSteps.push({
+            action: "visit-node",
+            nodeId: id,
+            message: `Visit node ${node.val}, add to serialization`,
+          });
+          preorder(node.left);
+          preorder(node.right);
+        }
+        preorder(0);
+
+        // Deserialization steps
+        serializeBSTSteps.push({
+          action: "deserialize-start",
+          message: "Start deserialization",
+        });
+        let data = bstNodes.map((n) => n.val).join(",");
+        let arr = data.split(",").map(Number);
+        function build(min, max) {
+          if (arr.length === 0) {
+            serializeBSTSteps.push({
+              action: "deserialize-null",
+              message: "No more nodes to deserialize",
+            });
+            return null;
+          }
+          if (arr[0] < min || arr[0] > max) {
+            serializeBSTSteps.push({
+              action: "deserialize-out-of-bound",
+              value: arr[0],
+              min,
+              max,
+              message: `Value ${arr[0]} out of bounds (${min}, ${max}), returning null`,
+            });
+            return null;
+          }
+          let val = arr.shift();
+          serializeBSTSteps.push({
+            action: "deserialize-node",
+            val,
+            min,
+            max,
+            message: `Create node with value ${val} within bounds (${min}, ${max})`,
+          });
+          let node = { val, left: null, right: null };
+          node.left = build(min, val);
+          node.right = build(val, max);
+          return node;
+        }
+        build(-Infinity, Infinity);
+        serializeBSTSteps.push({
+          action: "deserialize-end",
+          message: "Deserialization complete",
+        });
+      }
+
+      function showSerializeBSTStep(index) {
+        if (index < 0 || index >= serializeBSTSteps.length) return;
+        const step = serializeBSTSteps[index];
+        serializeBSTStepText.textContent = step.message;
+        clearHighlights(serializeBSTSvg);
+        if (step.action === "visit-node" && step.nodeId !== null) {
+          highlightNode(serializeBSTSvg, step.nodeId, "highlight");
+        } else if (step.action === "deserialize-node") {
+          // Highlight the node with value if found in tree (if any)
+          const node = bstNodes.find((n) => n.val === step.val);
+          if (node) highlightNode(serializeBSTSvg, node.id, "found");
+        }
+      }
+
+      serializeBSTStartBtn.onclick = () => {
+        buildSerializeBSTSteps();
+        serializeBSTStepIndex = 0;
+        showSerializeBSTStep(serializeBSTStepIndex);
+        serializeBSTStartBtn.disabled = true;
+        serializeBSTNextStepBtn.disabled = false;
+        serializeBSTResetBtn.disabled = false;
+      };
+      serializeBSTNextStepBtn.onclick = () => {
+        serializeBSTStepIndex++;
+        if (serializeBSTStepIndex >= serializeBSTSteps.length - 1) {
+          serializeBSTStepIndex = serializeBSTSteps.length - 1;
+          serializeBSTNextStepBtn.disabled = true;
+        }
+        showSerializeBSTStep(serializeBSTStepIndex);
+      };
+      serializeBSTResetBtn.onclick = () => {
+        serializeBSTStepIndex = -1;
+        serializeBSTStepText.textContent = "";
+        clearHighlights(serializeBSTSvg);
+        serializeBSTStartBtn.disabled = false;
+        serializeBSTNextStepBtn.disabled = true;
+        serializeBSTResetBtn.disabled = true;
+      };
+    </script>
+  </body>
+</html>
+
+
+
+
+const linkedList = [
+{ 
+    head : {
+        data : 1,
+        next : {
+            data : 2,
+            next : {
+                data : 3,
+                next : null
+            }
+        }
+    }
+}
+]
+
+
+
+
+
+
+
+
+
+
+
+

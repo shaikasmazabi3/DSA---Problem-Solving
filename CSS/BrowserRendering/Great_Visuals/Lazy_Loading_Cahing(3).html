@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>03 - Lazy Loading and Caching</title>
+<style>
+  body { font-family: 'Comic Sans MS', cursive, sans-serif; background: #f0f8ff; margin: 0; color: #333; }
+  .container { max-width: 900px; margin: 2em auto; background: white; padding: 2em; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
+  h1, h2 { margin-bottom: 0.5em; }
+  .lazy-img {
+    width: 200px;
+    height: 120px;
+    background: #ddd;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #777;
+    font-weight: bold;
+    font-size: 1.2em;
+    border: 3px dashed #bbb;
+    margin: 1em auto;
+    user-select: none;
+    background-size: cover;
+    background-position: center;
+  }
+  .box {
+    display: inline-block;
+    padding: 0.6em 1em;
+    margin: 0.3em 0.5em 0.5em 0;
+    border-radius: 12px;
+    background: #0078d7;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0,120,215,0.4);
+    cursor: default;
+    user-select: none;
+  }
+  nav { margin-top: 2em; text-align: center; }
+  nav a { background: #0078d7; color: white; padding: 0.7em 1.5em; border-radius: 10px; text-decoration: none; font-weight: bold; margin: 0 0.5em; display: inline-block; }
+  nav a:hover { background: #005ea2; }
+</style>
+</head>
+<body>
+<div class="container" role="main" aria-label="Lazy Loading and Caching">
+  <h1>Lazy Loading: Load Only What You See</h1>
+  <p>Imagine a big coloring book with 100 pages but you only color the first 5 pages now.</p>
+  <p>Lazy loading means the browser only loads images or content when you scroll to see them.</p>
+  <div class="lazy-img" aria-label="Image placeholder for lazy loading">
+    Image not loaded yet
+  </div>
+  <p>Without lazy loading, the browser loads all images at once, making the page slow.</p>
+
+  <h2>Caching: Remembering to Save Time</h2>
+  <p>When you visit a website, your browser saves some files in a secret box called <strong>cache</strong>.</p>
+  <p>Next time, the browser uses those saved files instead of asking the server again, making loading faster.</p>
+  <div class="box">Cache</div>
+  <p>Think of it as your browser remembering your favorite book so you don’t have to borrow it again.</p>
+
+  <nav>
+    <a href="02-dom-cssom-render-tree.html" aria-label="Previous lesson: DOM, CSSOM, Render Tree">⬅️ Previous</a>
+    <a href="04-critical-rendering-path.html" aria-label="Next lesson: Critical Rendering Path and Performance Metrics">Next ➡️</a>
+  </nav>
+
+<script>
+  // Simulate lazy loading image after 2 seconds
+  window.addEventListener('load', () => {
+    const lazyImg = document.querySelector('.lazy-img');
+    setTimeout(() => {
+      lazyImg.textContent = '';
+      lazyImg.style.backgroundImage = "url('https://via.placeholder.com/200x120?text=Lazy+Loaded+Image')";
+    }, 2000);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reflow & Repaint Visualizer: Real-Life Layout Impact</title>
+<style>
+  body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: #e9f5f9;
+    margin: 0;
+    padding: 20px;
+    color: #004d40;
+  }
+  h1, h2 {
+    text-align: center;
+    color: #00796b;
+    margin-bottom: 6px;
+  }
+  p.description {
+    max-width: 900px;
+    margin: 0 auto 30px;
+    font-size: 1.2em;
+    text-align: center;
+    color: #004d40dd;
+  }
+
+  /* Container for entire page */
+  .container {
+    max-width: 960px;
+    margin: 0 auto 60px;
+    background: #b2dfdb;
+    border-radius: 15px;
+    padding: 25px 30px 40px;
+    box-shadow: 0 0 20px #004d4080;
+  }
+
+  /* Section title */
+  .section-title {
+    font-weight: bold;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    color: #004d40;
+    text-align: center;
+  }
+
+  /* Layout containers */
+  .layout-visualizer {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  .layout-container {
+    background: white;
+    border: 3px solid #00796b;
+    border-radius: 15px;
+    width: 460px;
+    min-height: 380px;
+    padding: 20px;
+    box-shadow: 0 0 15px #004d4080;
+    position: relative;
+    overflow: hidden;
+  }
+  .layout-label {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 12px;
+    color: #00796b;
+    text-align: center;
+  }
+
+  /* Realistic "YouTube-like" layout boxes with varied sizes */
+  .yt-box {
+    position: absolute;
+    background: #f1f1f1;
+    border-radius: 8px;
+    box-shadow: 0 0 6px #aaa inset;
+    color: #333;
+    font-weight: bold;
+    font-size: 0.9em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    transition: all 0.8s ease;
+  }
+  /* Individual boxes initial layout */
+  #yt1-header {
+    top: 10px; left: 10px; right: 10px; height: 50px;
+    background: #ff0000; color: white; font-size: 1.1em; box-shadow: 0 0 10px #cc0000;
+  }
+  #yt1-sidebar {
+    top: 70px; left: 10px; width: 120px; height: 280px;
+    background: #e0e0e0; color: #555;
+  }
+  #yt1-content1 {
+    top: 70px; left: 140px; width: 300px; height: 130px;
+    background: #fff; border: 2px solid #ccc; color: #222;
+  }
+  #yt1-content2 {
+    top: 210px; left: 140px; width: 300px; height: 140px;
+    background: #fff; border: 2px solid #ccc; color: #222;
+  }
+  #yt1-footer {
+    bottom: 10px; left: 10px; right: 10px; height: 40px;
+    background: #ddd; color: #555; font-size: 0.9em;
+  }
+
+  /* Modified layout (bad practice) - sidebar width increased, content squeezed */
+  .modified #yt1-sidebar {
+    width: 200px;
+    background: #d0d0d0;
+  }
+  .modified #yt1-content1 {
+    left: 220px;
+    width: 220px;
+    border-color: #ff6f00;
+  }
+  .modified #yt1-content2 {
+    left: 220px;
+    width: 220px;
+    border-color: #ff6f00;
+  }
+
+  /* Realistic "Amazon-like" layout boxes with varied sizes */
+  .amz-box {
+    position: absolute;
+    background: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 6px #bbb inset;
+    color: #333;
+    font-weight: bold;
+    font-size: 0.9em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    transition: all 0.8s ease;
+  }
+  /* Initial layout */
+  #amz1-header {
+    top: 10px; left: 10px; right: 10px; height: 60px;
+    background: #232f3e; color: white; font-size: 1.2em; box-shadow: 0 0 10px #000a1a;
+  }
+  #amz1-search {
+    top: 80px; left: 10px; right: 10px; height: 40px;
+    background: #fff; border: 2px solid #ccc; color: #333;
+  }
+  #amz1-nav {
+    top: 130px; left: 10px; width: 150px; height: 220px;
+    background: #f0f0f0; color: #555;
+  }
+  #amz1-main {
+    top: 130px; left: 170px; right: 10px; height: 220px;
+    background: #fff; border: 2px solid #ccc; color: #222;
+  }
+  #amz1-footer {
+    bottom: 10px; left: 10px; right: 10px; height: 50px;
+    background: #ddd; color: #555; font-size: 0.9em;
+  }
+
+  /* Modified layout (bad practice) - nav width increased, main area squeezed */
+  .modified #amz1-nav {
+    width: 250px;
+    background: #e0e0e0;
+  }
+  .modified #amz1-main {
+    left: 270px;
+    border-color: #d84315;
+  }
+
+  /* Reflow & Repaint Section */
+  #reflowRepaintSection {
+    max-width: 960px;
+    margin: 0 auto 60px;
+    background: #fff3e0;
+    border-radius: 15px;
+    padding: 25px 30px 35px;
+    box-shadow: 0 0 20px #ffb74d;
+    color: #bf360c;
+  }
+  #reflowRepaintTitle {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    color: #bf360c;
+  }
+  #reflowRepaintVisual {
+    margin: 20px auto 15px;
+    width: 920px;
+    height: 360px;
+    position: relative;
+    border: 3px solid #bf360c;
+    border-radius: 12px;
+    background: #fff8e1;
+    display: flex;
+    gap: 40px;
+    padding: 15px;
+    box-sizing: border-box;
+    overflow-x: auto;
+  }
+
+  /* Reflow and repaint containers */
+  #reflowContainer, #repaintContainer {
+    flex: 1;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 15px;
+    overflow-x: auto;
+    border: 2px solid #bf360c;
+    border-radius: 12px;
+    padding: 10px;
+    box-sizing: border-box;
+    background: #fbe9e7;
+  }
+
+  /* Boxes inside reflow/repaint demo with varied sizes */
+  .reflow-box, .repaint-box {
+    flex: none;
+    border-radius: 12px;
+    font-weight: bold;
+    color: white;
+    user-select: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px;
+    font-size: 1em;
+    transition: all 0.6s ease;
+  }
+  /* Reflow boxes - orange with varied sizes */
+  .reflow-box {
+    background: #f57c00;
+    box-shadow: 0 0 15px #ef6c00;
+    border: 3px solid #bf360c;
+    border-radius: 10px;
+  }
+  /* Repaint boxes - yellow with varied sizes */
+  .repaint-box {
+    background: #fbc02d;
+    color: black;
+    box-shadow: 0 0 15px #f9a825;
+    border: 3px solid #bf360c;
+    border-radius: 10px;
+  }
+  /* Reflow expanded state */
+  .reflow-box.expanded {
+    filter: drop-shadow(0 0 5px #d84315);
+  }
+  /* Repaint changed color state */
+  .repaint-box.changed {
+    background: #f57c00;
+    color: white;
+    box-shadow: 0 0 15px #d84315;
+  }
+
+  /* Reflow/Repaint labels */
+  #reflowRepaintText {
+    font-size: 1.2em;
+    text-align: center;
+    margin-top: 15px;
+    min-height: 90px;
+    max-width: 920px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Scrollbar styling */
+  #reflowContainer::-webkit-scrollbar,
+  #repaintContainer::-webkit-scrollbar {
+    height: 10px;
+  }
+  #reflowContainer::-webkit-scrollbar-track,
+  #repaintContainer::-webkit-scrollbar-track {
+    background: #fbe9e7;
+  }
+  #reflowContainer::-webkit-scrollbar-thumb,
+  #repaintContainer::-webkit-scrollbar-thumb {
+    background: #bf360c;
+    border-radius: 10px;
+  }
+
+  /* Accessibility focus outline */
+  .reflow-box:focus, .repaint-box:focus {
+    outline: 3px solid #d84315;
+    outline-offset: 3px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1000px) {
+    .layout-visualizer {
+      flex-direction: column;
+      align-items: center;
+    }
+    .layout-container {
+      width: 90vw;
+      margin-bottom: 30px;
+    }
+    #reflowRepaintVisual {
+      width: 95vw;
+      height: 320px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Reflow & Repaint Visualizer: Real-Life Layout Impact</h1>
+<p class="description">
+  Explore how small layout changes impact the browser's <strong>Critical Rendering Path</strong> in real-world style layouts inspired by YouTube and Amazon.
+  See side-by-side layouts before and after a change that triggers <em>reflow</em>, and understand repaint effects with interactive examples below.
+</p>
+
+<div class="container" aria-label="Critical Rendering Path Visualization">
+
+  <div class="section-title">YouTube-like Layout: Normal vs Modified (Triggers Reflow)</div>
+  <div class="layout-visualizer" aria-label="YouTube style layout comparison">
+    <div class="layout-container" id="ytLayoutNormal" aria-label="YouTube layout normal">
+      <div class="layout-label">Normal Layout</div>
+      <div id="yt1-header" class="yt-box" tabindex="0" aria-label="Header">Header</div>
+      <div id="yt1-sidebar" class="yt-box" tabindex="0" aria-label="Sidebar">Sidebar</div>
+      <div id="yt1-content1" class="yt-box" tabindex="0" aria-label="Content Block 1">Content 1</div>
+      <div id="yt1-content2" class="yt-box" tabindex="0" aria-label="Content Block 2">Content 2</div>
+      <div id="yt1-footer" class="yt-box" tabindex="0" aria-label="Footer">Footer</div>
+    </div>
+    <div class="layout-container" id="ytLayoutModified" aria-label="YouTube layout modified (reflow)">
+      <div class="layout-label">Modified Layout (Bad Practice)</div>
+      <div id="yt2-header" class="yt-box" tabindex="0" aria-label="Header">Header</div>
+      <div id="yt2-sidebar" class="yt-box" tabindex="0" aria-label="Sidebar">Sidebar (Wider)</div>
+      <div id="yt2-content1" class="yt-box" tabindex="0" aria-label="Content Block 1">Content 1 (Narrower)</div>
+      <div id="yt2-content2" class="yt-box" tabindex="0" aria-label="Content Block 2">Content 2 (Narrower)</div>
+      <div id="yt2-footer" class="yt-box" tabindex="0" aria-label="Footer">Footer</div>
+    </div>
+  </div>
+
+  <div class="section-title">Amazon-like Layout: Normal vs Modified (Triggers Reflow)</div>
+  <div class="layout-visualizer" aria-label="Amazon style layout comparison">
+    <div class="layout-container" id="amzLayoutNormal" aria-label="Amazon layout normal">
+      <div class="layout-label">Normal Layout</div>
+      <div id="amz1-header" class="amz-box" tabindex="0" aria-label="Header">Header</div>
+      <div id="amz1-search" class="amz-box" tabindex="0" aria-label="Search Bar">Search Bar</div>
+      <div id="amz1-nav" class="amz-box" tabindex="0" aria-label="Navigation Sidebar">Navigation</div>
+      <div id="amz1-main" class="amz-box" tabindex="0" aria-label="Main Content">Main Content</div>
+      <div id="amz1-footer" class="amz-box" tabindex="0" aria-label="Footer">Footer</div>
+    </div>
+    <div class="layout-container" id="amzLayoutModified" aria-label="Amazon layout modified (reflow)">
+      <div class="layout-label">Modified Layout (Bad Practice)</div>
+      <div id="amz2-header" class="amz-box" tabindex="0" aria-label="Header">Header</div>
+      <div id="amz2-search" class="amz-box" tabindex="0" aria-label="Search Bar">Search Bar</div>
+      <div id="amz2-nav" class="amz-box" tabindex="0" aria-label="Navigation Sidebar">Navigation (Wider)</div>
+      <div id="amz2-main" class="amz-box" tabindex="0" aria-label="Main Content">Main Content (Narrower)</div>
+      <div id="amz2-footer" class="amz-box" tabindex="0" aria-label="Footer">Footer</div>
+    </div>
+  </div>
+</div>
+
+<section id="reflowRepaintSection" aria-label="Reflow and Repaint demonstration">
+  <h2 id="reflowRepaintTitle">Reflow and Repaint: Interactive Large Scale Demo</h2>
+  <p style="max-width: 920px; margin: 0 auto 15px; text-align:center; color:#bf360c;">
+    Click any orange box to toggle its size (causing <strong>Reflow</strong>) or any yellow box to toggle its color (causing <strong>Repaint</strong>). Observe the different visual impacts on multiple varied-size boxes.
+  </p>
+  <div id="reflowRepaintVisual" role="region" aria-label="Interactive boxes for reflow and repaint demo">
+    <div id="reflowContainer" aria-label="Reflow boxes container">
+      <!-- JS will populate 5 varied size boxes -->
+    </div>
+    <div id="repaintContainer" aria-label="Repaint boxes container">
+      <!-- JS will populate 5 varied size boxes -->
+    </div>
+  </div>
+  <div id="reflowRepaintText" role="region" aria-live="polite" aria-atomic="true" style="max-width: 920px; margin: 20px auto 0; font-size: 1.2em; text-align:center; min-height: 90px;">
+    Click any orange box to toggle its size and trigger <strong>Reflow</strong>.<br>Click any yellow box to toggle its color and trigger <strong>Repaint</strong>.
+  </div>
+</section>
+
+<script>
+  // Initialize layouts for YouTube modified layout with reflow effect
+  const ytNormal = document.getElementById('ytLayoutNormal');
+  const ytModified = document.getElementById('ytLayoutModified');
+
+  // Set initial styles for modified layout boxes to simulate reflow effect
+  function setupYouTubeModified() {
+    ytModified.classList.add('modified');
+    const sidebar = document.getElementById('yt2-sidebar');
+    const content1 = document.getElementById('yt2-content1');
+    const content2 = document.getElementById('yt2-content2');
+
+    // Animate transition for reflow effect
+    sidebar.style.transition = 'width 0.8s ease, background-color 0.8s ease';
+    content1.style.transition = 'left 0.8s ease, width 0.8s ease, border-color 0.8s ease';
+    content2.style.transition = 'left 0.8s ease, width 0.8s ease, border-color 0.8s ease';
+
+    // Trigger layout change after a short delay to visualize reflow
+    setTimeout(() => {
+      sidebar.style.width = '200px';
+      sidebar.style.backgroundColor = '#d0d0d0';
+      content1.style.left = '220px';
+      content1.style.width = '220px';
+      content1.style.borderColor = '#ff6f00';
+      content2.style.left = '220px';
+      content2.style.width = '220px';
+      content2.style.borderColor = '#ff6f00';
+    }, 300);
+  }
+  setupYouTubeModified();
+
+  // Initialize layouts for Amazon modified layout with reflow effect
+  const amzNormal = document.getElementById('amzLayoutNormal');
+  const amzModified = document.getElementById('amzLayoutModified');
+
+  function setupAmazonModified() {
+    amzModified.classList.add('modified');
+    const nav = document.getElementById('amz2-nav');
+    const main = document.getElementById('amz2-main');
+
+    nav.style.transition = 'width 0.8s ease, background-color 0.8s ease';
+    main.style.transition = 'left 0.8s ease, border-color 0.8s ease';
+
+    setTimeout(() => {
+      nav.style.width = '250px';
+      nav.style.backgroundColor = '#e0e0e0';
+      main.style.left = '270px';
+      main.style.borderColor = '#d84315';
+    }, 300);
+  }
+  setupAmazonModified();
+
+  // Reflow & Repaint demo setup
+  const reflowContainer = document.getElementById('reflowContainer');
+  const repaintContainer = document.getElementById('repaintContainer');
+  const reflowRepaintText = document.getElementById('reflowRepaintText');
+
+  // Varied sizes for reflow boxes (width x height in px)
+  const reflowSizes = [
+    [100, 60],
+    [140, 90],
+    [90, 50],
+    [160, 100],
+    [120, 70]
+  ];
+  // Varied sizes for repaint boxes (width x height in px)
+  const repaintSizes = [
+    [110, 80],
+    [130, 60],
+    [100, 90],
+    [150, 70],
+    [90, 60]
+  ];
+
+  function createReflowBox(index, width, height) {
+    const box = document.createElement('div');
+    box.className = 'reflow-box';
+    box.textContent = `Box ${index + 1}`;
+    box.style.width = `${width}px`;
+    box.style.height = `${height}px`;
+    box.setAttribute('tabindex', '0');
+    box.setAttribute('role', 'button');
+    box.setAttribute('aria-pressed', 'false');
+    box.setAttribute('aria-label', `Reflow box number ${index + 1}, click to toggle size`);
+    box.addEventListener('click', () => toggleReflowBox(box));
+    box.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleReflowBox(box);
+      }
+    });
+    return box;
+  }
+
+  function createRepaintBox(index, width, height) {
+    const box = document.createElement('div');
+    box.className = 'repaint-box';
+    box.textContent = `Box ${index + 1}`;
+    box.style.width = `${width}px`;
+    box.style.height = `${height}px`;
+    box.setAttribute('tabindex', '0');
+    box.setAttribute('role', 'button');
+    box.setAttribute('aria-pressed', 'false');
+    box.setAttribute('aria-label', `Repaint box number ${index + 1}, click to toggle color`);
+    box.addEventListener('click', () => toggleRepaintBox(box));
+    box.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleRepaintBox(box);
+      }
+    });
+    return box;
+  }
+
+  // Populate reflow boxes with varied sizes
+  reflowSizes.forEach((size, i) => {
+    const box = createReflowBox(i, size[0], size[1]);
+    reflowContainer.appendChild(box);
+  });
+
+  // Populate repaint boxes with varied sizes
+  repaintSizes.forEach((size, i) => {
+    const box = createRepaintBox(i, size[0], size[1]);
+    repaintContainer.appendChild(box);
+  });
+
+  function toggleReflowBox(box) {
+    const expanded = box.classList.toggle('expanded');
+    box.setAttribute('aria-pressed', expanded.toString());
+    if (expanded) {
+      // Increase size by ~40%
+      box.style.width = `${box.offsetWidth * 1.4}px`;
+      box.style.height = `${box.offsetHeight * 1.4}px`;
+      reflowRepaintText.innerHTML = "<strong>Reflow:</strong> This box changed size, so the browser recalculates layout for all affected elements. This can cause large performance costs in complex layouts.";
+    } else {
+      // Reset size to original (from style attribute)
+      box.style.width = '';
+      box.style.height = '';
+      reflowRepaintText.innerHTML = "Click any orange box to toggle its size and trigger <strong>Reflow</strong>.";
+    }
+  }
+
+  function toggleRepaintBox(box) {
+    const changed = box.classList.toggle('changed');
+    box.setAttribute('aria-pressed', changed.toString());
+    if (changed) {
+      box.style.backgroundColor = '#f57c00';
+      box.style.color = 'white';
+      reflowRepaintText.innerHTML = "<strong>Repaint:</strong> This box changed color, so the browser repaints pixels but does not recalculate layout. This is less costly than reflow.";
+    } else {
+      box.style.backgroundColor = '';
+      box.style.color = '';
+      reflowRepaintText.innerHTML = "Click any yellow box to toggle its color and trigger <strong>Repaint</strong>.";
+    }
+  }
+</script>
+
+</body>
+</html>

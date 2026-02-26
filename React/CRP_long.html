@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Critical Rendering Path with Layout, Paint, Reflow & Repaint</title>
+    <style>
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: #e0f7fa;
+        margin: 0;
+        padding: 20px;
+        color: #004d40;
+      }
+      h1,
+      h2 {
+        text-align: center;
+        color: #00796b;
+      }
+      .container {
+        max-width: 900px;
+        margin: 20px auto 60px;
+        background: #b2dfdb;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 0 20px #004d4080;
+      }
+      .step {
+        margin: 25px 0;
+        opacity: 0.3;
+        transition: opacity 1s ease;
+      }
+      .step.active {
+        opacity: 1;
+      }
+      .title {
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #004d40;
+        text-align: center;
+      }
+      .tree-container {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+      .tree {
+        background: white;
+        border: 3px solid #00796b;
+        border-radius: 12px;
+        width: 250px;
+        min-height: 200px;
+        padding: 15px;
+        box-shadow: 0 0 15px #004d4080;
+        position: relative;
+      }
+      .node {
+        background: #004d40;
+        color: white;
+        border-radius: 8px;
+        padding: 10px 15px;
+        margin: 10px auto;
+        width: fit-content;
+        font-weight: bold;
+        font-size: 1.1em;
+        box-shadow: 0 0 8px #00796b;
+        cursor: default;
+      }
+      .subtree {
+        margin-left: 25px;
+        border-left: 2px dashed #00796b;
+        padding-left: 15px;
+      }
+      .highlight {
+        animation: glow 1.5s ease-in-out forwards;
+      }
+      @keyframes glow {
+        0% {
+          box-shadow: 0 0 0px 0px #ffcc00;
+        }
+        50% {
+          box-shadow: 0 0 15px 6px #ffcc00;
+        }
+        100% {
+          box-shadow: 0 0 0px 0px #ffcc00;
+        }
+      }
+      .arrow {
+        font-size: 3em;
+        text-align: center;
+        color: #00796b;
+        margin: 15px 0;
+      }
+      .btn-container {
+        text-align: center;
+        margin-top: 30px;
+      }
+      button {
+        background: #00796b;
+        color: white;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 8px;
+        font-size: 1.2em;
+        cursor: pointer;
+        box-shadow: 0 0 15px #004d40;
+        transition: background 0.3s ease;
+      }
+      button:hover {
+        background: #004d40;
+      }
+      .description {
+        max-width: 700px;
+        margin: 15px auto 0;
+        font-size: 1.2em;
+        background: #b2dfdb;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: inset 0 0 12px #004d4080;
+        color: #004d40;
+        min-height: 70px;
+        text-align: center;
+      }
+      /* Layout Visual Boxes */
+      #layoutVisual {
+        background: white;
+        border: 3px solid #00796b;
+        border-radius: 12px;
+        width: 400px;
+        height: 250px;
+        margin: 20px auto;
+        position: relative;
+        box-shadow: 0 0 15px #004d4080;
+      }
+      .box {
+        position: absolute;
+        border: 2px solid #004d40;
+        background: #b2dfdb;
+        color: #004d40;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 8px;
+        box-shadow: 0 0 8px #00796b;
+        user-select: none;
+      }
+      #box1 {
+        top: 20px;
+        left: 20px;
+        width: 360px;
+        height: 60px;
+      }
+      #box2 {
+        top: 100px;
+        left: 40px;
+        width: 320px;
+        height: 50px;
+      }
+      #box3 {
+        top: 170px;
+        left: 60px;
+        width: 280px;
+        height: 50px;
+      }
+      /* Painted boxes fill animation */
+      .painted {
+        background: #00796b !important;
+        color: white !important;
+        transition: background-color 1.5s ease, color 1.5s ease;
+      }
+      /* Reflow & Repaint section */
+      #reflowRepaintSection {
+        max-width: 700px;
+        margin: 40px auto 0;
+        background: #fff3e0;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 0 20px #ffb74d;
+        color: #bf360c;
+      }
+      #reflowRepaintVisual {
+        margin: 20px auto 10px;
+        width: 300px;
+        height: 150px;
+        position: relative;
+        border: 3px solid #bf360c;
+        border-radius: 12px;
+        background: #fff8e1;
+      }
+      #reflowBox {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        width: 100px;
+        height: 50px;
+        background: #f57c00;
+        border-radius: 10px;
+        text-align: center;
+        line-height: 50px;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.7s ease;
+        box-shadow: 0 0 10px #ef6c00;
+      }
+      #repaintBox {
+        position: absolute;
+        top: 90px;
+        left: 150px;
+        width: 100px;
+        height: 50px;
+        background: #fbc02d;
+        border-radius: 10px;
+        text-align: center;
+        line-height: 50px;
+        font-weight: bold;
+        color: black;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.7s ease;
+        box-shadow: 0 0 10px #f9a825;
+      }
+      #reflowRepaintText {
+        font-size: 1.1em;
+        text-align: center;
+        margin-top: 15px;
+        min-height: 60px;
+      }
+      #reflowRepaintTitle {
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.3em;
+        margin-bottom: 10px;
+        color: #bf360c;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Critical Rendering Path Visualizer</h1>
+    <p style="text-align: center; max-width: 700px; margin: auto">
+      Watch how a browser builds your webpage: from trees to layout, paint, and
+      how changes cause reflow and repaint!
+    </p>
+
+    <div class="container">
+      <!-- Steps 1-3: DOM, CSSOM, Render Tree -->
+      <div id="domStep" class="step">
+        <div class="title">1. DOM Tree</div>
+        <div class="tree" id="domTree">
+          <div class="node" id="htmlNode">
+            &lt;html&gt;
+            <div class="subtree">
+              <div class="node" id="headNode">&lt;head&gt;</div>
+              <div class="node" id="bodyNode">
+                &lt;body&gt;
+                <div class="subtree">
+                  <div class="node" id="h1Node">
+                    &lt;h1&gt;Hello World&lt;/h1&gt;
+                  </div>
+                  <div class="node" id="pNode">
+                    &lt;p&gt;Welcome to the page.&lt;/p&gt;
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow" id="arrow1" style="opacity: 0">&#8595;</div>
+
+      <div id="cssomStep" class="step">
+        <div class="title">2. CSSOM Tree</div>
+        <div class="tree" id="cssomTree">
+          <div class="node" id="styleSheetNode">
+            Stylesheet
+            <div class="subtree">
+              <div class="node" id="h1StyleNode">h1 { color: blue; }</div>
+              <div class="node" id="pStyleNode">p { font-size: 16px; }</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow" id="arrow2" style="opacity: 0">&#8595;</div>
+
+      <div id="renderStep" class="step">
+        <div class="title">3. Render Tree</div>
+        <div class="tree" id="renderTree">
+          <div class="node" id="renderHtmlNode">
+            &lt;html&gt;
+            <div class="subtree">
+              <div class="node" id="renderBodyNode">
+                &lt;body&gt;
+                <div class="subtree">
+                  <div class="node" id="renderH1Node" style="color: blue">
+                    &lt;h1&gt;Hello World&lt;/h1&gt;
+                  </div>
+                  <div class="node" id="renderPNode" style="font-size: 16px">
+                    &lt;p&gt;Welcome to the page.&lt;/p&gt;
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow" id="arrow3" style="opacity: 0">&#8595;</div>
+
+      <!-- Layout visualization -->
+      <div id="layoutStep" class="step">
+        <div class="title">4. Layout</div>
+        <div id="layoutVisual">
+          <div id="box1" class="box">html</div>
+          <div id="box2" class="box">body</div>
+          <div id="box3" class="box">content</div>
+        </div>
+      </div>
+
+      <div class="arrow" id="arrow4" style="opacity: 0">&#8595;</div>
+
+      <!-- Paint visualization -->
+      <div id="paintStep" class="step">
+        <div class="title">5. Paint</div>
+        <div id="layoutVisual">
+          <div id="box1" class="box">html</div>
+          <div id="box2" class="box">body</div>
+          <div id="box3" class="box">content</div>
+        </div>
+      </div>
+
+      <div class="description" id="descriptionBox"></div>
+
+      <div class="btn-container">
+        <button id="nextBtn">Start Animation</button>
+      </div>
+    </div>
+
+    <!-- Reflow & Repaint explanation section -->
+    <div id="reflowRepaintSection">
+      <div id="reflowRepaintTitle">Reflow and Repaint</div>
+      <p style="text-align: center; max-width: 700px; margin: auto">
+        See how changing different things causes the browser to recalculate
+        layout (reflow) or just repaint colors (repaint).
+      </p>
+      <div id="reflowRepaintVisual">
+        <div id="reflowBox" title="Click me to change size (causes Reflow)">
+          Box (Reflow)
+        </div>
+        <div id="repaintBox" title="Click me to change color (causes Repaint)">
+          Box (Repaint)
+        </div>
+      </div>
+      <div id="reflowRepaintText"></div>
+    </div>
+
+    <script>
+      const descriptionBox = document.getElementById("descriptionBox");
+      const nextBtn = document.getElementById("nextBtn");
+
+      // Steps with highlight and description
+      const steps = [
+        {
+          id: "domStep",
+          description:
+            "The browser reads your HTML code and builds the <strong>DOM tree</strong>, which represents the structure of the page.",
+          highlight: () => {
+            highlightNodes([
+              "htmlNode",
+              "headNode",
+              "bodyNode",
+              "h1Node",
+              "pNode",
+            ]);
+          },
+        },
+        {
+          id: "cssomStep",
+          description:
+            "The browser reads CSS files and builds the <strong>CSSOM tree</strong> to understand styles for each element.",
+          highlight: () => {
+            highlightNodes(["styleSheetNode", "h1StyleNode", "pStyleNode"]);
+          },
+        },
+        {
+          id: "renderStep",
+          description:
+            "The browser combines DOM and CSSOM to build the <strong>Render tree</strong>, which contains only visible elements with styles applied.",
+          highlight: () => {
+            highlightNodes([
+              "renderHtmlNode",
+              "renderBodyNode",
+              "renderH1Node",
+              "renderPNode",
+            ]);
+          },
+        },
+        {
+          id: "layoutStep",
+          description:
+            "The browser calculates the size and position of each box in the render tree. This is called <strong>Layout (Reflow)</strong>.",
+          highlight: () => {
+            clearLayoutPaint();
+            // Animate layout boxes growing to their size and position
+            const box1 = document.getElementById("box1");
+            const box2 = document.getElementById("box2");
+            const box3 = document.getElementById("box3");
+            box1.style.transition = "all 1s ease";
+            box2.style.transition = "all 1s ease 0.5s";
+            box3.style.transition = "all 1s ease 1s";
+
+            // Reset to small size first
+            box1.style.width = "50px";
+            box1.style.height = "30px";
+            box2.style.width = "40px";
+            box2.style.height = "20px";
+            box3.style.width = "30px";
+            box3.style.height = "15px";
+
+            setTimeout(() => {
+              box1.style.width = "360px";
+              box1.style.height = "60px";
+              box2.style.width = "320px";
+              box2.style.height = "50px";
+              box3.style.width = "280px";
+              box3.style.height = "50px";
+            }, 100);
+
+            // Highlight layout step container
+            document.getElementById("layoutStep").classList.add("highlight");
+          },
+        },
+        {
+          id: "paintStep",
+          description:
+            "Finally, the browser paints pixels on the screen to display the page. This is called <strong>Paint (Repaint)</strong>.",
+          highlight: () => {
+            // Paint by filling boxes with color and changing text color
+            const box1 = document.getElementById("box1");
+            const box2 = document.getElementById("box2");
+            const box3 = document.getElementById("box3");
+            box1.classList.add("painted");
+            setTimeout(() => box2.classList.add("painted"), 500);
+            setTimeout(() => box3.classList.add("painted"), 1000);
+
+            document.getElementById("paintStep").classList.add("highlight");
+          },
+        },
+      ];
+
+      let currentStep = -1;
+
+      function resetHighlights() {
+        // Remove highlights from all nodes and steps
+        document
+          .querySelectorAll(".node")
+          .forEach((n) => n.classList.remove("highlight"));
+        document
+          .querySelectorAll(".step")
+          .forEach((s) => s.classList.remove("active"));
+        document
+          .querySelectorAll(".arrow")
+          .forEach((a) => (a.style.opacity = 0));
+        document.getElementById("layoutStep").classList.remove("highlight");
+        document.getElementById("paintStep").classList.remove("highlight");
+        clearLayoutPaint();
+      }
+
+      function highlightNodes(ids) {
+        ids.forEach((id) => {
+          const node = document.getElementById(id);
+          if (node) node.classList.add("highlight");
+        });
+      }
+
+      function clearLayoutPaint() {
+        // Reset layout boxes to default size and remove paint
+        const box1 = document.getElementById("box1");
+        const box2 = document.getElementById("box2");
+        const box3 = document.getElementById("box3");
+        box1.style.transition = "";
+        box2.style.transition = "";
+        box3.style.transition = "";
+        box1.style.width = "360px";
+        box1.style.height = "60px";
+        box2.style.width = "320px";
+        box2.style.height = "50px";
+        box3.style.width = "280px";
+        box3.style.height = "50px";
+        box1.classList.remove("painted");
+        box2.classList.remove("painted");
+        box3.classList.remove("painted");
+      }
+
+      function showStep(index) {
+        resetHighlights();
+        if (index < 0 || index >= steps.length) {
+          currentStep = -1;
+          nextBtn.textContent = "Start Animation";
+          descriptionBox.innerHTML = "";
+          return;
+        }
+        currentStep = index;
+        const step = steps[index];
+        document.getElementById(step.id).classList.add("active");
+        descriptionBox.innerHTML = step.description;
+        step.highlight();
+
+        // Show arrows up to current step
+        for (let i = 1; i <= index; i++) {
+          const arrow = document.getElementById(`arrow${i}`);
+          if (arrow) arrow.style.opacity = 1;
+        }
+
+        if (currentStep === steps.length - 1) {
+          nextBtn.textContent = "Restart Animation";
+        } else {
+          nextBtn.textContent = "Next Step";
+        }
+      }
+
+      nextBtn.addEventListener("click", () => {
+        if (currentStep === steps.length - 1) {
+          // Restart
+          showStep(-1);
+        } else {
+          showStep(currentStep + 1);
+        }
+      });
+
+      showStep(-1);
+
+      // Reflow and Repaint interactive demo
+      const reflowBox = document.getElementById("reflowBox");
+      const repaintBox = document.getElementById("repaintBox");
+      const reflowRepaintText = document.getElementById("reflowRepaintText");
+
+      let reflowToggled = false;
+      reflowBox.addEventListener("click", () => {
+        if (!reflowToggled) {
+          reflowBox.style.width = "150px";
+          reflowBox.style.height = "80px";
+          reflowBox.textContent = "Box (Reflow)";
+          reflowRepaintText.innerHTML =
+            "<strong>Reflow:</strong> The box size changed, so the browser recalculates layout for affected elements. This is a costly operation.";
+          reflowToggled = true;
+        } else {
+          reflowBox.style.width = "100px";
+          reflowBox.style.height = "50px";
+          reflowRepaintText.innerHTML =
+            "Click the orange box to change its size and trigger <strong>Reflow</strong>.";
+          reflowToggled = false;
+        }
+      });
+
+      let repaintToggled = false;
+      repaintBox.addEventListener("click", () => {
+        if (!repaintToggled) {
+          repaintBox.style.backgroundColor = "#f57c00";
+          repaintBox.textContent = "Box (Repaint)";
+          reflowRepaintText.innerHTML =
+            "<strong>Repaint:</strong> The box color changed, so the browser repaints pixels without recalculating layout. This is cheaper than reflow.";
+          repaintToggled = true;
+        } else {
+          repaintBox.style.backgroundColor = "#fbc02d";
+          reflowRepaintText.innerHTML =
+            "Click the yellow box to change its color and trigger <strong>Repaint</strong>.";
+          repaintToggled = false;
+        }
+      });
+
+      // Initial text for reflow/repaint
+      reflowRepaintText.innerHTML =
+        "Click the orange box to change its size and trigger <strong>Reflow</strong>.<br>Click the yellow box to change its color and trigger <strong>Repaint</strong>.";
+    </script>
+  </body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redux Saga Flow Visualization</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: #f5f7fa;
+        color: #333;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      #steps {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .step {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        padding: 16px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        position: relative;
+      }
+      .step:hover {
+        background: #e0f0ff;
+      }
+      .step.active {
+        border-left: 6px solid #007acc;
+        background: #d0eaff;
+      }
+      .step-title {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+      .step-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease;
+      }
+      .step.active .step-content {
+        max-height: 1000px; /* large enough to show content */
+        margin-top: 12px;
+      }
+      pre {
+        background: #272822;
+        color: #f8f8f2;
+        padding: 12px;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 14px;
+      }
+      .tooltip {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #007acc;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: help;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Redux Saga Flow: Step-by-Step Interactive Visualization</h1>
+
+    <div id="steps">
+      <div class="step" data-step="1">
+        <div class="step-title">
+          1. Watcher Saga
+          <span
+            class="tooltip"
+            title="Listens for dispatched actions and triggers worker sagas."
+            >?</span
+          >
+        </div>
+        <div class="step-content">
+          <p>
+            The watcher saga listens for specific Redux actions using effects
+            like <code>takeEvery</code> or <code>takeLatest</code> and calls the
+            worker saga in response.
+          </p>
+          <pre><code>function* watchFetchData() {
+  yield takeEvery('FETCH_REQUESTED', fetchData);
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="step" data-step="2">
+        <div class="step-title">
+          2. Worker Saga
+          <span
+            class="tooltip"
+            title="Performs the side effects like API calls and dispatches actions."
+            >?</span
+          >
+        </div>
+        <div class="step-content">
+          <p>
+            The worker saga performs the actual side effect, such as making an
+            API call, and then dispatches success or failure actions.
+          </p>
+          <pre><code>function* fetchData(action) {
+  try {
+    const data = yield call(Api.fetchUser, action.payload.userId);
+    yield put({ type: 'FETCH_SUCCEEDED', data });
+  } catch (e) {
+    yield put({ type: 'FETCH_FAILED', message: e.message });
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="step" data-step="3">
+        <div class="step-title">
+          3. Redux Saga Effects
+          <span
+            class="tooltip"
+            title="Core effects for saga operations like call, put, take, fork, etc."
+            >?</span
+          >
+        </div>
+        <div class="step-content">
+          <p>
+            Redux Saga provides effects to manage side effects declaratively:
+          </p>
+          <ul>
+            <li>
+              <code>call(fn, ...args)</code>: calls a function and waits for the
+              result.
+            </li>
+            <li><code>put(action)</code>: dispatches an action.</li>
+            <li>
+              <code>take(actionType)</code>: pauses saga until action is
+              dispatched.
+            </li>
+            <li>
+              <code>fork(fn, ...args)</code>: non-blocking call to a saga.
+            </li>
+          </ul>
+          <pre><code>yield call(api.fetchData);
+yield put({ type: 'ACTION_TYPE' });
+yield take('ACTION_TYPE');
+yield fork(workerSaga);</code></pre>
+        </div>
+      </div>
+
+      <div class="step" data-step="4">
+        <div class="step-title">
+          4. Saga Middleware Integration
+          <span
+            class="tooltip"
+            title="How to connect saga middleware with Redux store."
+            >?</span
+          >
+        </div>
+        <div class="step-content">
+          <p>
+            The saga middleware is created and connected to the Redux store,
+            then the root saga is run.
+          </p>
+          <pre><code>import createSagaMiddleware from 'redux-saga';
+const sagaMiddleware = createSagaMiddleware();
+const store = createStore(
+  reducer,
+  applyMiddleware(sagaMiddleware)
+);
+sagaMiddleware.run(rootSaga);</code></pre>
+        </div>
+      </div>
+
+      <div class="step" data-step="5">
+        <div class="step-title">
+          5. Root Saga
+          <span
+            class="tooltip"
+            title="Combines multiple sagas to run in parallel."
+            >?</span
+          >
+        </div>
+        <div class="step-content">
+          <p>
+            The root saga aggregates multiple watcher sagas using
+            <code>all</code> effect.
+          </p>
+          <pre><code>function* rootSaga() {
+  yield all([
+    watchFetchData(),
+    watchAnotherAction(),
+  ]);
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const steps = document.querySelectorAll(".step");
+      steps.forEach((step) => {
+        step.addEventListener("click", () => {
+          if (step.classList.contains("active")) {
+            step.classList.remove("active");
+          } else {
+            steps.forEach((s) => s.classList.remove("active"));
+            step.classList.add("active");
+          }
+        });
+      });
+
+      // Optional: Tooltip hover explanation handled by title attribute
+    </script>
+  </body>
+</html>
