@@ -1,0 +1,19 @@
+Atlassian offers an 60-80 LPA CTC, and the remote job hype was unmatched. 🔥
+
+Online Assessment
+The OA consisted of 2 medium and 1 hard DSA problems.
+Questions were based on sliding window, binary search on answer, and graph traversal.
+The candidate managed to solve all three and cleared the round.
+
+Onsite Round 1
+Started with core CS fundamentals — caching vs. database lookups, process vs. thread.
+
+Faced a binary tree traversal problem with constraints.
+
+Provided a working solution, though not fully optimized.
+ ➡️ Still advanced to the next stage.
+
+Onsite Round 2
+A low-level design discussion with an interviewer from the platform team.
+Since the candidate had backend-focused projects on their resume, this left a strong impression.
+The round went fairly smooth.
